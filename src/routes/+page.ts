@@ -8,7 +8,7 @@ export async function load({ fetch }) {
 	const token = localStorage.getItem('jwt_token');
 
 	if (!token) {
-		throw redirect(302, '/login'); // Redirect ke halaman login jika tidak ada token
+		throw redirect(302, '/auth/login'); // Redirect ke halaman login jika tidak ada token
 	}
 
 	// Opsional: Validasi token dengan endpoint /auth/me
@@ -21,7 +21,7 @@ export async function load({ fetch }) {
 
 		if (!response.ok) {
 			localStorage.removeItem('jwt_token'); // Hapus token kadaluarsa/tidak valid
-			throw redirect(302, '/login');
+			throw redirect(302, '/auth/login');
 		}
 
 		const user = await response.json();
@@ -29,7 +29,7 @@ export async function load({ fetch }) {
 	} catch (error) {
 		console.error('Error fetching user data:', error);
 		localStorage.removeItem('jwt_token');
-		throw redirect(302, '/login');
+		throw redirect(302, '/auth/login');
 	}
 }
 
