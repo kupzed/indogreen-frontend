@@ -57,6 +57,7 @@
   async function fetchCustomers() {
     try {
       const response = await axiosClient.get('/mitras/customers');
+      console.log('DATA CUSTOMERS:', response.data.data);
       customers = response.data.data;
     } catch (err) {
       console.error('Failed to fetch customers:', err);
