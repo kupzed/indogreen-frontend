@@ -1,6 +1,25 @@
 <script lang="ts">
 	import Header from './Header.svelte';
 	import '../app.css';
+	import axiosClient from '$lib/axiosClient';
+	import { goto } from '$app/navigation';
+
+	async function logout() {
+		if (confirm('Apakah Anda yakin ingin logout?')) {
+		try {
+			await axiosClient.post('/auth/logout'); // Panggil endpoint logout API
+			localStorage.removeItem('jwt_token');
+			alert('Logout berhasil!');
+			goto('/auth/login');
+		} catch (error) {
+			console.error('Logout failed:', error);
+			// Tetap hapus token di frontend meskipun API error
+			localStorage.removeItem('jwt_token');
+			alert('Logout gagal, namun Anda telah keluar dari sesi.');
+			goto('/auth/login');
+		}
+		}
+	}
 
 	let { children } = $props();
 </script>
@@ -16,6 +35,7 @@
 		<p>
 			visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to learn about SvelteKit
 		</p>
+		<button on:click={logout}>Logout</button>
 	</footer>
 </div>
 
