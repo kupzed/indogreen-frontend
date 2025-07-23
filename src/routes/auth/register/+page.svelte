@@ -21,7 +21,7 @@
       // Biasanya setelah register, pengguna perlu login secara terpisah atau API langsung mengembalikan token
       // Dalam kasus ini, diasumsikan register berhasil dan bisa langsung ke halaman login
       alert('Registrasi berhasil! Silakan login.');
-      goto('/login');
+      goto('/auth/login');
     } catch (err: any) {
       // Tangani error validasi dari Laravel
       const apiErrors = err.response?.data?.errors;

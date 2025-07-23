@@ -72,7 +72,8 @@
                   <div class="mt-2 sm:flex sm:justify-between">
                     <div class="sm:flex">
                       <p class="flex items-center text-sm text-gray-500">
-                        Customer: {project.mitra?.nama || '-'} | Deskripsi: {project.description?.substring(0, 50)}{project.description?.length > 50 ? '...' : ''}
+                        Customer: {project.mitra?.nama || '-'}
+                        | Deskripsi: {project.description?.substring(0, 50)}{project.description?.length > 50 ? '...' : ''}
                       </p>
                     </div>
                     <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">

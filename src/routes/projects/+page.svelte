@@ -195,11 +195,17 @@
 </div>
 
 {#if loading}
-  <p>Memuat proyek...</p>
+  <p>Memuat project...</p>
 {:else if error}
   <p class="text-red-500">{error}</p>
 {:else if projects.length === 0}
-  <p class="text-gray-500">Belum ada project.</p>
+  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <ul class="divide-y divide-gray-200">
+      <li class="px-4 py-4 sm:px-6">
+        <p class="text-sm text-gray-500">Belum ada project. </p>
+      </li>
+    </ul>
+  </div>
 {:else}
   <div class="bg-white shadow overflow-hidden sm:rounded-md">
     <ul class="divide-y divide-gray-200">

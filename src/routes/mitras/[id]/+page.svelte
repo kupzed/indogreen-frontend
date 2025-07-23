@@ -31,6 +31,8 @@
     kontak_2_jabatan: '',
   };
 
+  let editingMitra: any = true;
+
   const mitraKategoriOptions = ['Pribadi', 'Perusahaan', 'Customer', 'Vendor'];
 
   async function fetchMitraDetails() {
@@ -206,65 +208,67 @@
       </div>
     </div>
   </div>
+{/if}
 
   <Modal bind:show={showEditModal} title="Edit Mitra" maxWidth="max-w-xl">
-    <form on:submit|preventDefault={handleSubmitUpdate}>
-      <div class="space-y-4">
-        <div>
-          <label for="edit_mitra_nama" class="block text-sm font-medium text-gray-900">Nama</label>
-          <input type="text" id="edit_mitra_nama" bind:value={form.nama} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-900">Kategori</label>
-          <div class="flex flex-wrap gap-4 mt-2">
-            <label><input type="checkbox" bind:checked={form.is_pribadi} class="mr-1"> Pribadi</label>
-            <label><input type="checkbox" bind:checked={form.is_perusahaan} class="mr-1"> Perusahaan</label>
-            <label><input type="checkbox" bind:checked={form.is_customer} class="mr-1"> Customer</label>
-            <label><input type="checkbox" bind:checked={form.is_vendor} class="mr-1"> Vendor</label>
+    {#if mitra}
+      <form on:submit|preventDefault={handleSubmitUpdate}>
+        <div class="space-y-4">
+          <div>
+            <label for="edit_mitra_nama" class="block text-sm font-medium text-gray-900">Nama</label>
+            <input type="text" id="edit_mitra_nama" bind:value={form.nama} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-900">Kategori</label>
+            <div class="flex flex-wrap gap-4 mt-2">
+              <label><input type="checkbox" bind:checked={form.is_pribadi} class="mr-1"> Pribadi</label>
+              <label><input type="checkbox" bind:checked={form.is_perusahaan} class="mr-1"> Perusahaan</label>
+              <label><input type="checkbox" bind:checked={form.is_customer} class="mr-1"> Customer</label>
+              <label><input type="checkbox" bind:checked={form.is_vendor} class="mr-1"> Vendor</label>
+            </div>
+          </div>
+          <div>
+            <label for="edit_mitra_alamat" class="block text-sm font-medium text-gray-900">Alamat</label>
+            <textarea id="edit_mitra_alamat" bind:value={form.alamat} rows="2" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+          </div>
+          <div>
+            <label for="edit_mitra_website" class="block text-sm font-medium text-gray-900">Website</label>
+            <input type="text" id="edit_mitra_website" bind:value={form.website} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          </div>
+          <div>
+            <label for="edit_mitra_email" class="block text-sm font-medium text-gray-900">Email</label>
+            <input type="email" id="edit_mitra_email" bind:value={form.email} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          </div>
+          <div>
+            <label for="edit_mitra_kontak_1" class="block text-sm font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
+            <input type="text" id="edit_mitra_kontak_1" bind:value={form.kontak_1} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          </div>
+          <div>
+            <label for="edit_mitra_kontak_1_nama" class="block text-sm font-medium text-gray-900">Nama Kontak 1</label>
+            <input type="text" id="edit_mitra_kontak_1_nama" bind:value={form.kontak_1_nama} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          </div>
+          <div>
+            <label for="edit_mitra_kontak_1_jabatan" class="block text-sm font-medium text-gray-900">Jabatan Kontak 1</label>
+            <input type="text" id="edit_mitra_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          </div>
+          <div>
+            <label for="edit_mitra_kontak_2" class="block text-sm font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
+            <input type="text" id="edit_mitra_kontak_2" bind:value={form.kontak_2} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          </div>
+          <div>
+            <label for="edit_mitra_kontak_2_nama" class="block text-sm font-medium text-gray-900">Nama Kontak 2</label>
+            <input type="text" id="edit_mitra_kontak_2_nama" bind:value={form.kontak_2_nama} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          </div>
+          <div>
+            <label for="edit_mitra_kontak_2_jabatan" class="block text-sm font-medium text-gray-900">Jabatan Kontak 2</label>
+            <input type="text" id="edit_mitra_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
           </div>
         </div>
-        <div>
-          <label for="edit_mitra_alamat" class="block text-sm font-medium text-gray-900">Alamat</label>
-          <textarea id="edit_mitra_alamat" bind:value={form.alamat} rows="2" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+        <div class="mt-6 flex justify-end">
+          <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            Update Mitra
+          </button>
         </div>
-        <div>
-          <label for="edit_mitra_website" class="block text-sm font-medium text-gray-900">Website</label>
-          <input type="text" id="edit_mitra_website" bind:value={form.website} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        </div>
-        <div>
-          <label for="edit_mitra_email" class="block text-sm font-medium text-gray-900">Email</label>
-          <input type="email" id="edit_mitra_email" bind:value={form.email} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        </div>
-        <div>
-          <label for="edit_mitra_kontak_1" class="block text-sm font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
-          <input type="text" id="edit_mitra_kontak_1" bind:value={form.kontak_1} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        </div>
-        <div>
-          <label for="edit_mitra_kontak_1_nama" class="block text-sm font-medium text-gray-900">Nama Kontak 1</label>
-          <input type="text" id="edit_mitra_kontak_1_nama" bind:value={form.kontak_1_nama} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        </div>
-        <div>
-          <label for="edit_mitra_kontak_1_jabatan" class="block text-sm font-medium text-gray-900">Jabatan Kontak 1</label>
-          <input type="text" id="edit_mitra_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        </div>
-        <div>
-          <label for="edit_mitra_kontak_2" class="block text-sm font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
-          <input type="text" id="edit_mitra_kontak_2" bind:value={form.kontak_2} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        </div>
-        <div>
-          <label for="edit_mitra_kontak_2_nama" class="block text-sm font-medium text-gray-900">Nama Kontak 2</label>
-          <input type="text" id="edit_mitra_kontak_2_nama" bind:value={form.kontak_2_nama} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        </div>
-        <div>
-          <label for="edit_mitra_kontak_2_jabatan" class="block text-sm font-medium text-gray-900">Jabatan Kontak 2</label>
-          <input type="text" id="edit_mitra_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-        </div>
-      </div>
-      <div class="mt-6 flex justify-end">
-        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-          Update Mitra
-        </button>
-      </div>
-    </form>
-  {/if}
-</Modal>
+      </form>
+    {/if}
+  </Modal>

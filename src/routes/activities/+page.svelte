@@ -159,10 +159,11 @@
     try {
       const formData = new FormData();
       for (const key in form) {
-        if (key === 'attachment' && form.attachment) {
-          formData.append(key, form.attachment);
-        } else if (key !== 'attachment_removed' && form[key] !== null && form[key] !== undefined) {
-          formData.append(key, form[key] as string | Blob);
+        const typedKey = key as keyof typeof form;
+        if (typedKey === 'attachment' && form.attachment) {
+          formData.append(typedKey, form.attachment);
+        } else if (typedKey !== 'attachment_removed' && form[typedKey] !== null && form[typedKey] !== undefined) {
+          formData.append(typedKey, form[typedKey] as string | Blob);
         }
       }
 
@@ -205,12 +206,13 @@
     try {
       const formData = new FormData();
       for (const key in form) {
-        if (key === 'attachment' && form.attachment) {
-          formData.append(key, form.attachment);
-        } else if (key === 'attachment_removed') {
-          formData.append(key, form.attachment_removed ? '1' : '0');
-        } else if (form[key] !== null && form[key] !== undefined) {
-          formData.append(key, form[key] as string | Blob);
+        const typedKey = key as keyof typeof form;
+        if (typedKey === 'attachment' && form.attachment) {
+          formData.append(typedKey, form.attachment);
+        } else if (typedKey === 'attachment_removed') {
+          formData.append(typedKey, form.attachment_removed ? '1' : '0');
+        } else if (form[typedKey] !== null && form[typedKey] !== undefined) {
+          formData.append(typedKey, form[typedKey] as string | Blob);
         }
       }
 
@@ -328,7 +330,13 @@
 {:else if error}
   <p class="text-red-500">{error}</p>
 {:else if activities.length === 0}
-  <p class="text-gray-500">Belum ada aktivitas.</p>
+  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <ul class="divide-y divide-gray-200">
+      <li class="px-4 py-4 sm:px-6">
+        <p class="text-sm text-gray-500">Belum ada mitra. </p>
+      </li>
+    </ul>
+  </div>
 {:else}
   <div class="bg-white shadow overflow-hidden sm:rounded-md">
     <ul class="divide-y divide-gray-200">

@@ -115,12 +115,13 @@
     try {
       const formData = new FormData();
       for (const key in form) {
-        if (key === 'attachment' && form.attachment) {
-          formData.append(key, form.attachment);
-        } else if (key === 'attachment_removed') {
-          formData.append(key, form.attachment_removed ? '1' : '0');
-        } else if (form[key] !== null && form[key] !== undefined) {
-          formData.append(key, form[key] as string | Blob);
+        const typedKey = key as keyof typeof form;
+        if (typedKey === 'attachment' && form.attachment) {
+          formData.append(typedKey, form.attachment);
+        } else if (typedKey === 'attachment_removed') {
+          formData.append(typedKey, form.attachment_removed ? '1' : '0');
+        } else if (form[typedKey] !== null && form[typedKey] !== undefined) {
+          formData.append(typedKey, form[typedKey] as string | Blob);
         }
       }
 
@@ -318,8 +319,10 @@
       </div>
     </div>
   </div>
+{/if}
 
-  <Modal bind:show={showEditModal} title="Edit Aktivitas" maxWidth="max-w-xl">
+<Modal bind:show={showEditModal} title="Edit Aktivitas" maxWidth="max-w-xl">
+  {#if activity}
     <form on:submit|preventDefault={handleSubmitUpdate}>
       <div class="space-y-4">
         <div>

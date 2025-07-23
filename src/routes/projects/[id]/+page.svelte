@@ -222,10 +222,11 @@
     try {
       const formData = new FormData();
       for (const key in createActivityForm) {
-        if (key === 'attachment' && createActivityForm.attachment) {
-          formData.append(key, createActivityForm.attachment);
-        } else if (createActivityForm[key] !== null && createActivityForm[key] !== undefined) {
-          formData.append(key, createActivityForm[key] as string | Blob);
+        const typedKey = key as keyof typeof createActivityForm;
+        if (typedKey === 'attachment' && createActivityForm.attachment) {
+          formData.append(typedKey, createActivityForm.attachment);
+        } else if (createActivityForm[typedKey] !== null && createActivityForm[typedKey] !== undefined) {
+          formData.append(typedKey, createActivityForm[typedKey] as string | Blob);
         }
       }
 
@@ -420,7 +421,7 @@
         <ul class="divide-y divide-gray-200">
           {#if activities.length === 0}
             <li class="px-4 py-4 sm:px-6">
-              <p class="text-sm text-gray-500">Belum ada aktivitas untuk proyek ini.</p>
+              <p class="text-sm text-gray-500">Belum ada aktivitas untuk project ini.</p>
             </li>
           {:else}
             {#each activities as activity (activity.id)}
