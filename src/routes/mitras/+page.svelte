@@ -208,13 +208,13 @@
 {:else if error}
   <p class="text-red-500">{error}</p>
 {:else if mitras.length === 0}
-<div class="bg-white shadow overflow-hidden sm:rounded-md">
-  <ul class="divide-y divide-gray-200">
-    <li class="px-4 py-4 sm:px-6">
-      <p class="text-sm text-gray-500">Belum ada mitra. </p>
-    </li>
-  </ul>
-</div>
+  <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <ul class="divide-y divide-gray-200">
+      <li class="px-4 py-4 sm:px-6">
+        <p class="text-sm text-gray-500">Belum ada mitra. </p>
+      </li>
+    </ul>
+  </div>
 {:else}
   <div class="bg-white shadow overflow-hidden sm:rounded-md">
     <ul class="divide-y divide-gray-200">
