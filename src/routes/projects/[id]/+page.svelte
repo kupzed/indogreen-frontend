@@ -125,11 +125,11 @@
   async function fetchFormDependencies() {
     try {
       // Fetch only vendors for activity creation form if needed
-      const response = await axiosClient.get('/mitras/vendors');
+      const response = await axiosClient.get('/mitra/vendors');
       vendors = response.data.data;
 
       // Fetch customers for project edit modal
-      const customerResponse = await axiosClient.get('/mitras/customers');
+      const customerResponse = await axiosClient.get('/mitra/customers');
       customers = customerResponse.data.data;
     } catch (err) {
       console.error('Failed to fetch form dependencies:', err);
