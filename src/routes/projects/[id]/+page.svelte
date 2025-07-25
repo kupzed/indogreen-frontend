@@ -151,6 +151,7 @@
     try {
       await axiosClient.put(`/projects/${project.id}`, editProjectForm);
       alert('Proyek berhasil diperbarui!');
+      goto(`/projects/${project.id}`);
       showEditProjectModal = false;
       fetchProjectDetails(); // Refresh project details
     } catch (err: any) {
@@ -248,6 +249,7 @@
         },
       });
       alert('Aktivitas berhasil ditambahkan!');
+      goto(`/projects/${project.id}`);
       showCreateActivityModal = false;
       fetchProjectDetails(); // Refresh activities list
     } catch (err: any) {
@@ -260,7 +262,7 @@
   }
 
   // Update customer_id/mitra_id selection based on activity type
-  $: if (createActivityForm.jenis) {
+  $: if (showCreateActivityModal && createActivityForm.jenis) {
     if (createActivityForm.jenis === 'Customer') {
       createActivityForm.mitra_id = project?.mitra_id || null;
     } else if (createActivityForm.jenis === 'Internal') {
@@ -269,6 +271,12 @@
       // If selected 'Vendor' but current mitra_id is not a vendor or is empty, reset it
       createActivityForm.mitra_id = '';
     }
+  }
+
+  // Reset form saat modal ditutup
+  $: if (!showCreateActivityModal) {
+    createActivityForm.mitra_id = '';
+    createActivityForm.jenis = '';
   }
 </script>
 

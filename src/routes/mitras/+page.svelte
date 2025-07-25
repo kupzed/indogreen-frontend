@@ -108,6 +108,7 @@
     try {
       await axiosClient.post('/mitras', form);
       alert('Mitra berhasil ditambahkan!');
+      goto(`/mitras`);
       showCreateModal = false;
       fetchMitras(); // Refresh list
     } catch (err: any) {
@@ -124,6 +125,7 @@
     try {
       await axiosClient.put(`/mitras/${editingMitra.id}`, form);
       alert('Mitra berhasil diperbarui!');
+      goto(`/mitras`);
       showEditModal = false;
       fetchMitras(); // Refresh list
     } catch (err: any) {
@@ -140,6 +142,7 @@
       try {
         await axiosClient.delete(`/mitras/${mitraId}`);
         alert('Mitra berhasil dihapus!');
+        goto(`/mitras`);
         fetchMitras(); // Refresh list
       } catch (err: any) {
         alert('Gagal menghapus mitra: ' + (err.response?.data?.message || 'Terjadi kesalahan'));

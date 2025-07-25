@@ -110,6 +110,7 @@
     try {
       await axiosClient.post('/projects', form);
       alert('Proyek berhasil ditambahkan!');
+      goto(`/projects`);
       showCreateModal = false;
       fetchProjects(); // Refresh daftar
     } catch (err: any) {
@@ -126,6 +127,7 @@
     try {
       await axiosClient.put(`/projects/${editingProject.id}`, form);
       alert('Proyek berhasil diperbarui!');
+      goto(`/projects`);
       showEditModal = false;
       fetchProjects(); // Refresh daftar
     } catch (err: any) {
@@ -142,6 +144,7 @@
       try {
         await axiosClient.delete(`/projects/${projectId}`);
         alert('Proyek berhasil dihapus!');
+        goto(`/projects`);
         fetchProjects(); // Refresh daftar
       } catch (err: any) {
         alert('Gagal menghapus proyek: ' + (err.response?.data?.message || 'Terjadi kesalahan'));

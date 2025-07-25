@@ -72,6 +72,7 @@
     try {
       await axiosClient.put(`/mitras/${mitra.id}`, form);
       alert('Mitra berhasil diperbarui!');
+      goto(`/mitras/${mitra.id}`);
       showEditModal = false;
       fetchMitraDetails(); // Refresh details
     } catch (err: any) {

@@ -77,7 +77,7 @@
 
   async function fetchFormDependencies() {
     try {
-      const response = await axiosClient.get('/activities/getFormDependencies');
+      const response = await axiosClient.get('/activity/getFormDependencies');
       projects = response.data.projects;
       customers = response.data.customers;
       vendors = response.data.mitras;
@@ -149,6 +149,7 @@
         },
       });
       alert('Aktivitas berhasil diperbarui!');
+      goto(`/activities/${activity.id}`);
       showEditModal = false;
       fetchActivityDetails(); // Refresh details
     } catch (err: any) {

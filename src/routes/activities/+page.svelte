@@ -70,10 +70,10 @@
 
   async function fetchFormDependencies() {
     try {
-      const response = await axiosClient.get('/activities/getFormDependencies');
+      const response = await axiosClient.get('/activity/getFormDependencies');
       projects = response.data.projects;
       customers = response.data.customers;
-      vendors = response.data.mitras; // 'mitras' here likely refers to vendors as per your ActivityController
+      vendors = response.data.vendors; // Perbaiki: ambil dari vendors, bukan mitras
     } catch (err) {
       console.error('Failed to fetch form dependencies:', err);
     }
@@ -190,6 +190,7 @@
         },
       });
       alert('Aktivitas berhasil ditambahkan!');
+      goto(`/activities`);
       showCreateModal = false;
       fetchActivities(); // Refresh list
     } catch (err: any) {
@@ -241,6 +242,7 @@
         },
       });
       alert('Aktivitas berhasil diperbarui!');
+      goto(`/activities`);
       showEditModal = false;
       fetchActivities(); // Refresh list
     } catch (err: any) {
@@ -257,6 +259,7 @@
       try {
         await axiosClient.delete(`/activities/${activityId}`);
         alert('Aktivitas berhasil dihapus!');
+        goto(`/activities`);
         fetchActivities(); // Refresh list
       } catch (err: any) {
         alert('Gagal menghapus aktivitas: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
@@ -266,21 +269,31 @@
   }
 
   // Reactive logic for mitra_id dropdown in forms
-  $: if (form.jenis) {
+  $: if (showCreateModal && form.jenis) {
     if (form.jenis === 'Customer') {
-      // If project_id is available, set mitra_id to project's customer_id
       const selectedProject = projects.find(p => p.id == form.project_id);
-      form.mitra_id = selectedProject?.customer_id || null; // Assuming customer_id exists on Project model
+      if (form.mitra_id !== (selectedProject?.mitra_id || null)) {
+        form.mitra_id = selectedProject?.mitra_id || null;
+      }
     } else if (form.jenis === 'Internal') {
-      form.mitra_id = '1'; // Hardcode for internal partner
+      if (form.mitra_id !== '1') {
+        form.mitra_id = '1';
+      }
     } else if (form.jenis === 'Vendor') {
-      // Ensure mitra_id is valid for vendors, clear if not
-      if (!vendors.some(v => v.id === form.mitra_id)) {
-          form.mitra_id = '';
+      if (Array.isArray(vendors) && !vendors.some(v => v.id === form.mitra_id)) {
+        form.mitra_id = '';
       }
     } else {
-      form.mitra_id = null;
+      if (form.mitra_id !== null && form.mitra_id !== '') {
+        form.mitra_id = '';
+      }
     }
+  }
+
+  // Reset form saat modal ditutup
+  $: if (!showCreateModal) {
+    form.mitra_id = '';
+    form.jenis = '';
   }
 </script>
 
