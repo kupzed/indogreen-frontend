@@ -205,7 +205,6 @@
   }
 </script>
 
-<h1 class="text-2xl font-semibold text-gray-900 mb-4">Detail Aktivitas</h1>
 
 {#if loadingActivity}
   <p>Memuat detail aktivitas...</p>

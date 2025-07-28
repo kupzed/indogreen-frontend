@@ -17,7 +17,7 @@
   </script>
   
   <div
-    class="hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-in-out bg-gray-800 text-white shadow-lg"
+    class="hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ease-in-out bg-white text-gray-700 shadow-lg"
     class:lg:w-64={!collapsed}
     class:lg:w-20={collapsed}
   >
@@ -29,17 +29,17 @@
           class:w-0={collapsed}
           class:overflow-hidden={collapsed}
         >
-          <svg class="h-8 w-8 text-indigo-400" viewBox="0 0 24 24" fill="none">
+          <svg class="h-8 w-8 text-indigo-600" viewBox="0 0 24 24" fill="none">
             <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span class="text-xl font-bold ml-2 text-indigo-400 whitespace-nowrap">INDOGREEN</span>
+          <span class="text-xl font-bold ml-2 text-indigo-600 whitespace-nowrap">INDOGREEN</span>
         </div>
   
         <button
           on:click={toggleCollapsed}
-          class="text-gray-400 hover:text-white focus:outline-none transition-transform duration-200"
+          class="text-gray-500 hover:text-gray-800 focus:outline-none transition-transform duration-200"
           class:ml-auto={!collapsed}
           class:ml-0={collapsed}
         >
@@ -75,7 +75,7 @@
       <div class="mt-auto px-2 pb-4">
         <button
           on:click={handleLogout}
-          class="w-full text-red-300 hover:bg-red-700 hover:text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+          class="w-full text-red-500 hover:bg-red-700 hover:text-white group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors duration-200"
           class:justify-center={collapsed}
         >
           <svg class="h-6 w-6 transition-transform duration-200" class:mr-0={collapsed} fill="none" viewBox="0 0 24 24" stroke="currentColor">

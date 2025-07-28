@@ -110,7 +110,6 @@
   }
 </script>
 
-<h1 class="text-2xl font-semibold text-gray-900 mb-4">Detail Mitra</h1>
 
 {#if loadingMitra}
   <p>Memuat detail mitra...</p>

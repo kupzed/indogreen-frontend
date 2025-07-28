@@ -280,7 +280,6 @@
   }
 </script>
 
-<h1 class="text-2xl font-semibold text-gray-900 mb-4">Detail Project</h1>
 
 {#if loadingProject}
   <p>Memuat detail proyek...</p>

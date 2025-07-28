@@ -163,7 +163,6 @@
   }
 </script>
 
-<h1 class="text-2xl font-semibold text-gray-900 mb-4">Daftar Mitra</h1>
 
 <div class="flex justify-between items-center mb-6">
   <div class="flex space-x-2">

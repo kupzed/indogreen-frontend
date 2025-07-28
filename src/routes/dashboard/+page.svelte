@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import axiosClient from '$lib/axiosClient';
-  import { goto } from '$app/navigation'; // Untuk navigasi ke detail
 
   let latestProjects: any[] = [];
   let latestActivities: any[] = [];
@@ -39,15 +38,13 @@
   }
 </script>
 
-<h1 class="text-2xl font-semibold text-gray-900 mb-4">Dashboard</h1>
-
 {#if loading}
   <p>Memuat data dashboard...</p>
 {:else if error}
   <p class="text-red-500">{error}</p>
 {:else}
   <div class="my-2">
-    <h2 class="text-lg leading-6 font-medium text-gray-900">Project Terbaru</h2>
+    <h2 class="text-2xl leading-6 font-medium text-gray-900">Project Terbaru</h2>
     <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200">
         {#if latestProjects.length === 0}
@@ -95,7 +92,7 @@
   </div>
 
   <div class="mt-8">
-    <h2 class="text-lg leading-6 font-medium text-gray-900">Aktivitas Terbaru</h2>
+    <h2 class="text-2xl leading-6 font-medium text-gray-900">Aktivitas Terbaru</h2>
     <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200">
         {#if latestActivities.length === 0}

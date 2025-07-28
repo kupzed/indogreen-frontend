@@ -27,9 +27,10 @@
 </script>
 
 <header class="sticky top-0 z-10 flex h-16 flex-shrink-0 bg-white shadow">
+  <!-- svelte-ignore a11y_consider_explicit_label -->
   <button
     type="button"
-    class="px-4 text-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:ring-offset-2 lg:hidden"
+    class="ml-4 text-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:ring-offset-2 lg:hidden"
     on:click={toggleMobileSidebar}
   >
     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,11 +40,13 @@
 
   <div class="flex flex-1 justify-between px-4 py-4">
     <div class="flex flex-1 items-center">
-      <slot></slot> </div>
+      <slot name="topnav-title"></slot>
+    </div>
 
     <div class="ml-4 flex items-center md:ml-6">
       <div class="relative" id="user-dropdown-container">
         <div>
+          <!-- svelte-ignore a11y_consider_explicit_label -->
           <button
             type="button"
             class="flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:ring-offset-2"
@@ -73,7 +76,7 @@
             <button
               type="button"
               on:click={() => dispatch('logout')}
-              class="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 hover:text-red-800"
+              class="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-700 hover:text-white"
               role="menuitem"
               tabindex="-1"
             >

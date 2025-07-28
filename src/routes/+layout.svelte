@@ -31,7 +31,26 @@
   
 	// Cek apakah halaman saat ini adalah bagian dari rute autentikasi
 	$: isAuthRoute = $page.url.pathname.startsWith('/auth');
-  </script>
+
+	// Function untuk mendapatkan title berdasarkan route
+	function getPageTitle(pathname: string): string {
+		switch (pathname) {
+			case '/dashboard':
+				return 'Dashboard';
+			case '/projects':
+				return 'Daftar Project';
+			case '/activities':
+				return 'Daftar Activity';
+			case '/mitras':
+				return 'Daftar Mitra';
+			default:
+				if (pathname.startsWith('/projects/')) return 'Detail Project';
+				if (pathname.startsWith('/activities/')) return 'Detail Activity';
+				if (pathname.startsWith('/mitras/')) return 'Detail Mitra';
+				return 'Dashboard';
+		}
+	}
+</script>
   
   {#if isAuthRoute}
 	<slot></slot>
@@ -53,8 +72,11 @@
 		  on:close={() => (sidebarOpen = false)}
 		  on:logout={logout}
 		/>
-  
+		
 		<TopNav on:toggleMobileSidebar={() => (sidebarOpen = true)}>
+			<svelte:fragment slot="topnav-title">
+				<h1 class="text-2xl font-semibold text-gray-900">{getPageTitle($page.url.pathname)}</h1>
+			</svelte:fragment>
 		</TopNav>
   
 		<main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
