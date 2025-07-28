@@ -321,11 +321,13 @@
   <form on:submit|preventDefault={handleSubmitCreate}>
     <div class="space-y-4">
       <div>
-        <label for="create_nama" class="block text-sm font-medium text-gray-900">Nama</label>
-        <input type="text" id="create_nama" bind:value={form.nama} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label for="create_nama" class="block text-sm/6 font-medium text-gray-900">Nama</label>
+        <div class="mt-2">
+          <input type="text" id="create_nama" bind:value={form.nama} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+        </div>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-900">Kategori</label>
+        <label class="block text-sm/6 font-medium text-gray-900">Kategori</label>
         <div class="flex flex-wrap gap-4 mt-2">
           <label><input type="checkbox" bind:checked={form.is_pribadi} class="mr-1"> Pribadi</label>
           <label><input type="checkbox" bind:checked={form.is_perusahaan} class="mr-1"> Perusahaan</label>
@@ -334,44 +336,62 @@
         </div>
       </div>
       <div>
-        <label for="create_alamat" class="block text-sm font-medium text-gray-900">Alamat</label>
-        <textarea id="create_alamat" bind:value={form.alamat} rows="2" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+        <label for="create_alamat" class="block text-sm/6 font-medium text-gray-900">Alamat</label>
+        <div class="mt-2">
+          <textarea id="create_alamat" bind:value={form.alamat} rows="2" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+        </div>
       </div>
       <div>
-        <label for="create_website" class="block text-sm font-medium text-gray-900">Website</label>
-        <input type="text" id="create_website" bind:value={form.website} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label for="create_website" class="block text-sm/6 font-medium text-gray-900">Website</label>
+        <div class="mt-2">
+          <input type="text" id="create_website" bind:value={form.website} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+        </div>
       </div>
       <div>
-        <label for="create_email" class="block text-sm font-medium text-gray-900">Email</label>
-        <input type="email" id="create_email" bind:value={form.email} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label for="create_email" class="block text-sm/6 font-medium text-gray-900">Email</label>
+        <div class="mt-2">
+          <input type="email" id="create_email" bind:value={form.email} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+        </div>
       </div>
       <div>
-        <label for="create_kontak_1" class="block text-sm font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
-        <input type="text" id="create_kontak_1" bind:value={form.kontak_1} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label for="create_kontak_1" class="block text-sm/6 font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
+        <div class="mt-2">
+          <input type="text" id="create_kontak_1" bind:value={form.kontak_1} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+        </div>
       </div>
       <div>
-        <label for="create_kontak_1_nama" class="block text-sm font-medium text-gray-900">Nama Kontak 1</label>
-        <input type="text" id="create_kontak_1_nama" bind:value={form.kontak_1_nama} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label for="create_kontak_1_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 1</label>
+        <div class="mt-2">
+          <input type="text" id="create_kontak_1_nama" bind:value={form.kontak_1_nama} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+        </div>
       </div>
       <div>
-        <label for="create_kontak_1_jabatan" class="block text-sm font-medium text-gray-900">Jabatan Kontak 1</label>
-        <input type="text" id="create_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label for="create_kontak_1_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 1</label>
+        <div class="mt-2">
+          <input type="text" id="create_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+        </div>
       </div>
       <div>
-        <label for="create_kontak_2" class="block text-sm font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
-        <input type="text" id="create_kontak_2" bind:value={form.kontak_2} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label for="create_kontak_2" class="block text-sm/6 font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
+        <div class="mt-2">
+          <input type="text" id="create_kontak_2" bind:value={form.kontak_2} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+        </div>
       </div>
       <div>
-        <label for="create_kontak_2_nama" class="block text-sm font-medium text-gray-900">Nama Kontak 2</label>
-        <input type="text" id="create_kontak_2_nama" bind:value={form.kontak_2_nama} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label for="create_kontak_2_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 2</label>
+        <div class="mt-2">
+          <input type="text" id="create_kontak_2_nama" bind:value={form.kontak_2_nama} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+        </div>
       </div>
       <div>
-        <label for="create_kontak_2_jabatan" class="block text-sm font-medium text-gray-900">Jabatan Kontak 2</label>
-        <input type="text" id="create_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+        <label for="create_kontak_2_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 2</label>
+        <div class="mt-2">
+          <input type="text" id="create_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+        </div>
       </div>
     </div>
-    <div class="mt-6 flex justify-end">
-      <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+    <div class="mt-6">
+      <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
         Tambah Mitra
       </button>
     </div>
@@ -383,11 +403,13 @@
     <form on:submit|preventDefault={handleSubmitUpdate}>
       <div class="space-y-4">
         <div>
-          <label for="edit_nama" class="block text-sm font-medium text-gray-900">Nama</label>
-          <input type="text" id="edit_nama" bind:value={form.nama} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="edit_nama" class="block text-sm/6 font-medium text-gray-900">Nama</label>
+          <div class="mt-2">
+            <input type="text" id="edit_nama" bind:value={form.nama} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-900">Kategori</label>
+          <label class="block text-sm/6 font-medium text-gray-900">Kategori</label>
           <div class="flex flex-wrap gap-4 mt-2">
             <label><input type="checkbox" bind:checked={form.is_pribadi} class="mr-1"> Pribadi</label>
             <label><input type="checkbox" bind:checked={form.is_perusahaan} class="mr-1"> Perusahaan</label>
@@ -396,44 +418,62 @@
           </div>
         </div>
         <div>
-          <label for="edit_alamat" class="block text-sm font-medium text-gray-900">Alamat</label>
-          <textarea id="edit_alamat" bind:value={form.alamat} rows="2" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+          <label for="edit_alamat" class="block text-sm/6 font-medium text-gray-900">Alamat</label>
+          <div class="mt-2">
+            <textarea id="edit_alamat" bind:value={form.alamat} rows="2" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          </div>
         </div>
         <div>
-          <label for="edit_website" class="block text-sm font-medium text-gray-900">Website</label>
-          <input type="text" id="edit_website" bind:value={form.website} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="edit_website" class="block text-sm/6 font-medium text-gray-900">Website</label>
+          <div class="mt-2">
+            <input type="text" id="edit_website" bind:value={form.website} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label for="edit_email" class="block text-sm font-medium text-gray-900">Email</label>
-          <input type="email" id="edit_email" bind:value={form.email} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="edit_email" class="block text-sm/6 font-medium text-gray-900">Email</label>
+          <div class="mt-2">
+            <input type="email" id="edit_email" bind:value={form.email} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label for="edit_kontak_1" class="block text-sm font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
-          <input type="text" id="edit_kontak_1" bind:value={form.kontak_1} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="edit_kontak_1" class="block text-sm/6 font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
+          <div class="mt-2">
+            <input type="text" id="edit_kontak_1" bind:value={form.kontak_1} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label for="edit_kontak_1_nama" class="block text-sm font-medium text-gray-900">Nama Kontak 1</label>
-          <input type="text" id="edit_kontak_1_nama" bind:value={form.kontak_1_nama} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="edit_kontak_1_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 1</label>
+          <div class="mt-2">
+            <input type="text" id="edit_kontak_1_nama" bind:value={form.kontak_1_nama} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label for="edit_kontak_1_jabatan" class="block text-sm font-medium text-gray-900">Jabatan Kontak 1</label>
-          <input type="text" id="edit_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="edit_kontak_1_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 1</label>
+          <div class="mt-2">
+            <input type="text" id="edit_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label for="edit_kontak_2" class="block text-sm font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
-          <input type="text" id="edit_kontak_2" bind:value={form.kontak_2} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="edit_kontak_2" class="block text-sm/6 font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
+          <div class="mt-2">
+            <input type="text" id="edit_kontak_2" bind:value={form.kontak_2} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label for="edit_kontak_2_nama" class="block text-sm font-medium text-gray-900">Nama Kontak 2</label>
-          <input type="text" id="edit_kontak_2_nama" bind:value={form.kontak_2_nama} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="edit_kontak_2_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 2</label>
+          <div class="mt-2">
+            <input type="text" id="edit_kontak_2_nama" bind:value={form.kontak_2_nama} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label for="edit_kontak_2_jabatan" class="block text-sm font-medium text-gray-900">Jabatan Kontak 2</label>
-          <input type="text" id="edit_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="edit_kontak_2_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 2</label>
+          <div class="mt-2">
+            <input type="text" id="edit_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
       </div>
-      <div class="mt-6 flex justify-end">
-        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      <div class="mt-6">
+        <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
           Update Mitra
         </button>
       </div>

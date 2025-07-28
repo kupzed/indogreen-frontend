@@ -526,42 +526,54 @@
       <form on:submit|preventDefault={handleSubmitUpdateProject}>
         <div class="space-y-4">
           <div>
-            <label for="edit_project_name" class="block text-sm font-medium text-gray-900">Nama Project</label>
-            <input type="text" id="edit_project_name" bind:value={editProjectForm.name} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+            <label for="edit_project_name" class="block text-sm/6 font-medium text-gray-900">Nama Project</label>
+            <div class="mt-2">
+              <input type="text" id="edit_project_name" bind:value={editProjectForm.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            </div>
           </div>
           <div>
-            <label for="edit_project_customer_id" class="block text-sm font-medium text-gray-900">Customer</label>
-            <select id="edit_project_customer_id" bind:value={editProjectForm.mitra_id} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-              <option value="">Pilih Customer</option>
-              {#each customers as customer (customer.id)}
-                <option value={customer.id}>{customer.nama}</option>
-              {/each}
-            </select>
+            <label for="edit_project_customer_id" class="block text-sm/6 font-medium text-gray-900">Customer</label>
+            <div class="mt-2">
+              <select id="edit_project_customer_id" bind:value={editProjectForm.mitra_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                <option value="">Pilih Customer</option>
+                {#each customers as customer (customer.id)}
+                  <option value={customer.id}>{customer.nama}</option>
+                {/each}
+              </select>
+            </div>
           </div>
           <div>
-            <label for="edit_project_status" class="block text-sm font-medium text-gray-900">Status</label>
-            <select id="edit_project_status" bind:value={editProjectForm.status} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-              <option value="">Pilih Status</option>
-              {#each projectStatuses as status}
-                <option value={status}>{status}</option>
-              {/each}
-            </select>
+            <label for="edit_project_status" class="block text-sm/6 font-medium text-gray-900">Status</label>
+            <div class="mt-2">
+              <select id="edit_project_status" bind:value={editProjectForm.status} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                <option value="">Pilih Status</option>
+                {#each projectStatuses as status}
+                  <option value={status}>{status}</option>
+                {/each}
+              </select>
+            </div>
           </div>
           <div>
-            <label for="edit_project_description" class="block text-sm font-medium text-gray-900">Deskripsi</label>
-            <textarea id="edit_project_description" bind:value={editProjectForm.description} rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+            <label for="edit_project_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
+            <div class="mt-2">
+              <textarea id="edit_project_description" bind:value={editProjectForm.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+            </div>
           </div>
           <div>
-            <label for="edit_project_start_date" class="block text-sm font-medium text-gray-900">Tanggal Mulai</label>
-            <input type="date" id="edit_project_start_date" bind:value={editProjectForm.start_date} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+            <label for="edit_project_start_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Mulai</label>
+            <div class="mt-2">
+              <input type="date" id="edit_project_start_date" bind:value={editProjectForm.start_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            </div>
           </div>
           <div>
-            <label for="edit_project_finish_date" class="block text-sm font-medium text-gray-900">Tanggal Selesai (Opsional)</label>
-            <input type="date" id="edit_project_finish_date" bind:value={editProjectForm.finish_date} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+            <label for="edit_project_finish_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Selesai (Opsional)</label>
+            <div class="mt-2">
+              <input type="date" id="edit_project_finish_date" bind:value={editProjectForm.finish_date} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            </div>
           </div>
         </div>
-        <div class="mt-6 flex justify-end">
-          <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <div class="mt-6">
+          <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
             Update Project
           </button>
         </div>
@@ -579,56 +591,72 @@
     <form on:submit|preventDefault={handleSubmitCreateActivity}>
       <div class="space-y-4">
         <div>
-          <label for="activity_name" class="block text-sm font-medium text-gray-900">Nama Aktivitas</label>
-          <input type="text" id="activity_name" bind:value={createActivityForm.name} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="activity_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
+          <div class="mt-2">
+            <input type="text" id="activity_name" bind:value={createActivityForm.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label for="modal_jenis" class="block text-sm font-medium text-gray-900">Jenis</label>
-          <select id="modal_jenis" bind:value={createActivityForm.jenis} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-            <option value="">Pilih Jenis</option>
-            {#each activityJenisList as jenis}
-              <option value={jenis}>{jenis}</option>
-            {/each}
-          </select>
-        </div>
-        {#if createActivityForm.jenis === 'Vendor'}
-          <div>
-            <label for="modal_mitra_id" class="block text-sm font-medium text-gray-900">Vendor</label>
-            <select id="modal_mitra_id" bind:value={createActivityForm.mitra_id} required={createActivityForm.jenis === 'Vendor'} class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-              <option value="">Pilih Vendor</option>
-              {#each vendors as vendor (vendor.id)}
-                <option value={vendor.id}>{vendor.nama}</option>
+          <label for="modal_jenis" class="block text-sm/6 font-medium text-gray-900">Jenis</label>
+          <div class="mt-2">
+            <select id="modal_jenis" bind:value={createActivityForm.jenis} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+              <option value="">Pilih Jenis</option>
+              {#each activityJenisList as jenis}
+                <option value={jenis}>{jenis}</option>
               {/each}
             </select>
           </div>
+        </div>
+        {#if createActivityForm.jenis === 'Vendor'}
+          <div>
+            <label for="modal_mitra_id" class="block text-sm/6 font-medium text-gray-900">Vendor</label>
+            <div class="mt-2">
+              <select id="modal_mitra_id" bind:value={createActivityForm.mitra_id} required={createActivityForm.jenis === 'Vendor'} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                <option value="">Pilih Vendor</option>
+                {#each vendors as vendor (vendor.id)}
+                  <option value={vendor.id}>{vendor.nama}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
         {/if}
         <div>
-          <label for="modal_kategori" class="block text-sm font-medium text-gray-900">Kategori</label>
-          <select id="modal_kategori" bind:value={createActivityForm.kategori} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-            <option value="">Pilih Kategori</option>
-            {#each activityKategoriList as kategori}
-              <option value={kategori}>{kategori}</option>
-            {/each}
-          </select>
+          <label for="modal_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
+          <div class="mt-2">
+            <select id="modal_kategori" bind:value={createActivityForm.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+              <option value="">Pilih Kategori</option>
+              {#each activityKategoriList as kategori}
+                <option value={kategori}>{kategori}</option>
+              {/each}
+            </select>
+          </div>
         </div>
         <div>
-          <label for="activity_from" class="block text-sm font-medium text-gray-900">From (Optional)</label>
-          <textarea id="activity_from" bind:value={createActivityForm.from} rows="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+          <label for="activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
+          <div class="mt-2">
+            <textarea id="activity_from" bind:value={createActivityForm.from} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          </div>
         </div>
         <div>
-          <label for="activity_to" class="block text-sm font-medium text-gray-900">To (Optional)</label>
-          <textarea id="activity_to" bind:value={createActivityForm.to} rows="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+          <label for="activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
+          <div class="mt-2">
+            <textarea id="activity_to" bind:value={createActivityForm.to} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          </div>
         </div>
         <div>
-          <label for="activity_description" class="block text-sm font-medium text-gray-900">Deskripsi</label>
-          <textarea id="activity_description" bind:value={createActivityForm.description} rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+          <label for="activity_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
+          <div class="mt-2">
+            <textarea id="activity_description" bind:value={createActivityForm.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          </div>
         </div>
         <div>
-          <label for="activity_date" class="block text-sm font-medium text-gray-900">Tanggal Aktivitas</label>
-          <input type="date" id="activity_date" bind:value={createActivityForm.activity_date} required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+          <label for="activity_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Aktivitas</label>
+          <div class="mt-2">
+            <input type="date" id="activity_date" bind:value={createActivityForm.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
         <div>
-          <label for="file_upload" class="block text-sm font-medium text-gray-900">Attachment File</label>
+          <label for="file_upload" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
           <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
             <div class="text-center">
               <svg class="mx-auto size-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -648,8 +676,8 @@
           </div>
         </div>
       </div>
-      <div class="mt-6 flex justify-end">
-        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      <div class="mt-6">
+        <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
           Tambah Aktivitas
         </button>
       </div>
