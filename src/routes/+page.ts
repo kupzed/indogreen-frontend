@@ -1,11 +1,14 @@
-// since there's no dynamic data here, we can prerender
-// it so that it gets served as a static asset in production
-// src/routes/dashboard/+page.ts (atau src/routes/+layout.ts untuk global check)
+// src/routes/+page.ts
 import { redirect } from '@sveltejs/kit';
 import { API_BASE_URL } from '$lib/config';
+import { browser } from '$app/environment'; // Import 'browser' dari $app/environment
 
 export async function load({ fetch }) {
-	const token = localStorage.getItem('jwt_token');
+	let token = null;
+	if (browser) {
+		// Periksa apakah kode berjalan di browser
+		token = localStorage.getItem('jwt_token');
+	}
 
 	if (!token) {
 		throw redirect(302, '/auth/login'); // Redirect ke halaman login jika tidak ada token
@@ -20,17 +23,19 @@ export async function load({ fetch }) {
 		});
 
 		if (!response.ok) {
-			localStorage.removeItem('jwt_token'); // Hapus token kadaluarsa/tidak valid
+			if (browser) {
+				localStorage.removeItem('jwt_token'); // Hapus token kadaluarsa/tidak valid
+			}
 			throw redirect(302, '/auth/login');
 		}
 
-		const user = await response.json();
-		return { user }; // Sediakan data user ke komponen
+		// Jika token valid dan respons OK, redirect ke dashboard
+		throw redirect(302, '/dashboard');
 	} catch (error) {
 		console.error('Error fetching user data:', error);
-		localStorage.removeItem('jwt_token');
+		if (browser) {
+			localStorage.removeItem('jwt_token');
+		}
 		throw redirect(302, '/auth/login');
 	}
 }
-
-export const prerender = true;
