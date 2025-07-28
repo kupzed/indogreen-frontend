@@ -6,7 +6,6 @@
 
   let activities: any[] = [];
   let projects: any[] = []; // For project dropdown in activity forms
-  let customers: any[] = []; // For customer dropdown (if 'jenis' is customer)
   let vendors: any[] = []; // For vendor dropdown (if 'jenis' is vendor)
   let loading = true;
   let error = '';
@@ -72,7 +71,6 @@
     try {
       const response = await axiosClient.get('/activity/getFormDependencies');
       projects = response.data.projects;
-      customers = response.data.customers;
       vendors = response.data.vendors; // Perbaiki: ambil dari vendors, bukan mitras
     } catch (err) {
       console.error('Failed to fetch form dependencies:', err);
@@ -133,6 +131,15 @@
       to: editingActivity.to || '',
       attachment_removed: false,
     };
+    
+    // If jenis is Customer, set mitra_id to the project's mitra_id
+    if (form.jenis === 'Customer' && form.project_id) {
+      const selectedProject = projects.find(p => p.id == form.project_id);
+      if (selectedProject?.mitra_id) {
+        form.mitra_id = selectedProject.mitra_id;
+      }
+    }
+    
     formFileName = activity.attachment ? activity.attachment.split('/').pop() : ''; // Display current attachment name
     showEditModal = true;
   }
@@ -171,12 +178,12 @@
       if (form.jenis === 'Internal') {
         formData.set('mitra_id', '1'); // Asumsi mitra_id 1 adalah 'Internal'
       } else if (form.jenis === 'Customer') {
-        // Find the project's customer ID if the project is selected
+        // Find the project's mitra_id if the project is selected
         const selectedProject = projects.find(p => p.id == form.project_id);
-        if (selectedProject?.customer_id) { // Assuming project model has customer_id
-          formData.set('mitra_id', selectedProject.customer_id);
+        if (selectedProject?.mitra_id) { // Using project's mitra_id
+          formData.set('mitra_id', selectedProject.mitra_id);
         } else {
-          formData.delete('mitra_id'); // Ensure it's not sent if no customer found for project
+          formData.delete('mitra_id'); // Ensure it's not sent if no mitra found for project
         }
       } else if (form.jenis === 'Vendor' && form.mitra_id) {
         formData.set('mitra_id', form.mitra_id);
@@ -221,10 +228,10 @@
       if (form.jenis === 'Internal') {
         formData.set('mitra_id', '1'); // Asumsi mitra_id 1 adalah 'Internal'
       } else if (form.jenis === 'Customer') {
-        // Find the project's customer ID if the project is selected
+        // Find the project's mitra_id if the project is selected
         const selectedProject = projects.find(p => p.id == form.project_id);
-        if (selectedProject?.customer_id) { // Assuming project model has customer_id
-          formData.set('mitra_id', selectedProject.customer_id);
+        if (selectedProject?.mitra_id) { // Using project's mitra_id
+          formData.set('mitra_id', selectedProject.mitra_id);
         } else {
           formData.delete('mitra_id');
         }
@@ -269,7 +276,7 @@
   }
 
   // Reactive logic for mitra_id dropdown in forms
-  $: if (showCreateModal && form.jenis) {
+  $: if ((showCreateModal || showEditModal) && form.jenis) {
     if (form.jenis === 'Customer') {
       const selectedProject = projects.find(p => p.id == form.project_id);
       if (form.mitra_id !== (selectedProject?.mitra_id || null)) {
@@ -291,7 +298,7 @@
   }
 
   // Reset form saat modal ditutup
-  $: if (!showCreateModal) {
+  $: if (!showCreateModal && !showEditModal) {
     form.mitra_id = '';
     form.jenis = '';
   }
