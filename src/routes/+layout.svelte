@@ -1,77 +1,71 @@
 <script lang="ts">
-	import Header from './Header.svelte';
-	import '../app.css';
+	import '../app.css'; // Pastikan Tailwind CSS diimpor
 	import axiosClient from '$lib/axiosClient';
 	import { goto } from '$app/navigation';
-
+	import { page } from '$app/stores';
+  
+	// Import komponen baru
+	import Sidebar from '$lib/components/Sidebar.svelte';
+	import TopNav from '$lib/components/TopNav.svelte';
+	import MobileSidebar from '$lib/components/Mobilesidebar.svelte';
+  
+	// State untuk mengontrol sidebar
+	let sidebarOpen: boolean = false; // Untuk mobile sidebar
+	let sidebarCollapsed: boolean = false; // Untuk desktop sidebar (collapse/expand)
+  
 	async function logout() {
-		if (confirm('Apakah Anda yakin ingin logout?')) {
+	  if (confirm('Apakah Anda yakin ingin logout?')) {
 		try {
-			await axiosClient.post('/auth/logout'); // Panggil endpoint logout API
-			localStorage.removeItem('jwt_token');
-			alert('Logout berhasil!');
-			goto('/auth/login');
+		  await axiosClient.post('/auth/logout');
+		  localStorage.removeItem('jwt_token');
+		  alert('Logout berhasil!');
+		  goto('/auth/login');
 		} catch (error) {
-			console.error('Logout failed:', error);
-			// Tetap hapus token di frontend meskipun API error
-			localStorage.removeItem('jwt_token');
-			alert('Logout gagal, namun Anda telah keluar dari sesi.');
-			goto('/auth/login');
+		  console.error('Logout failed:', error);
+		  localStorage.removeItem('jwt_token');
+		  alert('Logout gagal, namun Anda telah keluar dari sesi.');
+		  goto('/auth/login');
 		}
-		}
+	  }
 	}
-
-	let { children } = $props();
-</script>
-
-<div class="app">
-	<Header />
-
-	<main>
-		{@render children()}
-	</main>
-
-	<footer>
-		<p>
-			visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to learn about SvelteKit
-		</p>
-		<button on:click={logout}>Logout</button>
-	</footer>
-</div>
-
-<style>
-	.app {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-	}
-
-	main {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		width: 100%;
-		max-width: 64rem;
-		margin: 0 auto;
-		box-sizing: border-box;
-	}
-
-	footer {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 12px;
-	}
-
-	footer a {
-		font-weight: bold;
-	}
-
-	@media (min-width: 480px) {
-		footer {
-			padding: 12px 0;
-		}
-	}
-</style>
+  
+	// Cek apakah halaman saat ini adalah bagian dari rute autentikasi
+	$: isAuthRoute = $page.url.pathname.startsWith('/auth');
+  </script>
+  
+  {#if isAuthRoute}
+	<slot></slot>
+  {:else}
+	<div class="flex h-screen bg-gray-100 font-sans">
+	  <Sidebar
+		bind:collapsed={sidebarCollapsed}
+		on:toggleCollapsed={() => (sidebarCollapsed = !sidebarCollapsed)}
+		on:logout={logout}
+	  />
+  
+	  <div
+		class="flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out"
+		class:lg:pl-64={!sidebarCollapsed}
+		class:lg:pl-20={sidebarCollapsed}
+	  >
+		<MobileSidebar
+		  bind:open={sidebarOpen}
+		  on:close={() => (sidebarOpen = false)}
+		  on:logout={logout}
+		/>
+  
+		<TopNav on:toggleMobileSidebar={() => (sidebarOpen = true)}>
+		</TopNav>
+  
+		<main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+		  <div class="mx-auto max-w-7xl">
+			<slot></slot> </div>
+		</main>
+	  </div>
+	</div>
+  {/if}
+  
+  <style>
+	/* Tidak perlu style tambahan jika menggunakan Tailwind secara ekstensif */
+	/* Pastikan `src/app.css` hanya berisi impor Tailwind dan sedikit custom CSS global jika ada */
+  </style>
