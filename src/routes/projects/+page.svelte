@@ -17,7 +17,7 @@
   // Modal state for Create/Update
   let showCreateModal: boolean = false;
   let showEditModal: boolean = false;
-  let editingProject: any = null; // Data proyek yang sedang diedit
+  let editingProject: any = null; // Data project yang sedang diedit
 
   // Form data for Create/Update
   let form = {
@@ -47,7 +47,7 @@
       lastPage = response.data.pagination.last_page;
       totalProjects = response.data.pagination.total;
     } catch (err: any) {
-      error = err.response?.data?.message || 'Gagal memuat proyek.';
+      error = err.response?.data?.message || 'Gagal memuat project.';
       console.error('Error fetching projects:', err);
     } finally {
       loading = false;
@@ -109,14 +109,14 @@
   async function handleSubmitCreate() {
     try {
       await axiosClient.post('/projects', form);
-      alert('Proyek berhasil ditambahkan!');
+      alert('Project berhasil ditambahkan!');
       goto(`/projects`);
       showCreateModal = false;
       fetchProjects(); // Refresh daftar
     } catch (err: any) {
       const messages = err.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join('\n')
-        : err.response?.data?.message || 'Gagal menambahkan proyek.';
+        : err.response?.data?.message || 'Gagal menambahkan project.';
       alert('Error:\n' + messages);
       console.error('Create project failed:', err.response || err);
     }
@@ -126,28 +126,28 @@
     if (!editingProject?.id) return;
     try {
       await axiosClient.put(`/projects/${editingProject.id}`, form);
-      alert('Proyek berhasil diperbarui!');
+      alert('Project berhasil diperbarui!');
       goto(`/projects`);
       showEditModal = false;
       fetchProjects(); // Refresh daftar
     } catch (err: any) {
       const messages = err.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join('\n')
-        : err.response?.data?.message || 'Gagal memperbarui proyek.';
+        : err.response?.data?.message || 'Gagal memperbarui project.';
       alert('Error:\n' + messages);
       console.error('Update project failed:', err.response || err);
     }
   }
 
   async function handleDelete(projectId: number) {
-    if (confirm('Apakah Anda yakin ingin menghapus proyek ini?')) {
+    if (confirm('Apakah Anda yakin ingin menghapus project ini?')) {
       try {
         await axiosClient.delete(`/projects/${projectId}`);
-        alert('Proyek berhasil dihapus!');
+        alert('Project berhasil dihapus!');
         goto(`/projects`);
         fetchProjects(); // Refresh daftar
       } catch (err: any) {
-        alert('Gagal menghapus proyek: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
+        alert('Gagal menghapus project: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
         console.error('Delete project failed:', err.response || err);
       }
     }
@@ -155,25 +155,25 @@
 </script>
 
 
-<div class="flex justify-between items-center mb-6">
-  <div class="flex space-x-2">
+<div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
+  <div class="flex w-full sm:w-auto space-x-2">
     <button
       on:click={() => { statusFilter = ''; handleFilterOrSearch(); }}
-      class="px-3 py-2 rounded-md text-sm font-semibold {statusFilter === '' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 border border-gray-300'}"
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold {statusFilter === '' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 border border-gray-300'}"
     >
       Semua Status
     </button>
     {#each projectStatuses as status}
       <button
         on:click={() => { statusFilter = status; handleFilterOrSearch(); }}
-        class="px-3 py-2 rounded-md text-sm font-semibold {statusFilter === status ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 border border-gray-300'}"
+        class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold {statusFilter === status ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 border border-gray-300'}"
       >
         {status}
       </button>
     {/each}
   </div>
-  <div class="flex-grow ml-4">
-    <div class="relative">
+  <div class="w-full sm:w-auto flex-grow">
+    <div class="relative w-full sm:w-auto">
       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
@@ -181,7 +181,7 @@
       </div>
       <input
         type="text"
-        placeholder="Cari proyek..."
+        placeholder="Cari project..."
         bind:value={search}
         on:input={handleFilterOrSearch}
         class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -190,7 +190,7 @@
   </div>
   <button
     on:click={openCreateModal}
-    class="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
   >
     Tambah Project
   </button>
