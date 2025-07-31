@@ -43,7 +43,7 @@
 {:else if error}
   <p class="text-red-500">{error}</p>
 {:else}
-  <div class="my-2">
+  <div>
     <h2 class="text-2xl leading-6 font-medium text-gray-900">Project Terbaru</h2>
     <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200">

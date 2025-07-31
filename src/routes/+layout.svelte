@@ -43,10 +43,13 @@
 				return 'Daftar Activity';
 			case '/mitras':
 				return 'Daftar Mitra';
+			case '/settings':
+				return 'Pengaturan';
 			default:
 				if (pathname.startsWith('/projects/')) return 'Detail Project';
 				if (pathname.startsWith('/activities/')) return 'Detail Activity';
 				if (pathname.startsWith('/mitras/')) return 'Detail Mitra';
+				if (pathname.startsWith('/settings/')) return 'Pengaturan';
 				return 'Dashboard';
 		}
 	}

@@ -370,7 +370,7 @@
               {#if project.finish_date}
                 {new Date(project.finish_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
               {:else}
-                Tanggal belum ditambahkan
+                <span class="text-gray-500">Tanggal belum ditambahkan</span>
               {/if}
             </dd>
           </div>
