@@ -278,6 +278,12 @@
     createActivityForm.mitra_id = '';
     createActivityForm.jenis = '';
   }
+
+  // State untuk tab
+  let activeTab: 'detail' | 'activity' | 'mitra' = 'activity';
+  
+  // State untuk toggle tampilan activity
+  let activityView: 'table' | 'list' = 'table';
 </script>
 
 
@@ -322,202 +328,393 @@
       </div>
     </div>
 
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
-      <div class="px-4 py-5 sm:px-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Project</h3>
-      </div>
-      <div class="border-t border-gray-200">
-        <dl class="divide-y divide-gray-100">
-          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Nama Project</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              {project.name}
-            </dd>
-          </div>
-          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Customer</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              {#if project.mitra}
-                <a href={`/mitras/${project.mitra.id}`} class="text-indigo-600 hover:text-indigo-900">{project.mitra.nama}</a>
-              {:else}
-                -
-              {/if}
-            </dd>
-          </div>
-          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Status</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(project.status)}">
-                {project.status}
-              </span>
-            </dd>
-          </div>
-          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              {project.description}
-            </dd>
-          </div>
-          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Tanggal Mulai</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              {new Date(project.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-            </dd>
-          </div>
-          <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Tanggal Selesai</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              {#if project.finish_date}
-                {new Date(project.finish_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-              {:else}
-                <span class="text-gray-500">Tanggal belum ditambahkan</span>
-              {/if}
-            </dd>
-          </div>
-        </dl>
-      </div>
-    </div>
-
-    <div class="mt-8">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">
-          Aktivitas Project
-        </h3>
+    <!-- Tab Navigation -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-1 bg-gray-200 rounded-lg inline-flex" role="tablist">
         <button
-          on:click={openCreateActivityModal}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          on:click={() => (activeTab = 'detail')}
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+          class:bg-white={activeTab === 'detail'}
+          class:shadow={activeTab === 'detail'}
+          class:text-gray-600={activeTab !== 'detail'}
+          role="tab"
+          aria-selected={activeTab === 'detail'}
         >
-          Tambah Aktivitas
+          Detail
+        </button>
+        <button
+          on:click={() => (activeTab = 'activity')}
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+          class:bg-white={activeTab === 'activity'}
+          class:shadow={activeTab === 'activity'}
+          class:text-gray-600={activeTab !== 'activity'}
+          role="tab"
+          aria-selected={activeTab === 'activity'}
+        >
+          Activity
+        </button>
+        <button
+          on:click={() => (activeTab = 'mitra')}
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+          class:bg-white={activeTab === 'mitra'}
+          class:shadow={activeTab === 'mitra'}
+          class:text-gray-600={activeTab !== 'mitra'}
+          role="tab"
+          aria-selected={activeTab === 'mitra'}
+        >
+          Mitra
         </button>
       </div>
-
-      <div class="flex flex-col sm:flex-row items-center justify-between my-4 space-y-4 sm:space-y-0 sm:space-x-4">
-        <div class="flex space-x-2 w-full sm:w-auto">
-          <select bind:value={activityJenisFilter} on:change={handleActivityFilterOrSearch} class="block w-full rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-            <option value="">Filter Jenis: Semua</option>
-            {#each activityJenisList as jenis}
-              <option value={jenis}>{jenis}</option>
-            {/each}
-          </select>
-          <select bind:value={activityKategoriFilter} on:change={handleActivityFilterOrSearch} class="block w-full rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-            <option value="">Filter Kategori: Semua</option>
-            {#each activityKategoriList as kategori}
-              <option value={kategori}>{kategori}</option>
-            {/each}
-          </select>
-        </div>
-        <div class="w-full sm:w-auto flex-grow">
-          <div class="relative w-full">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <input
-              type="text"
-              placeholder="Cari aktivitas..."
-              bind:value={activitySearch}
-              on:input={handleActivityFilterOrSearch}
-              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
-        <ul class="divide-y divide-gray-200">
-          {#if activities.length === 0}
-            <li class="px-4 py-4 sm:px-6">
-              <p class="text-sm text-gray-500">Belum ada aktivitas untuk project ini.</p>
-            </li>
-          {:else}
-            {#each activities as activity (activity.id)}
-              <li>
-                <a href={`/activities/${activity.id}`} class="block hover:bg-gray-50 px-4 py-4 sm:px-6">
-                  <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-indigo-600 truncate">
-                      {activity.name}
-                    </p>
-                    <div class="ml-2 flex-shrink-0 flex">
-                      <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
-                        {activity.kategori}
-                      </span>
-                    </div>
-                  </div>
-                  <div class="mt-2 sm:flex sm:justify-between">
-                    <div class="sm:flex">
-                      <p class="flex items-center text-sm text-gray-500">
-                        Jenis: {activity.jenis}
-                        {#if activity.jenis === 'Vendor' && activity.mitra}
-                          | Vendor: {activity.mitra.nama}
-                        {:else if activity.jenis === 'Customer' && activity.mitra}
-                          | Customer: {activity.mitra.nama}
-                        {/if}
-                        | Deskripsi: {activity.description.substring(0, 40)}{activity.description.length > 40 ? '...' : ''}
-                      </p>
-                    </div>
-                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                      </svg>
-                      <p>
-                        Aktivitas: {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-                      </p>
-                    </div>
-                  </div>
-                </a>
-              </li>
-            {/each}
-          {/if}
-        </ul>
-
-        <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-          <div class="flex flex-1 justify-between sm:hidden">
-            <button on:click={() => goToActivityPage(activityCurrentPage - 1)} disabled={activityCurrentPage === 1} class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {activityCurrentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">Previous</button>
-            <button on:click={() => goToActivityPage(activityCurrentPage + 1)} disabled={activityCurrentPage === activityLastPage} class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {activityCurrentPage === activityLastPage ? 'opacity-50 cursor-not-allowed' : ''}">Next</button>
-          </div>
-          <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div>
-              <p class="text-sm text-gray-700">
-                Showing
-                <span class="font-medium">{(activityCurrentPage - 1) * 10 + 1}</span>
-                to
-                <span class="font-medium">{(activityCurrentPage - 1) * 10 + activities.length}</span>
-                of
-                <span class="font-medium">{totalActivities}</span>
-                results
-              </p>
-            </div>
-            <div>
-              <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
-                <button on:click={() => goToActivityPage(activityCurrentPage - 1)} disabled={activityCurrentPage === 1} class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {activityCurrentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
-                  <span class="sr-only">Previous</span>
-                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
-                  </svg>
-                </button>
-                {#each Array(activityLastPage).fill(0) as _, i}
-                  {@const pageNum = i + 1}
-                  <button
-                    on:click={() => goToActivityPage(pageNum)}
-                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {pageNum === activityCurrentPage ? 'z-10 bg-indigo-600 text-white' : 'text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50'} focus:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    aria-current={pageNum === activityCurrentPage ? 'page' : undefined}
-                  >
-                    {pageNum}
-                  </button>
-                {/each}
-                <button on:click={() => goToActivityPage(activityCurrentPage + 1)} disabled={activityCurrentPage === activityLastPage} class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {activityCurrentPage === activityLastPage ? 'opacity-50 cursor-not-allowed' : ''}">
-                  <span class="sr-only">Next</span>
-                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                  </svg>
-                </button>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
+
+    <!-- Tab Content -->
+    {#if activeTab === 'detail'}
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:px-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Project</h3>
+        </div>
+        <div class="border-t border-gray-200">
+          <dl class="divide-y divide-gray-100">
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">Nama Project</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                {project.name}
+              </dd>
+            </div>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">Customer</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                {#if project.mitra}
+                  <a href={`/mitras/${project.mitra.id}`} class="text-indigo-600 hover:text-indigo-900">{project.mitra.nama}</a>
+                {:else}
+                  -
+                {/if}
+              </dd>
+            </div>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">Status</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(project.status)}">
+                  {project.status}
+                </span>
+              </dd>
+            </div>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                {project.description}
+              </dd>
+            </div>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">Tanggal Mulai</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                {new Date(project.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </dd>
+            </div>
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-gray-500">Tanggal Selesai</dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                {#if project.finish_date}
+                  {new Date(project.finish_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                {:else}
+                  <span class="text-gray-500">Tanggal belum ditambahkan</span>
+                {/if}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    {/if}
+
+    {#if activeTab === 'activity'}
+      <div class="mb-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
+          <div class="flex w-full sm:w-auto space-x-2">
+            <select bind:value={activityJenisFilter} on:change={handleActivityFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+              <option value="">Filter Jenis: Semua</option>
+              {#each activityJenisList as jenis}
+                <option value={jenis}>{jenis}</option>
+              {/each}
+            </select>
+            <select bind:value={activityKategoriFilter} on:change={handleActivityFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+              <option value="">Filter Kategori: Semua</option>
+              {#each activityKategoriList as kategori}
+                <option value={kategori}>{kategori}</option>
+              {/each}
+            </select>
+          </div>
+          <div class="w-full sm:w-auto flex-grow">
+            <div class="relative w-full sm:w-auto">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Cari aktivitas..."
+                bind:value={activitySearch}
+                on:input={handleActivityFilterOrSearch}
+                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+            </div>
+          </div>
+          <button
+            on:click={openCreateActivityModal}
+            class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Tambah Aktivitas
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-1 bg-gray-200 rounded-lg inline-flex" role="tablist">
+            <button
+              on:click={() => (activityView = 'table')}
+              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+              class:bg-white={activityView === 'table'}
+              class:shadow={activityView === 'table'}
+              class:text-gray-600={activityView !== 'table'}
+              role="tab"
+              aria-selected={activityView === 'table'}
+            >
+              Table
+            </button>
+            <button
+              on:click={() => (activityView = 'list')}
+              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+              class:bg-white={activityView === 'list'}
+              class:shadow={activityView === 'list'}
+              class:text-gray-600={activityView !== 'list'}
+              role="tab"
+              aria-selected={activityView === 'list'}
+            >
+              Simple
+            </button>
+          </div>
+        </div>
+
+        {#if activityView === 'list'}
+          <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
+            <ul class="divide-y divide-gray-200">
+              {#if activities.length === 0}
+                <li class="px-4 py-4 sm:px-6">
+                  <p class="text-sm text-gray-500">Belum ada aktivitas untuk project ini.</p>
+                </li>
+              {:else}
+                {#each activities as activity (activity.id)}
+                  <li>
+                    <a href={`/activities/${activity.id}`} class="block hover:bg-gray-50 px-4 py-4 sm:px-6">
+                      <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-indigo-600 truncate">
+                          {activity.name}
+                        </p>
+                        <div class="ml-2 flex-shrink-0 flex">
+                          <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
+                            {activity.kategori}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="mt-2 sm:flex sm:justify-between">
+                        <div class="sm:flex">
+                          <p class="flex items-center text-sm text-gray-500">
+                            Jenis: {activity.jenis}
+                            {#if activity.jenis === 'Vendor' && activity.mitra}
+                              | Vendor: {activity.mitra.nama}
+                            {:else if activity.jenis === 'Customer' && activity.mitra}
+                              | Customer: {activity.mitra.nama}
+                            {/if}
+                            | Deskripsi: {activity.description.substring(0, 40)}{activity.description.length > 40 ? '...' : ''}
+                          </p>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                          <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                          </svg>
+                          <p>
+                            Aktivitas: {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                {/each}
+              {/if}
+            </ul>
+            {#if activities.length > 0}
+              <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+                <div class="flex flex-1 justify-between sm:hidden">
+                  <button on:click={() => goToActivityPage(activityCurrentPage - 1)} disabled={activityCurrentPage === 1} class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {activityCurrentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">Previous</button>
+                  <button on:click={() => goToActivityPage(activityCurrentPage + 1)} disabled={activityCurrentPage === activityLastPage} class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {activityCurrentPage === activityLastPage ? 'opacity-50 cursor-not-allowed' : ''}">Next</button>
+                </div>
+                <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                  <div>
+                    <p class="text-sm text-gray-700">
+                      Showing
+                      <span class="font-medium">{(activityCurrentPage - 1) * 10 + 1}</span>
+                      to
+                      <span class="font-medium">{(activityCurrentPage - 1) * 10 + activities.length}</span>
+                      of
+                      <span class="font-medium">{totalActivities}</span>
+                      results
+                    </p>
+                  </div>
+                  <div>
+                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
+                      <button on:click={() => goToActivityPage(activityCurrentPage - 1)} disabled={activityCurrentPage === 1} class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {activityCurrentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
+                        <span class="sr-only">Previous</span>
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                      {#each Array(activityLastPage).fill(0) as _, i}
+                        {@const pageNum = i + 1}
+                        <button
+                          on:click={() => goToActivityPage(pageNum)}
+                          class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {pageNum === activityCurrentPage ? 'z-10 bg-indigo-600 text-white' : 'text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50'} focus:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                          aria-current={pageNum === activityCurrentPage ? 'page' : undefined}
+                        >
+                          {pageNum}
+                        </button>
+                      {/each}
+                      <button on:click={() => goToActivityPage(activityCurrentPage + 1)} disabled={activityCurrentPage === activityLastPage} class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {activityCurrentPage === activityLastPage ? 'opacity-50 cursor-not-allowed' : ''}">
+                        <span class="sr-only">Next</span>
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            {/if}
+          </div>
+        {/if}
+
+        {#if activityView === 'table'}
+          <div class="mt-4 bg-white shadow-md rounded-lg">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      Nama Aktivitas
+                    </th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Kategori
+                    </th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Jenis
+                    </th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Mitra
+                    </th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Tanggal Aktivitas
+                    </th>
+                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                      <span class="sr-only">Aksi</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                  {#each activities as activity (activity.id)}
+                    <tr>
+                      <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                        {activity.name}
+                        <br>
+                        <span class="text-xs text-gray-500">{activity.description.substring(0, 50)}{activity.description.length > 50 ? '...' : ''}</span>
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <span class="inline-flex rounded-full text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
+                          {activity.kategori}
+                        </span>
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {activity.jenis}
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {#if activity.jenis === 'Vendor' && activity.mitra}
+                          {activity.mitra.nama}
+                        {:else if activity.jenis === 'Customer' && activity.mitra}
+                          {activity.mitra.nama}
+                        {:else}
+                          -
+                        {/if}
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <div class="flex items-center space-x-2 justify-end">
+                          <a href={`/activities/${activity.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <span class="sr-only">Detail, {activity.name}</span>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            </div>
+            {#if activities.length > 0}
+              <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+                <div class="flex flex-1 justify-between sm:hidden">
+                  <button on:click={() => goToActivityPage(activityCurrentPage - 1)} disabled={activityCurrentPage === 1} class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {activityCurrentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">Previous</button>
+                  <button on:click={() => goToActivityPage(activityCurrentPage + 1)} disabled={activityCurrentPage === activityLastPage} class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {activityCurrentPage === activityLastPage ? 'opacity-50 cursor-not-allowed' : ''}">Next</button>
+                </div>
+                <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                  <div>
+                    <p class="text-sm text-gray-700">
+                      Showing
+                      <span class="font-medium">{(activityCurrentPage - 1) * 10 + 1}</span>
+                      to
+                      <span class="font-medium">{(activityCurrentPage - 1) * 10 + activities.length}</span>
+                      of
+                      <span class="font-medium">{totalActivities}</span>
+                      results
+                    </p>
+                  </div>
+                  <div>
+                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
+                      <button on:click={() => goToActivityPage(activityCurrentPage - 1)} disabled={activityCurrentPage === 1} class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {activityCurrentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
+                        <span class="sr-only">Previous</span>
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                      {#each Array(activityLastPage).fill(0) as _, i}
+                        {@const pageNum = i + 1}
+                        <button
+                          on:click={() => goToActivityPage(pageNum)}
+                          class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {pageNum === activityCurrentPage ? 'z-10 bg-indigo-600 text-white' : 'text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50'} focus:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                          aria-current={pageNum === activityCurrentPage ? 'page' : undefined}
+                        >
+                          {pageNum}
+                        </button>
+                      {/each}
+                      <button on:click={() => goToActivityPage(activityCurrentPage + 1)} disabled={activityCurrentPage === activityLastPage} class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {activityCurrentPage === activityLastPage ? 'opacity-50 cursor-not-allowed' : ''}">
+                        <span class="sr-only">Next</span>
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            {/if}
+          </div>
+        {/if}
+      </div>
+    {/if}
+
+    {#if activeTab === 'mitra'}
+      <div class="mb-8">
+        <h1>Mitra</h1>
+      </div>
+    {/if}
   </div>
 
   <Modal bind:show={showEditProjectModal} title="Edit Project">
