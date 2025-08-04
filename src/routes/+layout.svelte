@@ -7,7 +7,7 @@
 	// Import komponen baru
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import TopNav from '$lib/components/TopNav.svelte';
-	import MobileSidebar from '$lib/components/Mobilesidebar.svelte';
+	import MobileSidebar from '$lib/components/MobileSidebar.svelte';
   
 	// State untuk mengontrol sidebar
 	let sidebarOpen: boolean = false; // Untuk mobile sidebar
@@ -83,7 +83,7 @@
 		</TopNav>
   
 		<main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-		  <div class="mx-auto max-w-7xl">
+		  <div class="mx-auto">
 			<slot></slot> </div>
 		</main>
 	  </div>
