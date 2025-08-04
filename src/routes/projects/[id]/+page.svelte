@@ -51,6 +51,23 @@
   };
   let createActivityFileName = '';
 
+  // Activity Edit Modal
+  let showEditActivityModal: boolean = false;
+  let editingActivity: any = null;
+  let editActivityForm = {
+    name: '',
+    description: '',
+    project_id: '',
+    kategori: '',
+    activity_date: '',
+    attachment: null as File | null,
+    jenis: '',
+    mitra_id: null as string | null,
+    from: '',
+    to: '',
+  };
+  let editActivityFileName = '';
+
   // Dynamic lists for activity form
   const activityKategoriList = [
     'Expense Report', 'Invoice', 'Purchase Order', 'Payment', 'Quotation',
@@ -219,6 +236,17 @@
     }
   }
 
+  function handleEditAttachmentChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+      editActivityForm.attachment = target.files[0];
+      editActivityFileName = target.files[0].name;
+    } else {
+      editActivityForm.attachment = null;
+      editActivityFileName = '';
+    }
+  }
+
   async function handleSubmitCreateActivity() {
     try {
       const formData = new FormData();
@@ -258,6 +286,85 @@
         : err.response?.data?.message || 'Gagal menambahkan aktivitas.';
       alert('Error:\n' + messages);
       console.error('Create activity failed:', err.response || err);
+    }
+  }
+
+  function openEditActivityModal(activity: any) {
+    editingActivity = { ...activity };
+    // Format date to YYYY-MM-DD
+    editingActivity.activity_date = activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '';
+
+    // Set form data
+    editActivityForm = { 
+      ...editingActivity,
+      project_id: editingActivity.project_id || '',
+      kategori: editingActivity.kategori || '',
+      jenis: editingActivity.jenis || '',
+      mitra_id: editingActivity.mitra_id || '',
+      attachment: null,
+      from: editingActivity.from || '',
+      to: editingActivity.to || '',
+    };
+    
+    editActivityFileName = activity.attachment ? activity.attachment.split('/').pop() : '';
+    showEditActivityModal = true;
+  }
+
+  async function handleSubmitUpdateActivity() {
+    if (!editingActivity?.id) return;
+    try {
+      const formData = new FormData();
+      for (const key in editActivityForm) {
+        const typedKey = key as keyof typeof editActivityForm;
+        if (typedKey === 'attachment' && editActivityForm.attachment) {
+          formData.append(typedKey, editActivityForm.attachment);
+        } else if (editActivityForm[typedKey] !== null && editActivityForm[typedKey] !== undefined) {
+          formData.append(typedKey, editActivityForm[typedKey] as string | Blob);
+        }
+      }
+
+      // Handle dynamic mitra_id based on jenis for activity
+      if (editActivityForm.jenis === 'Internal') {
+        formData.set('mitra_id', '1');
+      } else if (editActivityForm.jenis === 'Customer') {
+        formData.set('mitra_id', project.mitra_id);
+      } else if (editActivityForm.jenis === 'Vendor' && editActivityForm.mitra_id) {
+        formData.set('mitra_id', editActivityForm.mitra_id);
+      } else {
+        formData.delete('mitra_id');
+      }
+
+      formData.append('_method', 'PUT');
+
+      await axiosClient.post(`/activities/${editingActivity.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      alert('Aktivitas berhasil diperbarui!');
+      goto(`/projects/${project.id}`);
+      showEditActivityModal = false;
+      fetchProjectDetails(); // Refresh activities list
+    } catch (err: any) {
+      const messages = err.response?.data?.errors
+        ? Object.values(err.response.data.errors).flat().join('\n')
+        : err.response?.data?.message || 'Gagal memperbarui aktivitas.';
+      alert('Error:\n' + messages);
+      console.error('Update activity failed:', err.response || err);
+    }
+  }
+
+  async function handleDeleteActivity(activityId: number) {
+    if (confirm('Apakah Anda yakin ingin menghapus aktivitas ini?')) {
+      try {
+        await axiosClient.delete(`/activities/${activityId}`);
+        alert('Aktivitas berhasil dihapus!');
+        goto(`/projects/${project.id}`);
+        fetchProjectDetails(); // Refresh activities list
+      } catch (err: any) {
+        alert('Gagal menghapus aktivitas: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
+        console.error('Delete activity failed:', err.response || err);
+      }
     }
   }
 
@@ -537,6 +644,20 @@
                         </div>
                       </div>
                     </a>
+                    <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
+                      <button
+                        on:click|stopPropagation={() => openEditActivityModal(activity)}
+                        class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        on:click|stopPropagation={() => handleDeleteActivity(activity.id)}
+                        class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      >
+                        Hapus
+                      </button>
+                    </div>
                   </li>
                 {/each}
               {/if}
@@ -597,7 +718,7 @@
               <table class="min-w-full divide-y divide-gray-300">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Nama Aktivitas
                     </th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -612,15 +733,15 @@
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Tanggal Aktivitas
                     </th>
-                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                      <span class="sr-only">Aksi</span>
+                    <th scope="col" class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Aksi
                     </th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
                   {#each activities as activity (activity.id)}
                     <tr>
-                      <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                      <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                         {activity.name}
                         <br>
                         <span class="text-xs text-gray-500">{activity.description.substring(0, 50)}{activity.description.length > 50 ? '...' : ''}</span>
@@ -645,12 +766,20 @@
                       <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
-                      <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <div class="flex items-center space-x-2 justify-end">
+                      <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
+                        <div class="flex items-left space-x-2">
                           <a href={`/activities/${activity.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <span class="sr-only">Detail, {activity.name}</span>
                           </a>
+                          <button on:click|stopPropagation={() => openEditActivityModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            <span class="sr-only">Edit, {activity.name}</span>
+                          </button>
+                          <button on:click|stopPropagation={() => handleDeleteActivity(activity.id)} title="Delete" class="text-red-600 hover:text-red-900">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            <span class="sr-only">Hapus, {activity.name}</span>
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -877,6 +1006,111 @@
           Tambah Aktivitas
         </button>
       </div>
-    </form>
-  </Modal>
-{/if}
+          </form>
+    </Modal>
+
+    <Modal bind:show={showEditActivityModal} title="Edit Aktivitas" maxWidth="max-w-xl">
+      {#if editingActivity}
+        <h1 class="text-center text-base font-bold tracking-tight text-gray-900">
+          Project : {project.name}
+        </h1>
+        <h1 class="text-center text-base font-bold tracking-tight text-gray-900 mb-6">
+          Customer : {project.mitra?.nama || '-'}
+        </h1>
+        <form on:submit|preventDefault={handleSubmitUpdateActivity}>
+          <div class="space-y-4">
+            <div>
+              <label for="edit_activity_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
+              <div class="mt-2">
+                <input type="text" id="edit_activity_name" bind:value={editActivityForm.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              </div>
+            </div>
+            <div>
+              <label for="edit_modal_jenis" class="block text-sm/6 font-medium text-gray-900">Jenis</label>
+              <div class="mt-2">
+                <select id="edit_modal_jenis" bind:value={editActivityForm.jenis} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                  <option value="">Pilih Jenis</option>
+                  {#each activityJenisList as jenis}
+                    <option value={jenis}>{jenis}</option>
+                  {/each}
+                </select>
+              </div>
+            </div>
+            {#if editActivityForm.jenis === 'Vendor'}
+              <div>
+                <label for="edit_modal_mitra_id" class="block text-sm/6 font-medium text-gray-900">Vendor</label>
+                <div class="mt-2">
+                  <select id="edit_modal_mitra_id" bind:value={editActivityForm.mitra_id} required={editActivityForm.jenis === 'Vendor'} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                    <option value="">Pilih Vendor</option>
+                    {#each vendors as vendor (vendor.id)}
+                      <option value={vendor.id}>{vendor.nama}</option>
+                    {/each}
+                  </select>
+                </div>
+              </div>
+            {/if}
+            <div>
+              <label for="edit_modal_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
+              <div class="mt-2">
+                <select id="edit_modal_kategori" bind:value={editActivityForm.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                  <option value="">Pilih Kategori</option>
+                  {#each activityKategoriList as kategori}
+                    <option value={kategori}>{kategori}</option>
+                  {/each}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label for="edit_activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
+              <div class="mt-2">
+                <textarea id="edit_activity_from" bind:value={editActivityForm.from} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+              </div>
+            </div>
+            <div>
+              <label for="edit_activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
+              <div class="mt-2">
+                <textarea id="edit_activity_to" bind:value={editActivityForm.to} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+              </div>
+            </div>
+            <div>
+              <label for="edit_activity_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
+              <div class="mt-2">
+                <textarea id="edit_activity_description" bind:value={editActivityForm.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+              </div>
+            </div>
+            <div>
+              <label for="edit_activity_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Aktivitas</label>
+              <div class="mt-2">
+                <input type="date" id="edit_activity_date" bind:value={editActivityForm.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              </div>
+            </div>
+            <div>
+              <label for="edit_file_upload" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
+              <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
+                <div class="text-center">
+                  <svg class="mx-auto size-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z" clip-rule="evenodd" />
+                  </svg>
+                  <div class="mt-4 flex text-sm text-gray-600">
+                    <label for="edit_file_upload" class="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500">
+                      <span>Upload a file</span>
+                      <input id="edit_file_upload" name="attachment" type="file" class="sr-only" on:change={handleEditAttachmentChange} />
+                    </label>
+                    <p class="pl-1">or drag and drop</p>
+                  </div>
+                  <p class="text-xs text-gray-600">
+                    {editActivityFileName || 'PNG, JPG, GIF up to 10MB'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-6">
+            <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+              Update Aktivitas
+            </button>
+          </div>
+        </form>
+      {/if}
+    </Modal>
+  {/if}

@@ -352,7 +352,7 @@
         <table class="min-w-full divide-y divide-gray-300">
           <thead class="bg-gray-50">
             <tr>
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Nama Project
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -370,15 +370,15 @@
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Dilaksanakan
               </th>
-              <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                <span class="sr-only">Aksi</span>
+              <th scope="col" class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Aksi
               </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white">
             {#each projects as project (project.id)}
               <tr>
-                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                   {project.name}
                   <br>
                   <span class="text-xs text-gray-500">{project.mitra.nama}</span>
@@ -408,8 +408,8 @@
                     -
                   {/if}
                 </td>
-                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                  <div class="flex items-center justify-end space-x-2">
+                <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
+                  <div class="flex items-left space-x-2">
                     <a href={`/projects/${project.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {project.name}</span>

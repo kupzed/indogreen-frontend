@@ -16,6 +16,9 @@
   let lastPage: number = 1;
   let totalActivities: number = 0;
 
+  // State untuk toggle tampilan
+  let activeView: 'table' | 'list' = 'table';
+
   // Modal state for Create/Update
   let showCreateModal: boolean = false;
   let showEditModal: boolean = false;
@@ -344,6 +347,33 @@
   </button>
 </div>
 
+<div class="flex items-center justify-between mb-4">
+  <div class="p-1 bg-gray-200 rounded-lg inline-flex" role="tablist">
+    <button
+      on:click={() => (activeView = 'table')}
+      class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+      class:bg-white={activeView === 'table'}
+      class:shadow={activeView === 'table'}
+      class:text-gray-600={activeView !== 'table'}
+      role="tab"
+      aria-selected={activeView === 'table'}
+    >
+      Table
+    </button>
+    <button
+      on:click={() => (activeView = 'list')}
+      class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+      class:bg-white={activeView === 'list'}
+      class:shadow={activeView === 'list'}
+      class:text-gray-600={activeView !== 'list'}
+      role="tab"
+      aria-selected={activeView === 'list'}
+    >
+      Simple
+    </button>
+  </div>
+</div>
+
 {#if loading}
   <p>Memuat aktivitas...</p>
 {:else if error}
@@ -357,106 +387,236 @@
     </ul>
   </div>
 {:else}
-  <div class="bg-white shadow overflow-hidden sm:rounded-md">
-    <ul class="divide-y divide-gray-200">
-      {#each activities as activity (activity.id)}
-        <li>
-          <a href={`/activities/${activity.id}`} class="block hover:bg-gray-50 px-4 py-4 sm:px-6">
-            <div class="flex items-center justify-between">
-              <p class="text-sm font-medium text-indigo-600 truncate">
-                {activity.name}
-              </p>
-              <div class="ml-2 flex-shrink-0 flex">
-                <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
-                  {activity.kategori}
-                </span>
-              </div>
-            </div>
-            <div class="mt-2 sm:flex sm:justify-between">
-              <div class="sm:flex">
-                <p class="flex items-center text-sm text-gray-500">
-                  Project: {activity.project?.name || '-'}
-                  | Jenis: {activity.jenis}
-                  {#if (activity.jenis === 'Vendor' || activity.jenis === 'Customer') && activity.mitra}
-                    | {activity.jenis}: {activity.mitra.nama}
-                  {/if}
-                  | Deskripsi: {activity.description?.substring(0, 40)}{activity.description?.length > 40 ? '...' : ''}
+  {#if activeView === 'list'}
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        {#each activities as activity (activity.id)}
+          <li>
+            <a href={`/activities/${activity.id}`} class="block hover:bg-gray-50 px-4 py-4 sm:px-6">
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-indigo-600 truncate">
+                  {activity.name}
                 </p>
+                <div class="ml-2 flex-shrink-0 flex">
+                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
+                    {activity.kategori}
+                  </span>
+                </div>
               </div>
-              <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                </svg>
-                <p>
-                  Aktivitas: {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-                </p>
+              <div class="mt-2 sm:flex sm:justify-between">
+                <div class="sm:flex">
+                  <p class="flex items-center text-sm text-gray-500">
+                    Project: {activity.project?.name || '-'}
+                    | Jenis: {activity.jenis}
+                    {#if (activity.jenis === 'Vendor' || activity.jenis === 'Customer') && activity.mitra}
+                      | {activity.jenis}: {activity.mitra.nama}
+                    {/if}
+                    | Deskripsi: {activity.description?.substring(0, 40)}{activity.description?.length > 40 ? '...' : ''}
+                  </p>
+                </div>
+                <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                  <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                  </svg>
+                  <p>
+                    Aktivitas: {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
               </div>
-            </div>
-          </a>
-          <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
-            <button
-              on:click|stopPropagation={() => openEditModal(activity)}
-              class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Edit
-            </button>
-            <button
-              on:click|stopPropagation={() => handleDelete(activity.id)}
-              class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              Hapus
-            </button>
-          </div>
-        </li>
-      {/each}
-    </ul>
-
-    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-      <div class="flex flex-1 justify-between sm:hidden">
-        <button on:click={() => goToPage(currentPage - 1)} disabled={currentPage === 1} class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">Previous</button>
-        <button on:click={() => goToPage(currentPage + 1)} disabled={currentPage === lastPage} class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}">Next</button>
-      </div>
-      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm text-gray-700">
-            Showing
-            <span class="font-medium">{(currentPage - 1) * 10 + 1}</span>
-            to
-            <span class="font-medium">{(currentPage - 1) * 10 + activities.length}</span>
-            of
-            <span class="font-medium">{totalActivities}</span>
-            results
-          </p>
-        </div>
-        <div>
-          <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
-            <button on:click={() => goToPage(currentPage - 1)} disabled={currentPage === 1} class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
-              <span class="sr-only">Previous</span>
-              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
-              </svg>
-            </button>
-            {#each Array(lastPage).fill(0) as _, i}
-              {@const pageNum = i + 1}
+            </a>
+            <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
               <button
-                on:click={() => goToPage(pageNum)}
-                class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {pageNum === currentPage ? 'z-10 bg-indigo-600 text-white' : 'text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50'} focus:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                aria-current={pageNum === currentPage ? 'page' : undefined}
+                on:click|stopPropagation={() => openEditModal(activity)}
+                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                {pageNum}
+                Edit
               </button>
-            {/each}
-            <button on:click={() => goToPage(currentPage + 1)} disabled={currentPage === lastPage} class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}">
-              <span class="sr-only">Next</span>
-              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-              </svg>
-            </button>
-          </nav>
+              <button
+                on:click|stopPropagation={() => handleDelete(activity.id)}
+                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Hapus
+              </button>
+            </div>
+          </li>
+        {/each}
+      </ul>
+      {#if activities.length > 0}
+        <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+          <div class="flex flex-1 justify-between sm:hidden">
+            <button on:click={() => goToPage(currentPage - 1)} disabled={currentPage === 1} class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">Previous</button>
+            <button on:click={() => goToPage(currentPage + 1)} disabled={currentPage === lastPage} class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}">Next</button>
+          </div>
+          <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{(currentPage - 1) * 10 + 1}</span>
+                to
+                <span class="font-medium">{(currentPage - 1) * 10 + activities.length}</span>
+                of
+                <span class="font-medium">{totalActivities}</span>
+                results
+              </p>
+            </div>
+            <div>
+              <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
+                <button on:click={() => goToPage(currentPage - 1)} disabled={currentPage === 1} class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
+                  <span class="sr-only">Previous</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                {#each Array(lastPage).fill(0) as _, i}
+                  {@const pageNum = i + 1}
+                  <button
+                    on:click={() => goToPage(pageNum)}
+                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {pageNum === currentPage ? 'z-10 bg-indigo-600 text-white' : 'text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50'} focus:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    aria-current={pageNum === currentPage ? 'page' : undefined}
+                  >
+                    {pageNum}
+                  </button>
+                {/each}
+                <button on:click={() => goToPage(currentPage + 1)} disabled={currentPage === lastPage} class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}">
+                  <span class="sr-only">Next</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          </div>
         </div>
-      </div>
+      {/if}
     </div>
-  </div>
+  {/if}
+
+  {#if activeView === 'table'}
+    <div class="mt-4 bg-white shadow-md rounded-lg">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-300">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Nama Aktivitas
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Project
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Kategori
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Jenis
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Mitra
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Tanggal Aktivitas
+              </th>
+              <th scope="col" class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Aksi
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 bg-white">
+            {#each activities as activity (activity.id)}
+              <tr>
+                <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
+                  {activity.name}
+                  <br>
+                  <span class="text-xs text-gray-500">{activity.description?.substring(0, 50)}{activity.description?.length > 50 ? '...' : ''}</span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  {activity.project?.name || '-'}
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  {activity.kategori}
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  {activity.jenis}
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  {#if (activity.jenis === 'Vendor' || activity.jenis === 'Customer') && activity.mitra}
+                    {activity.mitra.nama}
+                  {:else}
+                    -
+                  {/if}
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </td>
+                <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
+                  <div class="flex items-left space-x-2">
+                    <a href={`/activities/${activity.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      <span class="sr-only">Detail, {activity.name}</span>
+                    </a>
+                    <button on:click|stopPropagation={() => openEditModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                      <span class="sr-only">Edit, {activity.name}</span>
+                    </button>
+                    <button on:click|stopPropagation={() => handleDelete(activity.id)} title="Delete" class="text-red-600 hover:text-red-900">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                      <span class="sr-only">Hapus, {activity.name}</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+      {#if activities.length > 0}
+        <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+          <div class="flex flex-1 justify-between sm:hidden">
+            <button on:click={() => goToPage(currentPage - 1)} disabled={currentPage === 1} class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">Previous</button>
+            <button on:click={() => goToPage(currentPage + 1)} disabled={currentPage === lastPage} class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 {currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}">Next</button>
+          </div>
+          <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{(currentPage - 1) * 10 + 1}</span>
+                to
+                <span class="font-medium">{(currentPage - 1) * 10 + activities.length}</span>
+                of
+                <span class="font-medium">{totalActivities}</span>
+                results
+              </p>
+            </div>
+            <div>
+              <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
+                <button on:click={() => goToPage(currentPage - 1)} disabled={currentPage === 1} class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
+                  <span class="sr-only">Previous</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                {#each Array(lastPage).fill(0) as _, i}
+                  {@const pageNum = i + 1}
+                  <button
+                    on:click={() => goToPage(pageNum)}
+                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {pageNum === currentPage ? 'z-10 bg-indigo-600 text-white' : 'text-gray-900 ring-1 ring-gray-300 ring-inset hover:bg-gray-50'} focus:z-20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    aria-current={pageNum === currentPage ? 'page' : undefined}
+                  >
+                    {pageNum}
+                  </button>
+                {/each}
+                <button on:click={() => goToPage(currentPage + 1)} disabled={currentPage === lastPage} class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-20 focus:outline-offset-0 {currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}">
+                  <span class="sr-only">Next</span>
+                  <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      {/if}
+    </div>
+  {/if}
 {/if}
 
 <Modal bind:show={showCreateModal} title="Form Aktivitas Baru" maxWidth="max-w-xl">
