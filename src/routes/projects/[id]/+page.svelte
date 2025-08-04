@@ -23,6 +23,11 @@
   let activityLastPage: number = 1;
   let totalActivities: number = 0;
 
+  // Date filter state
+  let activityDateFromFilter: string = '';
+  let activityDateToFilter: string = '';
+  let showActivityDateFilter: boolean = false;
+
   // Project Edit Modal
   let showEditProjectModal: boolean = false;
   let editProjectForm = {
@@ -101,6 +106,8 @@
           jenis: activityJenisFilter,
           kategori: activityKategoriFilter,
           search: activitySearch,
+          date_from: activityDateFromFilter,
+          date_to: activityDateToFilter,
           page: activityCurrentPage,
         }
       });
@@ -153,9 +160,56 @@
     }
   }
 
+  // Activity Handlers
+  function goToActivityPage(page: number) {
+    if (page > 0 && page <= activityLastPage) {
+      activityCurrentPage = page;
+      fetchProjectDetails();
+    }
+  }
+
+  function handleActivityFilterOrSearch() {
+    activityCurrentPage = 1; // Reset halaman saat filter/search berubah
+    fetchProjectDetails();
+  }
+
+  // Date filter functions
+  function clearActivityFilters() {
+    activityJenisFilter = '';
+    activityKategoriFilter = '';
+    activitySearch = '';
+    activityDateFromFilter = '';
+    activityDateToFilter = '';
+    activityCurrentPage = 1;
+    fetchProjectDetails();
+  }
+
+  function toggleActivityDateFilter() {
+    showActivityDateFilter = !showActivityDateFilter;
+  }
+
+  function handleActivityDateFilter() {
+    activityCurrentPage = 1;
+    fetchProjectDetails();
+  }
+
+  function handleClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.date-filter-dropdown')) {
+      showActivityDateFilter = false;
+    }
+  }
+
   onMount(() => {
     fetchProjectDetails();
     fetchFormDependencies();
+    
+    // Add click outside listener for date filter dropdown
+    document.addEventListener('click', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
   });
 
   // Project Edit Handlers
@@ -195,18 +249,6 @@
   }
 
   // Activity Handlers
-  function handleActivityFilterOrSearch() {
-    activityCurrentPage = 1; // Reset halaman saat filter/search berubah
-    fetchProjectDetails();
-  }
-
-  function goToActivityPage(page: number) {
-    if (page > 0 && page <= activityLastPage) {
-      activityCurrentPage = page;
-      fetchProjectDetails();
-    }
-  }
-
   function openCreateActivityModal() {
     // Reset form and pre-fill project_id
     createActivityForm = {
@@ -599,6 +641,101 @@
               Simple
             </button>
           </div>
+          
+          <!-- Date Filter Button -->
+          <div class="relative date-filter-dropdown">
+            <button
+              on:click={toggleActivityDateFilter}
+              class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class:bg-indigo-50={activityDateFromFilter || activityDateToFilter}
+              class:border-indigo-300={activityDateFromFilter || activityDateToFilter}
+              class:text-indigo-700={activityDateFromFilter || activityDateToFilter}
+            >
+              <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              Filter Tanggal
+              {#if activityDateFromFilter || activityDateToFilter}
+                <div class="w-2 h-2 bg-indigo-600 rounded-full ml-2"></div>
+              {/if}
+              <svg class="w-4 h-4 transition-transform" class:rotate-180={showActivityDateFilter} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            
+            {#if showActivityDateFilter}
+              <div class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                <div class="p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-medium text-gray-900">Filter Tanggal Aktivitas</h3>
+                    <!-- svelte-ignore a11y_consider_explicit_label -->
+                    <button
+                      on:click={toggleActivityDateFilter}
+                      class="text-gray-400 hover:text-gray-600"
+                    >
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div class="space-y-3">
+                    <div>
+                      <!-- svelte-ignore a11y_label_has_associated_control -->
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Dari Tanggal</label>
+                      <input
+                        type="date"
+                        bind:value={activityDateFromFilter}
+                        on:change={handleActivityDateFilter}
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <!-- svelte-ignore a11y_label_has_associated_control -->
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Sampai Tanggal</label>
+                      <input
+                        type="date"
+                        bind:value={activityDateToFilter}
+                        on:change={handleActivityDateFilter}
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                      />
+                    </div>
+                    
+                    {#if activityDateFromFilter || activityDateToFilter}
+                      <div class="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                        <strong>Filter Aktif:</strong><br>
+                        {#if activityDateFromFilter && activityDateToFilter}
+                          {new Date(activityDateFromFilter).toLocaleDateString('id-ID')} - {new Date(activityDateToFilter).toLocaleDateString('id-ID')}
+                        {:else if activityDateFromFilter}
+                          Dari {new Date(activityDateFromFilter).toLocaleDateString('id-ID')}
+                        {:else if activityDateToFilter}
+                          Sampai {new Date(activityDateToFilter).toLocaleDateString('id-ID')}
+                        {/if}
+                      </div>
+                    {/if}
+                  </div>
+                  
+                  <div class="flex justify-between mt-4 pt-3 border-t border-gray-200">
+                    <button
+                      type="button"
+                      on:click={clearActivityFilters}
+                      class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                    >
+                      Clear All
+                    </button>
+                    <button
+                      type="button"
+                      on:click={toggleActivityDateFilter}
+                      class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            {/if}
+          </div>
         </div>
 
         {#if activityView === 'list'}
@@ -742,7 +879,9 @@
                   {#each activities as activity (activity.id)}
                     <tr>
                       <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                        {activity.name}
+                        <a href={`/activities/${activity.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                          {activity.name}
+                        </a>
                         <br>
                         <span class="text-xs text-gray-500">{activity.description.substring(0, 50)}{activity.description.length > 50 ? '...' : ''}</span>
                       </td>
