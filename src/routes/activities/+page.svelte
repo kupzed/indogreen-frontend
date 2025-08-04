@@ -524,9 +524,11 @@
             {#each activities as activity (activity.id)}
               <tr>
                 <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                  {activity.name}
+                  <a href={`/activities/${activity.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                    {activity.name}
+                  </a>
                   <br>
-                  <span class="text-xs text-gray-500">{activity.description?.substring(0, 50)}{activity.description?.length > 50 ? '...' : ''}</span>
+                  <span class="text-xs text-gray-500">{activity.description?.substring(0, 30)}{activity.description?.length > 50 ? '...' : ''}</span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {activity.project?.name || '-'}

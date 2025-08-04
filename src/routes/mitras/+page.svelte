@@ -378,7 +378,9 @@
             {#each mitras as mitra (mitra.id)}
               <tr>
                 <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                  {mitra.nama}
+                  <a href={`/mitras/${mitra.id}`} class="hover:text-indigo-900" title="Detail">
+                    {mitra.nama}
+                  </a>
                   <br>
                   <div class="flex flex-wrap mt-1 gap-1">
                     {#if mitra.is_pribadi}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Pribadi')} text-white">Pribadi</span>{/if}

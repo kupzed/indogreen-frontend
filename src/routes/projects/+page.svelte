@@ -379,7 +379,9 @@
             {#each projects as project (project.id)}
               <tr>
                 <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                  {project.name}
+                  <a href={`/projects/${project.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                    {project.name}
+                  </a>
                   <br>
                   <span class="text-xs text-gray-500">{project.mitra.nama}</span>
                 </td>
