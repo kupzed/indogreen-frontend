@@ -19,15 +19,16 @@
   
   {#if open}
     <div class="relative z-50 lg:hidden">
+      <!-- Backdrop with fade transition -->
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
-        class="fixed inset-0 backdrop-blur-sm"
+        class="fixed inset-0 bg-black/25"
         on:click={closeSidebar}
-        in:fade="{{ duration: 150 }}"
-        out:fade="{{ duration: 150 }}"
+        transition:fade="{{ duration: 150 }}"
       ></div>
   
+      <!-- Drawer Panel with slide transition -->
       <div
         class="fixed inset-0 z-50 flex"
       >
@@ -51,6 +52,7 @@
                 class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-gray-500 hover:text-gray-900"
                 on:click={closeSidebar}
               >
+                <span class="sr-only">Close panel</span>
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
