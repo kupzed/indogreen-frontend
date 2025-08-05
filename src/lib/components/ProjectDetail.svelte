@@ -1,5 +1,6 @@
 <script lang="ts">
   export let project: any = null;
+  export let lebar: number = 3;
   
   // Helper function for badge colors
   function getStatusBadgeClasses(status: string) {
@@ -14,15 +15,15 @@
 </script>
 
 {#if project}
-<div class="bg-white shadow border border-gray-200 overflow-hidden sm:rounded-lg mb-8">
+<div class="bg-white shadow border border-gray-200 overflow-hidden">
   <dl class="divide-y divide-gray-100">
-    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
       <dt class="text-sm font-medium text-gray-500">Nama Project</dt>
       <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
         {project.name}
       </dd>
     </div>
-    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
       <dt class="text-sm font-medium text-gray-500">Customer</dt>
       <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
         {#if project.mitra}
@@ -32,7 +33,7 @@
         {/if}
       </dd>
     </div>
-    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
       <dt class="text-sm font-medium text-gray-500">Status</dt>
       <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
         <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(project.status)}">
@@ -40,19 +41,19 @@
         </span>
       </dd>
     </div>
-    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
       <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
       <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
         {project.description}
       </dd>
     </div>
-    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
       <dt class="text-sm font-medium text-gray-500">Tanggal Mulai</dt>
       <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
         {new Date(project.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
       </dd>
     </div>
-    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
       <dt class="text-sm font-medium text-gray-500">Tanggal Selesai</dt>
       <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
         {#if project.finish_date}

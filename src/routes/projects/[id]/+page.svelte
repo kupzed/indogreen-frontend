@@ -6,6 +6,7 @@
   import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import ActivityDetail from '$lib/components/ActivityDetail.svelte';
+  import ProjectDetail from '$lib/components/ProjectDetail.svelte';
 
   let projectId: string | null = null;
   let project: any = null;
@@ -529,12 +530,13 @@
 
     <!-- Tab Content -->
     {#if activeTab === 'detail'}
-      <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+      <div class="bg-white shadow overflow-hidden mb-8">
         <div class="px-4 py-5 sm:px-6">
           <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Project</h3>
         </div>
-        <div class="border-t border-gray-200">
-          <dl class="divide-y divide-gray-100">
+        <div class="border-t border-gray-100">
+          <ProjectDetail project={project} lebar={3} />
+          <!-- <dl class="divide-y divide-gray-100">
             <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Nama Project</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
@@ -581,7 +583,7 @@
                 {/if}
               </dd>
             </div>
-          </dl>
+          </dl> -->
         </div>
       </div>
     {/if}
