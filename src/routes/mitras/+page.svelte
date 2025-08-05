@@ -3,6 +3,8 @@
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
+  import Drawer from '$lib/components/Drawer.svelte';
+  import MitraDetail from '$lib/components/MitraDetail.svelte';
 
   let mitras: any[] = [];
   let loading = true;
@@ -23,6 +25,10 @@
   let showCreateModal: boolean = false;
   let showEditModal: boolean = false;
   let editingMitra: any = null; // Data mitra yang sedang diedit
+  
+  // Drawer state for mitra detail
+  let showDetailDrawer: boolean = false;
+  let selectedMitra: any = null; // Data mitra yang dipilih untuk detail
 
   // Form data for Create/Update
   let form = {
@@ -138,6 +144,11 @@
     editingMitra = { ...mitra }; // Copy data to avoid direct mutation
     form = { ...editingMitra }; // Set form data
     showEditModal = true;
+  }
+
+  function openDetailDrawer(mitra: any) {
+    selectedMitra = { ...mitra };
+    showDetailDrawer = true;
   }
 
   async function handleSubmitCreate() {
@@ -519,10 +530,10 @@
                 </td>
                 <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                   <div class="flex items-left space-x-2">
-                    <a href={`/mitras/${mitra.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                    <button on:click={() => openDetailDrawer(mitra)} class="text-indigo-600 hover:text-indigo-900" title="Detail">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {mitra.nama}</span>
-                    </a>
+                    </button>
                     <button on:click|stopPropagation={() => openEditModal(mitra)} title="Edit" class="text-blue-600 hover:text-blue-900">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                       <span class="sr-only">Edit, {mitra.nama}</span>
@@ -754,3 +765,12 @@
     </form>
   {/if}
 </Modal>
+
+<!-- Mitra Detail Drawer -->
+<Drawer 
+  bind:show={showDetailDrawer} 
+  title="Detail Mitra"
+  on:close={() => showDetailDrawer = false}
+>
+  <MitraDetail mitra={selectedMitra} />
+</Drawer>

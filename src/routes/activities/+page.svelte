@@ -3,6 +3,8 @@
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
+  import Drawer from '$lib/components/Drawer.svelte';
+  import ActivityDetail from '$lib/components/ActivityDetail.svelte';
 
   let activities: any[] = [];
   let projects: any[] = []; // For project dropdown in activity forms
@@ -26,6 +28,10 @@
   let showCreateModal: boolean = false;
   let showEditModal: boolean = false;
   let editingActivity: any = null; // Data aktivitas yang sedang diedit
+  
+  // Drawer state for activity detail
+  let showDetailDrawer: boolean = false;
+  let selectedActivity: any = null; // Data activity yang dipilih untuk detail
 
   // Form data for Create/Update
   let form = {
@@ -179,6 +185,11 @@
     
     formFileName = activity.attachment ? activity.attachment.split('/').pop() : ''; // Display current attachment name
     showEditModal = true;
+  }
+
+  function openDetailDrawer(activity: any) {
+    selectedActivity = { ...activity };
+    showDetailDrawer = true;
   }
 
   function handleAttachmentChange(event: Event) {
@@ -663,10 +674,10 @@
                 </td>
                 <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                   <div class="flex items-left space-x-2">
-                    <a href={`/activities/${activity.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                    <button on:click={() => openDetailDrawer(activity)} class="text-indigo-600 hover:text-indigo-900" title="Detail">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {activity.name}</span>
-                    </a>
+                    </button>
                     <button on:click|stopPropagation={() => openEditModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                       <span class="sr-only">Edit, {activity.name}</span>
@@ -935,3 +946,12 @@
     </form>
   {/if}
 </Modal>
+
+<!-- Activity Detail Drawer -->
+<Drawer 
+  bind:show={showDetailDrawer} 
+  title="Detail Activity"
+  on:close={() => showDetailDrawer = false}
+>
+  <ActivityDetail activity={selectedActivity} />
+</Drawer>

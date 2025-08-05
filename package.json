@@ -47,6 +47,7 @@
 		"vitest-browser-svelte": "^0.1.0"
 	},
 	"dependencies": {
+		"@tailwindplus/elements": "^1.0.5",
 		"axios": "^1.10.0"
 	}
 }

@@ -4,6 +4,8 @@
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
+  import Drawer from '$lib/components/Drawer.svelte';
+  import ActivityDetail from '$lib/components/ActivityDetail.svelte';
 
   let projectId: string | null = null;
   let project: any = null;
@@ -72,6 +74,10 @@
     to: '',
   };
   let editActivityFileName = '';
+  
+  // Drawer state for activity detail
+  let showActivityDetailDrawer: boolean = false;
+  let selectedActivity: any = null; // Data activity yang dipilih untuk detail
 
   // Dynamic lists for activity form
   const activityKategoriList = [
@@ -352,6 +358,11 @@
     showEditActivityModal = true;
   }
 
+  function openActivityDetailDrawer(activity: any) {
+    selectedActivity = { ...activity };
+    showActivityDetailDrawer = true;
+  }
+
   async function handleSubmitUpdateActivity() {
     if (!editingActivity?.id) return;
     try {
@@ -524,13 +535,13 @@
         </div>
         <div class="border-t border-gray-200">
           <dl class="divide-y divide-gray-100">
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Nama Project</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 {project.name}
               </dd>
             </div>
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Customer</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 {#if project.mitra}
@@ -540,7 +551,7 @@
                 {/if}
               </dd>
             </div>
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Status</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(project.status)}">
@@ -548,19 +559,19 @@
                 </span>
               </dd>
             </div>
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 {project.description}
               </dd>
             </div>
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Tanggal Mulai</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 {new Date(project.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
               </dd>
             </div>
-            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <div class="bg-white px-4 py-2 mb-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
               <dt class="text-sm font-medium text-gray-500">Tanggal Selesai</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 {#if project.finish_date}
@@ -907,10 +918,10 @@
                       </td>
                       <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                         <div class="flex items-left space-x-2">
-                          <a href={`/activities/${activity.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                          <button on:click={() => openActivityDetailDrawer(activity)} class="text-indigo-600 hover:text-indigo-900" title="Detail">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <span class="sr-only">Detail, {activity.name}</span>
-                          </a>
+                          </button>
                           <button on:click|stopPropagation={() => openEditActivityModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                             <span class="sr-only">Edit, {activity.name}</span>
@@ -1045,7 +1056,7 @@
     {/if}
   </Modal>
 
-  <Modal bind:show={showCreateActivityModal} title="Form Aktivitas Baru" maxWidth="max-w-xl">
+  <Modal bind:show={showCreateActivityModal} title="Form Tambah Aktivitas" maxWidth="max-w-xl">
     <h1 class="text-center text-base font-bold tracking-tight text-gray-900">
       Project : {project.name}
     </h1>
@@ -1253,3 +1264,12 @@
       {/if}
     </Modal>
   {/if}
+
+  <!-- Activity Detail Drawer -->
+  <Drawer 
+    bind:show={showActivityDetailDrawer} 
+    title="Detail Activity"
+    on:close={() => showActivityDetailDrawer = false}
+  >
+    <ActivityDetail activity={selectedActivity} />
+  </Drawer>

@@ -3,6 +3,8 @@
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
+  import Drawer from '$lib/components/Drawer.svelte';
+  import ProjectDetail from '$lib/components/ProjectDetail.svelte';
 
   let projects: any[] = [];
   let customers: any[] = [];
@@ -24,6 +26,10 @@
   let showCreateModal: boolean = false;
   let showEditModal: boolean = false;
   let editingProject: any = null; // Data project yang sedang diedit
+  
+  // Drawer state for project detail
+  let showDetailDrawer: boolean = false;
+  let selectedProject: any = null; // Data project yang dipilih untuk detail
 
   // Form data for Create/Update
   let form = {
@@ -79,9 +85,9 @@
     // Add click outside listener
     document.addEventListener('click', handleClickOutside);
     
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
+      return () => {
+    document.removeEventListener('click', handleClickOutside);
+  };
   });
   function handleFilterOrSearch() {
     currentPage = 1; // Reset halaman saat filter/search berubah
@@ -108,6 +114,8 @@
       showDateFilter = false;
     }
   }
+
+
 
   function goToPage(page: number) {
     if (page > 0 && page <= lastPage) {
@@ -138,6 +146,11 @@
     // Set form data
     form = { ...editingProject, mitra_id: editingProject.mitra_id || '' };
     showEditModal = true;
+  }
+
+  function openDetailDrawer(project: any) {
+    selectedProject = { ...project };
+    showDetailDrawer = true;
   }
 
   async function handleSubmitCreate() {
@@ -523,10 +536,10 @@
                 </td>
                 <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                   <div class="flex items-left space-x-2">
-                    <a href={`/projects/${project.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                    <button on:click={() => openDetailDrawer(project)} class="text-indigo-600 hover:text-indigo-900" title="Detail">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {project.name}</span>
-                    </a>
+                    </button>
                     <button on:click|stopPropagation={() => openEditModal(project)} title="Edit" class="text-blue-600 hover:text-blue-900">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                       <span class="sr-only">Edit, {project.name}</span>
@@ -711,3 +724,12 @@
     </form>
   {/if}
 </Modal>
+
+<!-- Project Detail Drawer -->
+<Drawer 
+  bind:show={showDetailDrawer} 
+  title="Detail Project"
+  on:close={() => showDetailDrawer = false}
+>
+  <ProjectDetail project={selectedProject} />
+</Drawer>
