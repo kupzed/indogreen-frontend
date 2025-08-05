@@ -14,69 +14,82 @@
 </script>
 
 {#if activity}
-  <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
-    <div class="px-4 py-5 sm:px-6">
-      <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Activity</h3>
-    </div>
-    <div class="border-t border-gray-200">
-      <dl class="divide-y divide-gray-100">
-        <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Judul</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {activity.title}
-          </dd>
-        </div>
-        <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Project</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {#if activity.project}
+  <div class="bg-white shadow border border-gray-200 overflow-hidden sm:rounded-lg mb-8">
+    <dl class="divide-y divide-gray-100">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Nama Aktivitas</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          {activity.name}
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Project</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          {#if activity.project}
+            <a href={`/projects/${activity.project.id}`} class="text-indigo-600 hover:text-indigo-900">
               {activity.project.name}
-            {:else}
-              -
-            {/if}
-          </dd>
-        </div>
-        <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Status</dt>
+            </a>
+          {:else}
+            <span class="text-gray-500">Project tidak ditemukan</span>
+          {/if}
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Jenis</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          {activity.jenis}
+        </dd>
+      </div>
+      {#if (activity.jenis === 'Customer' || activity.jenis === 'Vendor') && activity.mitra}
+        <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">{activity.jenis}</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(activity.status)}">
-              {activity.status}
-            </span>
+            <a href={`/mitras/${activity.mitra.id}`} class="text-indigo-600 hover:text-indigo-900">{activity.mitra.nama}</a>
           </dd>
         </div>
-        <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {activity.description || '-'}
-          </dd>
-        </div>
-        <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Tanggal Mulai</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {#if activity.start_date}
-              {new Date(activity.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-            {:else}
-              -
-            {/if}
-          </dd>
-        </div>
-        <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Tanggal Selesai</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {#if activity.end_date}
-              {new Date(activity.end_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-            {:else}
-              -
-            {/if}
-          </dd>
-        </div>
-        <div class="bg-white px-4 py-2 mb-4 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
-          <dt class="text-sm font-medium text-gray-500">Prioritas</dt>
-          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {activity.priority || '-'}
-          </dd>
-        </div>
-      </dl>
-    </div>
+      {/if}
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Kategori</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
+            {activity.kategori}
+          </span>
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">From</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          {activity.from || '-'}
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">To</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          {activity.to || '-'}
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          {activity.description}
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Tanggal Aktivitas</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+        </dd>
+      </div>
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500">Attachment File</dt>
+        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+          {#if activity.attachment}
+            <a href={`/storage/${activity.attachment}`} target="_blank" class="text-indigo-600 hover:underline">{activity.attachment.split('/').pop()}</a>
+          {:else}
+            <span class="text-gray-500">Tidak ada file</span>
+          {/if}
+        </dd>
+      </div>
+    </dl>
   </div>
 {/if} 

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { slide, fade } from 'svelte/transition';
   
   export let show: boolean = false;
   export let title: string = '';
@@ -33,17 +34,20 @@
 
 {#if show}
   <div class="fixed inset-0 overflow-hidden z-50">
-    <!-- Backdrop -->
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div 
-      class="absolute inset-0 bg-gray-500/75 transition-opacity duration-500 ease-in-out" 
+      class="absolute inset-0" 
       on:click={handleBackdropClick}
+      transition:fade="{{ duration: 300 }}"
     ></div>
     
-    <!-- Drawer Panel -->
-    <div class="absolute inset-y-0 right-0 pl-10 max-w-full flex">
+    <div 
+      class="absolute inset-y-0 right-0 pl-10 max-w-full flex"
+      transition:slide="{{ axis: 'x', duration: 300 }}"
+    >
       <div class="w-screen {width} transform transition-transform duration-500 ease-in-out translate-x-0">
         <div class="h-full flex flex-col bg-white shadow-xl">
-          <!-- Header -->
           <div class="px-4 py-6 sm:px-6">
             <div class="flex items-center justify-between">
               <h2 class="text-base font-semibold text-gray-900">{title}</h2>
@@ -60,7 +64,6 @@
             </div>
           </div>
           
-          <!-- Content -->
           <div class="flex-1 overflow-y-auto px-4 sm:px-6">
             <slot />
           </div>
@@ -68,4 +71,4 @@
       </div>
     </div>
   </div>
-{/if} 
+{/if}

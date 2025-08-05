@@ -221,6 +221,7 @@
             </div>
           </div>
           <div>
+            <!-- svelte-ignore a11y_label_has_associated_control -->
             <label class="block text-sm/6 font-medium text-gray-900">Kategori</label>
             <div class="flex flex-wrap gap-4 mt-2">
               <label><input type="checkbox" bind:checked={form.is_pribadi} class="mr-1"> Pribadi</label>
