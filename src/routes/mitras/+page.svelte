@@ -201,10 +201,10 @@
   // Helper for badge colors
   function getKategoriBadgeColor(kategori: string) {
     switch (kategori) {
-      case 'Pribadi': return 'bg-red-900';
-      case 'Perusahaan': return 'bg-green-900';
-      case 'Customer': return 'bg-blue-900';
-      case 'Vendor': return 'bg-gray-900';
+      case 'Pribadi': return 'bg-indigo-600';
+      case 'Perusahaan': return 'bg-indigo-600';
+      case 'Customer': return 'bg-indigo-600';
+      case 'Vendor': return 'bg-indigo-600';
       default: return 'bg-gray-500';
     }
   }
@@ -479,14 +479,11 @@
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Nama Mitra
               </th>
-              <!-- <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Kategori
-              </th> -->
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Alamat
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Email
+                Kategori
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Kontak
@@ -500,27 +497,24 @@
             {#each mitras as mitra (mitra.id)}
               <tr>
                 <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                  <a href={`/mitras/${mitra.id}`} class="hover:text-indigo-900" title="Detail">
+                  <a href={`/mitras/${mitra.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
                     {mitra.nama}
                   </a>
                   <br>
+                  <span class="text-xs text-gray-500">{mitra.email}</span>
+                </td>
+                <td class="px-3 py-4 text-sm text-gray-500">
+                  <div class="max-w-xs truncate">
+                    {mitra.alamat.substring(0, 40)}{mitra.alamat.length > 40 ? '...' : ''}
+                  </div>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   <div class="flex flex-wrap mt-1 gap-1">
                     {#if mitra.is_pribadi}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Pribadi')} text-white">Pribadi</span>{/if}
                     {#if mitra.is_perusahaan}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Perusahaan')} text-white">Perusahaan</span>{/if}
                     {#if mitra.is_customer}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Customer')} text-white">Customer</span>{/if}
                     {#if mitra.is_vendor}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Vendor')} text-white">Vendor</span>{/if}
                   </div>
-                </td>
-                <!-- <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {mitra.website}
-                </td> -->
-                <td class="px-3 py-4 text-sm text-gray-500">
-                  <div class="max-w-xs truncate">
-                    {mitra.alamat}
-                  </div>
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {mitra.email}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {mitra.kontak_1}

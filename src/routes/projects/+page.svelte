@@ -203,11 +203,11 @@
   // Helper function for badge colors (from existing code)
   function getStatusBadgeClasses(status: string) {
     switch (status) {
-      case 'Complete': return 'text-green-800';
-      case 'Ongoing': return 'text-blue-800';
-      case 'Prospect': return 'text-yellow-800';
-      case 'Cancel': return 'text-red-800';
-      default: return 'text-gray-800';
+      case 'Complete': return 'bg-green-100 text-green-800';
+      case 'Ongoing': return 'bg-blue-100 text-blue-800';
+      case 'Prospect': return 'bg-yellow-100 text-yellow-800';
+      case 'Cancel': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   }
 </script>
@@ -519,7 +519,7 @@
                   PLTS Hybrid
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  <span class="inline-flex rounded-full text-xs font-semibold leading-5
+                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
                     {getStatusBadgeClasses(project.status)}"
                   >
                     {project.status}

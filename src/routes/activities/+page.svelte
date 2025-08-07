@@ -651,13 +651,15 @@
                     {activity.name}
                   </a>
                   <br>
-                  <span class="text-xs text-gray-500">{activity.description?.substring(0, 30)}{activity.description?.length > 50 ? '...' : ''}</span>
+                  <span class="text-xs text-gray-500">{activity.description?.substring(0, 40)}{activity.description?.length > 40 ? '...' : ''}</span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {activity.project?.name || '-'}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {activity.kategori}
+                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
+                    {activity.kategori}
+                  </span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {activity.jenis}

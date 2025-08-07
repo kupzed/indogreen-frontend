@@ -1,5 +1,6 @@
 <script lang="ts">
   export let mitra: any = null;
+  export let lebar: number = 3;
 
   function getKategoriBadgeColor(kategori: string) {
     switch (kategori) {
@@ -13,15 +14,15 @@
 </script>
 
 {#if mitra}
-  <div class="bg-white shadow border border-gray-200 overflow-hidden sm:rounded-lg mb-8">
+  <div class="bg-white shadow border border-gray-200 overflow-hidden">
     <dl class="divide-y divide-gray-100">
-      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Nama</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {mitra.nama}
         </dd>
       </div>
-      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Kategori</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {#if mitra.is_pribadi}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Pribadi')} text-white mr-1">Pribadi</span>{/if}
@@ -30,32 +31,32 @@
           {#if mitra.is_vendor}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Vendor')} text-white mr-1">Vendor</span>{/if}
         </dd>
       </div>
-      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Alamat</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {mitra.alamat}
         </dd>
       </div>
-      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Website</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {mitra.website || '-'}
         </dd>
       </div>
-      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Email</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {mitra.email}
         </dd>
       </div>
-      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Kontak 1</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {mitra.kontak_1}<br>
           <span class="text-xs text-gray-500">Nama: {mitra.kontak_1_nama} | Jabatan: {mitra.kontak_1_jabatan}</span>
         </dd>
       </div>
-      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+      <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Kontak 2</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {#if mitra.kontak_2}
