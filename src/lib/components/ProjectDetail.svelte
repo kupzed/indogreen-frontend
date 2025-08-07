@@ -34,6 +34,30 @@
       </dd>
     </div>
     <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
+      <dt class="text-sm font-medium text-gray-500">Kategori</dt>
+      <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+        {project.kategori || '-'}
+      </dd>
+    </div>
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
+      <dt class="text-sm font-medium text-gray-500">Lokasi</dt>
+      <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+        {project.lokasi || '-'}
+      </dd>
+    </div>
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
+      <dt class="text-sm font-medium text-gray-500">No. PO</dt>
+      <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+        {project.no_po || '-'}
+      </dd>
+    </div>
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
+      <dt class="text-sm font-medium text-gray-500">No. SO</dt>
+      <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+        {project.no_so || '-'}
+      </dd>
+    </div>
+    <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-{lebar} sm:gap-4 sm:px-6">
       <dt class="text-sm font-medium text-gray-500">Status</dt>
       <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
         <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(project.status)}">

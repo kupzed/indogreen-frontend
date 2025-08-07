@@ -12,6 +12,7 @@
   let error = '';
   let search: string = '';
   let statusFilter: string = '';
+  let kategoriFilter: string = '';
   let dateFromFilter: string = '';
   let dateToFilter: string = '';
   let showDateFilter: boolean = false;
@@ -38,9 +39,21 @@
     status: '',
     start_date: '',
     finish_date: '',
-    mitra_id: '', // Di backend Anda ini adalah customer_id
+    mitra_id: '',
+    kategori: '',
+    lokasi: '',
+    no_po: '',
+    no_so: '',
   };
   const projectStatuses = ['Ongoing', 'Prospect', 'Complete', 'Cancel'];
+  const projectKategoris = [
+    'PLTS Hybrid', 
+    'PLTS Ongrid', 
+    'PLTS Offgrid', 
+    'PJUTS All In One', 
+    'PJUTS Two In One', 
+    'PJUTS Konvensional'
+  ];
 
   async function fetchProjects() {
     loading = true;
@@ -50,6 +63,7 @@
         params: {
           search: search,
           status: statusFilter,
+          kategori: kategoriFilter,
           date_from: dateFromFilter,
           date_to: dateToFilter,
           page: currentPage
@@ -97,6 +111,7 @@
   function clearFilters() {
     search = '';
     statusFilter = '';
+    kategoriFilter = '';
     dateFromFilter = '';
     dateToFilter = '';
     showDateFilter = false;
@@ -133,6 +148,10 @@
       start_date: '',
       finish_date: '',
       mitra_id: '',
+      kategori: '',
+      lokasi: '',
+      no_po: '',
+      no_so: '',
     };
     showCreateModal = true;
   }
@@ -214,20 +233,18 @@
 
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
-    <button
-      on:click={() => { statusFilter = ''; handleFilterOrSearch(); }}
-      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold {statusFilter === '' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 border border-gray-300'}"
-    >
-      Semua Status
-    </button>
-    {#each projectStatuses as status}
-      <button
-        on:click={() => { statusFilter = status; handleFilterOrSearch(); }}
-        class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold {statusFilter === status ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 border border-gray-300'}"
-      >
-        {status}
-      </button>
-    {/each}
+    <select bind:value={statusFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+      <option value="">Filter Status: Semua</option>
+      {#each projectStatuses as status}
+        <option value={status}>{status}</option>
+      {/each}
+    </select>
+    <select bind:value={kategoriFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+      <option value="">Filter Kategori: Semua</option>
+      {#each projectKategoris as kategori}
+        <option value={kategori}>{kategori}</option>
+      {/each}
+    </select>
   </div>
   <div class="w-full sm:w-auto flex-grow">
     <div class="relative w-full sm:w-auto">
@@ -510,13 +527,13 @@
                   <span class="text-xs text-gray-500">{project.mitra.nama}</span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  Leuwiliang, Bogor
+                  {project.lokasi.substring(0, 40)}{project.lokasi.length > 40 ? '...' : ''}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {new Date(project.start_date).toLocaleDateString('id-ID', { year: 'numeric' })}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  PLTS Hybrid
+                  {project.kategori || '-'}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
@@ -628,6 +645,37 @@
         </div>
       </div>
       <div>
+        <label for="create_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
+        <div class="mt-2">
+          <select id="create_kategori" bind:value={form.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+            <option value="">Pilih Kategori</option>
+            {#each projectKategoris as kategori}
+              <option value={kategori}>{kategori}</option>
+            {/each}
+          </select>
+        </div>
+      </div>
+      <div>
+        <label for="create_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
+        <div class="mt-2">
+          <textarea id="create_lokasi" bind:value={form.lokasi} rows="2" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="create_no_po" class="block text-sm/6 font-medium text-gray-900">No. PO</label>
+          <div class="mt-2">
+            <input type="text" id="create_no_po" bind:value={form.no_po} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
+        </div>
+        <div>
+          <label for="create_no_so" class="block text-sm/6 font-medium text-gray-900">No. SO</label>
+          <div class="mt-2">
+            <input type="text" id="create_no_so" bind:value={form.no_so} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
+        </div>
+      </div>
+      <div>
         <label for="create_status" class="block text-sm/6 font-medium text-gray-900">Status</label>
         <div class="mt-2">
           <select id="create_status" bind:value={form.status} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
@@ -684,6 +732,37 @@
                 <option value={customer.id}>{customer.nama}</option>
               {/each}
             </select>
+          </div>
+        </div>
+        <div>
+          <label for="edit_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
+          <div class="mt-2">
+            <select id="edit_kategori" bind:value={form.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+              <option value="">Pilih Kategori</option>
+              {#each projectKategoris as kategori}
+                <option value={kategori}>{kategori}</option>
+              {/each}
+            </select>
+          </div>
+        </div>
+        <div>
+          <label for="edit_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
+          <div class="mt-2">
+            <textarea id="edit_lokasi" bind:value={form.lokasi} rows="2" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="edit_no_po" class="block text-sm/6 font-medium text-gray-900">No. PO</label>
+            <div class="mt-2">
+              <input type="text" id="edit_no_po" bind:value={form.no_po} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            </div>
+          </div>
+          <div>
+            <label for="edit_no_so" class="block text-sm/6 font-medium text-gray-900">No. SO</label>
+            <div class="mt-2">
+              <input type="text" id="edit_no_so" bind:value={form.no_so} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            </div>
           </div>
         </div>
         <div>

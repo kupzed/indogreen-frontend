@@ -40,8 +40,20 @@
     start_date: '',
     finish_date: '',
     mitra_id: '',
+    kategori: '',
+    lokasi: '',
+    no_po: '',
+    no_so: '',
   };
   const projectStatuses = ['Ongoing', 'Prospect', 'Complete', 'Cancel'];
+  const projectKategoris = [
+    'PLTS Hybrid', 
+    'PLTS Ongrid', 
+    'PLTS Offgrid', 
+    'PJUTS All In One', 
+    'PJUTS Two In One', 
+    'PJUTS Konvensional'
+  ];
 
   // Activity Create Modal
   let showCreateActivityModal: boolean = false;
@@ -132,6 +144,10 @@
         start_date: project.start_date ? new Date(project.start_date).toISOString().split('T')[0] : '',
         finish_date: project.finish_date ? new Date(project.finish_date).toISOString().split('T')[0] : '',
         mitra_id: project.mitra_id || '',
+        kategori: project.kategori || '',
+        lokasi: project.lokasi || '',
+        no_po: project.no_po || '',
+        no_so: project.no_so || '',
       };
       
       // Pre-fill create activity form project_id
@@ -969,6 +985,37 @@
                   <option value={customer.id}>{customer.nama}</option>
                 {/each}
               </select>
+            </div>
+          </div>
+          <div>
+            <label for="edit_project_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
+            <div class="mt-2">
+              <select id="edit_project_kategori" bind:value={editProjectForm.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                <option value="">Pilih Kategori</option>
+                {#each projectKategoris as kategori}
+                  <option value={kategori}>{kategori}</option>
+                {/each}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label for="edit_project_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
+            <div class="mt-2">
+              <textarea id="edit_project_lokasi" bind:value={editProjectForm.lokasi} rows="2" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="edit_project_no_po" class="block text-sm/6 font-medium text-gray-900">No. PO</label>
+              <div class="mt-2">
+                <input type="text" id="edit_project_no_po" bind:value={editProjectForm.no_po} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              </div>
+            </div>
+            <div>
+              <label for="edit_project_no_so" class="block text-sm/6 font-medium text-gray-900">No. SO</label>
+              <div class="mt-2">
+                <input type="text" id="edit_project_no_so" bind:value={editProjectForm.no_so} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              </div>
             </div>
           </div>
           <div>
