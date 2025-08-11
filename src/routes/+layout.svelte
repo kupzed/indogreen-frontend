@@ -45,11 +45,17 @@
 				return 'Daftar Mitra';
 			case '/settings':
 				return 'Pengaturan';
+			case '/barang-certificates':
+				return 'Daftar Barang Sertifikat';
+			case '/certificates':
+				return 'Daftar Sertifikat';
 			default:
 				if (pathname.startsWith('/projects/')) return 'Detail Project';
 				if (pathname.startsWith('/activities/')) return 'Detail Activity';
 				if (pathname.startsWith('/mitras/')) return 'Detail Mitra';
 				if (pathname.startsWith('/settings/')) return 'Pengaturan';
+				if (pathname.startsWith('/barang-certificates/')) return 'Detail Barang Sertifikat';
+				if (pathname.startsWith('/certificates/')) return 'Detail Sertifikat';
 				return 'Dashboard';
 		}
 	}

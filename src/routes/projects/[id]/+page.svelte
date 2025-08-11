@@ -458,10 +458,79 @@
   }
 
   // State untuk tab
-  let activeTab: 'detail' | 'activity' | 'mitra' = 'activity';
+  let activeTab: 'detail' | 'activity' | 'mitra' | 'certificates' = 'detail';
   
   // State untuk toggle tampilan activity
   let activityView: 'table' | 'list' = 'table';
+
+  // Certificates state (per project)
+  type ProjectCertificate = {
+    id: number;
+    name: string;
+    no_certificate: string;
+    status: 'Belum' | 'Tidak Aktif' | 'Aktif';
+    date_of_issue: string;
+    date_of_expired: string;
+    attachment?: string | null;
+    barang_certificate?: { id: number; name: string } | null;
+  };
+
+  let certificates: ProjectCertificate[] = [];
+  let loadingCertificates: boolean = false;
+  let errorCertificates: string = '';
+  let certificateSearch: string = '';
+  let certificateCurrentPage: number = 1;
+  let certificateLastPage: number = 1;
+  let totalCertificates: number = 0;
+  let certificatesInitialized: boolean = false;
+
+  async function fetchCertificates() {
+    if (!project?.id) return;
+    loadingCertificates = true;
+    errorCertificates = '';
+    try {
+      const res = await axiosClient.get('/certificates', {
+        params: {
+          project_id: project.id,
+          search: certificateSearch,
+          page: certificateCurrentPage,
+        },
+      });
+      certificates = res.data?.data ?? [];
+      certificateCurrentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
+      certificateLastPage = res.data?.pagination?.last_page ?? res.data?.last_page ?? 1;
+      totalCertificates = res.data?.pagination?.total ?? res.data?.total ?? certificates.length;
+    } catch (err: any) {
+      errorCertificates = err?.response?.data?.message || 'Gagal memuat sertifikat.';
+      console.error('Error fetching certificates:', err?.response || err);
+    } finally {
+      loadingCertificates = false;
+    }
+  }
+
+  function handleCertificateSearchChange() {
+    certificateCurrentPage = 1;
+    fetchCertificates();
+  }
+
+  function clearCertificateSearch() {
+    certificateSearch = '';
+    certificateCurrentPage = 1;
+    fetchCertificates();
+  }
+
+  function goToCertificatePage(page: number) {
+    if (page > 0 && page <= certificateLastPage) {
+      certificateCurrentPage = page;
+      fetchCertificates();
+    }
+  }
+
+  // Fetch certificates first time when tab is opened and project loaded
+  $: if (activeTab === 'certificates' && project?.id && !certificatesInitialized) {
+    certificatesInitialized = true;
+    fetchCertificates();
+  }
 </script>
 
 
@@ -541,6 +610,15 @@
           aria-selected={activeTab === 'mitra'}
         >
           Mitra
+        </button>
+        <button
+          on:click={() => (activeTab = 'certificates')}
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+          class:bg-white={activeTab === 'certificates'}
+          class:shadow={activeTab === 'certificates'}
+          class:text-gray-600={activeTab !== 'certificates'}
+        >
+          List Barang
         </button>
       </div>
     </div>
@@ -889,6 +967,92 @@
     {#if activeTab === 'mitra'}
       <div class="mb-8">
         <h1>Mitra</h1>
+      </div>
+    {/if}
+
+    {#if activeTab === 'certificates'}
+      <div class="mb-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
+          <div class="w-full sm:w-auto flex-grow">
+            <div class="relative w-full sm:w-auto">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Cari sertifikat..."
+                bind:value={certificateSearch}
+                on:input={handleCertificateSearchChange}
+                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+            </div>
+          </div>
+          <div class="flex space-x-2 w-full sm:w-auto">
+            <button on:click={clearCertificateSearch} class="px-3 py-2 border rounded-md text-sm bg-white">Clear</button>
+          </div>
+        </div>
+
+        {#if loadingCertificates}
+          <p>Memuat sertifikat...</p>
+        {:else if errorCertificates}
+          <p class="text-red-500">{errorCertificates}</p>
+        {:else if certificates.length === 0}
+          <div class="bg-white shadow overflow-hidden sm:rounded-md">
+            <ul class="divide-y divide-gray-200">
+              <li class="px-4 py-4 sm:px-6">
+                <p class="text-sm text-gray-500">Belum ada sertifikat untuk proyek ini.</p>
+              </li>
+            </ul>
+          </div>
+        {:else}
+          <div class="mt-4 bg-white shadow-md rounded-lg">
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">No. Sertifikat</th>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Barang</th>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Terbit</th>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Expired</th>
+                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Lampiran</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                  {#each certificates as item (item.id)}
+                    <tr>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                        <a href={`/certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">{item.name}</a>
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.no_certificate}</td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.barang_certificate?.name || '-'}</td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.status}</td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{new Date(item.date_of_issue).toLocaleDateString('id-ID')}</td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{new Date(item.date_of_expired).toLocaleDateString('id-ID')}</td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-indigo-600">
+                        {#if item.attachment}
+                          <a href={item.attachment} target="_blank" rel="noreferrer" class="hover:underline">Lihat</a>
+                        {:else}-{/if}
+                      </td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            </div>
+            {#if certificates.length > 0}
+              <Pagination
+                currentPage={certificateCurrentPage}
+                lastPage={certificateLastPage}
+                onPageChange={goToCertificatePage}
+                totalItems={totalCertificates}
+                itemsPerPage={10}
+              />
+            {/if}
+          </div>
+        {/if}
       </div>
     {/if}
   </div>
