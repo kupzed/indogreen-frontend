@@ -253,7 +253,7 @@
         <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Aktivitas</h3>
       </div>
       <div class="border-t border-gray-200">
-        <ActivityDetail activity={activity} lebar={4} />
+        <ActivityDetail activity={activity} />
       </div>
     </div>
   </div>

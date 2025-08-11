@@ -153,7 +153,7 @@
         <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Mitra</h3>
       </div>
       <div class="border-t border-gray-200">
-        <MitraDetail mitra={mitra} lebar={4} />
+        <MitraDetail mitra={mitra} />
       </div>
     </div>
   </div>
