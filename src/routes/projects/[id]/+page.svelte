@@ -552,7 +552,7 @@
           <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Project</h3>
         </div>
         <div class="border-t border-gray-100">
-          <ProjectDetail project={project} lebar={4} />
+          <ProjectDetail project={project} />
         </div>
       </div>
     {/if}
@@ -856,7 +856,9 @@
                             <span class="sr-only">Detail, {activity.name}</span>
                           </button>
                           <button on:click|stopPropagation={() => openEditActivityModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-edit-2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
                             <span class="sr-only">Edit, {activity.name}</span>
                           </button>
                           <button on:click|stopPropagation={() => handleDeleteActivity(activity.id)} title="Delete" class="text-red-600 hover:text-red-900">
