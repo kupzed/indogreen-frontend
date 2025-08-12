@@ -90,7 +90,8 @@
   
 		<main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
 		  <div class="mx-auto">
-			<slot></slot> </div>
+			<slot></slot> 
+		  </div>
 		</main>
 	  </div>
 	</div>
