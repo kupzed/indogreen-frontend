@@ -45,6 +45,7 @@
   let selectedItem: Certificate | null = null;
   let activeView: 'table' | 'list' = 'table';
   // Form state
+  let formFileName = '';
   let form: {
     name: string;
     no_certificate: string;
@@ -147,6 +148,7 @@
       date_of_expired: '',
       attachment: null
     };
+    formFileName = '';
     showCreateModal = true;
   }
 
@@ -162,6 +164,7 @@
       date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
       attachment: null
     };
+    formFileName = item.attachment ? String(item.attachment).split('/').pop() ?? '' : '';
     showEditModal = true;
   }
 
@@ -607,11 +610,24 @@
       </div>
     </div>
     <div>
-      <label for="create_attachment" class="block text-sm font-medium text-gray-900">Lampiran (Opsional)</label>
-      <input id="create_attachment" type="file" accept="application/pdf,image/*" on:change={(e: Event) => {
-        const input = e.target as HTMLInputElement;
-        form.attachment = input.files && input.files[0] ? input.files[0] : null;
-      }} class="mt-1 block w-full text-sm" />
+      <label for="create_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
+      <div class="mt-2">
+        <input
+          id="create_attachment"
+          type="file"
+          accept="image/*,application/pdf"
+          on:change={(e: Event) => {
+            const input = e.target as HTMLInputElement;
+            const file = input.files && input.files[0] ? input.files[0] : null;
+            form.attachment = file;
+            formFileName = file ? file.name : '';
+          }}
+          class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+        />
+        {#if formFileName}
+          <p class="text-xs text-gray-600 mt-1">File terpilih: {formFileName}</p>
+        {/if}
+      </div>
     </div>
     <div>
       <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
@@ -668,11 +684,24 @@
         </div>
       </div>
       <div>
-        <label for="edit_attachment" class="block text-sm font-medium text-gray-900">Lampiran (Opsional)</label>
-        <input id="edit_attachment" type="file" accept="application/pdf,image/*" on:change={(e: Event) => {
-          const input = e.target as HTMLInputElement;
-          form.attachment = input.files && input.files[0] ? input.files[0] : null;
-        }} class="mt-1 block w-full text-sm" />
+        <label for="edit_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
+        <div class="mt-2">
+          <input
+            id="edit_attachment"
+            type="file"
+            accept="image/*,application/pdf"
+            on:change={(e: Event) => {
+              const input = e.target as HTMLInputElement;
+              const file = input.files && input.files[0] ? input.files[0] : null;
+              form.attachment = file;
+              formFileName = file ? file.name : '';
+            }}
+            class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+          />
+          {#if formFileName}
+            <p class="text-xs text-gray-600 mt-1">File saat ini: {formFileName}</p>
+          {/if}
+        </div>
       </div>
       <div>
         <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>

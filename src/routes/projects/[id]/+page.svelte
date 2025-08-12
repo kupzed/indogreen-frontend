@@ -522,6 +522,7 @@
     date_of_expired: '',
     attachment: null,
   };
+  let certificateFormFileName = '';
 
   // Certificates filter/view state
   let certificateView: 'table' | 'list' = 'table';
@@ -647,6 +648,7 @@
       date_of_expired: '',
       attachment: null,
     };
+    certificateFormFileName = '';
     showCreateCertificateModal = true;
   }
 
@@ -662,6 +664,7 @@
       date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
       attachment: null,
     };
+    certificateFormFileName = item.attachment ? String(item.attachment).split('/').pop() ?? '' : '';
     showEditCertificateModal = true;
   }
 
@@ -1608,22 +1611,18 @@
         </div>
         <div>
           <label for="file_upload" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
-          <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-            <div class="text-center">
-              <svg class="mx-auto size-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z" clip-rule="evenodd" />
-              </svg>
-              <div class="mt-4 flex text-sm text-gray-600">
-                <label for="file_upload" class="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500">
-                  <span>Upload a file</span>
-                  <input id="file_upload" name="attachment" type="file" class="sr-only" on:change={handleAttachmentChange} />
-                </label>
-                <p class="pl-1">or drag and drop</p>
-              </div>
-              <p class="text-xs text-gray-600">
-                {createActivityFileName || 'PNG, JPG, GIF up to 10MB'}
-              </p>
-            </div>
+          <div class="mt-2">
+            <input
+              id="file_upload"
+              name="attachment"
+              type="file"
+              accept="image/*,application/pdf"
+              on:change={handleAttachmentChange}
+              class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+            />
+            {#if createActivityFileName}
+              <p class="text-xs text-gray-600 mt-1">File terpilih: {createActivityFileName}</p>
+            {/if}
           </div>
         </div>
       </div>
@@ -1712,22 +1711,18 @@
             </div>
             <div>
               <label for="edit_file_upload" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
-              <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                <div class="text-center">
-                  <svg class="mx-auto size-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z" clip-rule="evenodd" />
-                  </svg>
-                  <div class="mt-4 flex text-sm text-gray-600">
-                    <label for="edit_file_upload" class="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500">
-                      <span>Upload a file</span>
-                      <input id="edit_file_upload" name="attachment" type="file" class="sr-only" on:change={handleEditAttachmentChange} />
-                    </label>
-                    <p class="pl-1">or drag and drop</p>
-                  </div>
-                  <p class="text-xs text-gray-600">
-                    {editActivityFileName || 'PNG, JPG, GIF up to 10MB'}
-                  </p>
-                </div>
+              <div class="mt-2">
+                <input
+                  id="edit_file_upload"
+                  name="attachment"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  on:change={handleEditAttachmentChange}
+                  class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+                />
+                {#if editActivityFileName}
+                  <p class="text-xs text-gray-600 mt-1">File saat ini: {editActivityFileName}</p>
+                {/if}
               </div>
             </div>
           </div>
@@ -1790,11 +1785,24 @@
         </div>
       </div>
       <div>
-        <label for="create_cert_attachment" class="block text-sm font-medium text-gray-900">Lampiran (Opsional)</label>
-        <input id="create_cert_attachment" type="file" accept="application/pdf,image/*" on:change={(e: Event) => {
-          const input = e.target as HTMLInputElement;
-          certificateForm.attachment = input.files && input.files[0] ? input.files[0] : null;
-        }} class="mt-1 block w-full text-sm" />
+        <label for="create_cert_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
+        <div class="mt-2">
+          <input
+            id="create_cert_attachment"
+            type="file"
+            accept="image/*,application/pdf"
+            on:change={(e: Event) => {
+              const input = e.target as HTMLInputElement;
+              const file = input.files && input.files[0] ? input.files[0] : null;
+              certificateForm.attachment = file;
+              certificateFormFileName = file ? file.name : '';
+            }}
+            class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+          />
+          {#if certificateFormFileName}
+            <p class="text-xs text-gray-600 mt-1">File terpilih: {certificateFormFileName}</p>
+          {/if}
+        </div>
       </div>
       <div>
         <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
@@ -1842,13 +1850,26 @@
             <input id="edit_cert_expired" type="date" bind:value={certificateForm.date_of_expired} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
           </div>
         </div>
-        <div>
-          <label for="edit_cert_attachment" class="block text-sm font-medium text-gray-900">Lampiran (Opsional)</label>
-          <input id="edit_cert_attachment" type="file" accept="application/pdf,image/*" on:change={(e: Event) => {
-            const input = e.target as HTMLInputElement;
-            certificateForm.attachment = input.files && input.files[0] ? input.files[0] : null;
-          }} class="mt-1 block w-full text-sm" />
-        </div>
+          <div>
+            <label for="edit_cert_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
+            <div class="mt-2">
+              <input
+                id="edit_cert_attachment"
+                type="file"
+                accept="image/*,application/pdf"
+                on:change={(e: Event) => {
+                  const input = e.target as HTMLInputElement;
+                  const file = input.files && input.files[0] ? input.files[0] : null;
+                  certificateForm.attachment = file;
+                  certificateFormFileName = file ? file.name : '';
+                }}
+                class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+              />
+              {#if certificateFormFileName}
+                <p class="text-xs text-gray-600 mt-1">File saat ini: {certificateFormFileName}</p>
+              {/if}
+            </div>
+          </div>
         <div>
           <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>
         </div>

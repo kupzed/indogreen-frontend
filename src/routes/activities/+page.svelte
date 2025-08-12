@@ -762,7 +762,18 @@
       <div>
         <label for="create_attachment" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
         <div class="mt-2">
-          <input type="file" id="create_attachment" accept="image/*,application/pdf" on:change={handleAttachmentChange} class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" />
+          <input 
+            type="file" 
+            id="create_attachment" 
+            accept="image/*,application/pdf" 
+            on:change={(e: Event) => {
+              const input = e.target as HTMLInputElement;
+              const file = input.files && input.files[0] ? input.files[0] : null;
+              form.attachment = file;
+              formFileName = file ? file.name : '';
+            }}
+            class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none" 
+          />
           {#if formFileName}
             <p class="text-xs text-gray-600 mt-1">File terpilih: {formFileName}</p>
           {/if}
@@ -862,7 +873,17 @@
         <div>
           <label for="edit_attachment" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
           <div class="mt-2">
-            <input type="file" id="edit_attachment" accept="image/*,application/pdf" on:change={handleAttachmentChange} class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" />
+            <input 
+              type="file"
+              id="edit_attachment"
+              accept="image/*,application/pdf"
+              on:change={(e: Event) => {
+                const input = e.target as HTMLInputElement;
+                const file = input.files && input.files[0] ? input.files[0] : null;
+                form.attachment = file;
+                formFileName = file ? file.name : '';
+              }}
+              class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none" />
             {#if formFileName}
               <p class="text-xs text-gray-600 mt-1">File saat ini: {formFileName}</p>
               <button type="button" on:click={() => { form.attachment_removed = true; form.attachment = null; formFileName = ''; }} class="text-red-600 text-xs mt-1">Hapus File</button>

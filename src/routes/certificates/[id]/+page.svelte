@@ -18,6 +18,7 @@
 
   // Edit state
   let showEditModal = false;
+  let formFileName = '';
   let form: {
     name: string;
     no_certificate: string;
@@ -82,6 +83,7 @@
       date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
       attachment: null
     };
+    formFileName = item.attachment ? String(item.attachment).split('/').pop() ?? '' : '';
     showEditModal = true;
   }
 
@@ -239,10 +241,21 @@
         <div>
           <label for="edit_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
           <div class="mt-2">
-            <input id="edit_attachment" type="file" accept="application/pdf,image/*" on:change={(e: Event) => {
-              const input = e.target as HTMLInputElement;
-              form.attachment = input.files && input.files[0] ? input.files[0] : null;
-            }} class="block w-full text-sm" />
+            <input
+              id="edit_attachment"
+              type="file"
+              accept="image/*,application/pdf"
+              on:change={(e: Event) => {
+                const input = e.target as HTMLInputElement;
+                const file = input.files && input.files[0] ? input.files[0] : null;
+                form.attachment = file;
+                formFileName = file ? file.name : '';
+              }}
+              class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+            />
+            {#if formFileName}
+              <p class="text-xs text-gray-600 mt-1">File saat ini: {formFileName}</p>
+            {/if}
           </div>
         </div>
       </div>
