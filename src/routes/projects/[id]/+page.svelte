@@ -8,6 +8,7 @@
   import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
   import ProjectDetail from '$lib/components/detail/ProjectDetail.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
+  import CertificatesDetail from '$lib/components/detail/CertificatesDetail.svelte';
 
   let projectId: string | null = null;
   let project: any = null;
@@ -221,6 +222,9 @@
     const target = event.target as HTMLElement;
     if (!target.closest('.date-filter-dropdown')) {
       showActivityDateFilter = false;
+    }
+    if (!target.closest('.certificate-date-filter-dropdown') && !target.closest('.certificate-date-filter-button')) {
+      showCertificateDateFilter = false;
     }
   }
 
@@ -464,6 +468,7 @@
   let activityView: 'table' | 'list' = 'table';
 
   // Certificates state (per project)
+  type Option = { id: number; name?: string; nama?: string; title?: string };
   type ProjectCertificate = {
     id: number;
     name: string;
@@ -479,10 +484,88 @@
   let loadingCertificates: boolean = false;
   let errorCertificates: string = '';
   let certificateSearch: string = '';
+  let certificateStatusFilter: '' | ProjectCertificate['status'] = '';
   let certificateCurrentPage: number = 1;
   let certificateLastPage: number = 1;
   let totalCertificates: number = 0;
   let certificatesInitialized: boolean = false;
+  let certificateDependenciesInitialized: boolean = false;
+
+  const certificateStatuses = ['Belum', 'Tidak Aktif', 'Aktif'] as const;
+  let certificateProjects: Option[] = [];
+  let certificateBarangOptions: Option[] = [];
+
+  // Modal/Drawer state (certificates)
+  let showCreateCertificateModal = false;
+  let showEditCertificateModal = false;
+  let showCertificateDetailDrawer = false;
+  let editingCertificate: ProjectCertificate | null = null;
+  let selectedCertificate: ProjectCertificate | null = null;
+
+  // Certificate form state
+  let certificateForm: {
+    name: string;
+    no_certificate: string;
+    project_id: number | '' | null;
+    barang_certificate_id: number | '' | null;
+    status: 'Belum' | 'Tidak Aktif' | 'Aktif' | '';
+    date_of_issue: string;
+    date_of_expired: string;
+    attachment: File | null;
+  } = {
+    name: '',
+    no_certificate: '',
+    project_id: '',
+    barang_certificate_id: '',
+    status: '',
+    date_of_issue: '',
+    date_of_expired: '',
+    attachment: null,
+  };
+
+  // Certificates filter/view state
+  let certificateView: 'table' | 'list' = 'table';
+  let certificateDateFromFilter: string = '';
+  let certificateDateToFilter: string = '';
+  let showCertificateDateFilter = false;
+
+  function getCertificateStatusBadgeClasses(status: string) {
+    switch (status) {
+      case 'Aktif':
+        return 'bg-green-100 text-green-800';
+      case 'Tidak Aktif':
+        return 'bg-red-100 text-red-800';
+      case 'Belum':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  function buildCertificateFormData() {
+    const fd = new FormData();
+    fd.append('name', certificateForm.name);
+    fd.append('no_certificate', certificateForm.no_certificate);
+    // Force assign current project
+    if (project?.id) fd.append('project_id', String(project.id));
+    if (certificateForm.barang_certificate_id !== '' && certificateForm.barang_certificate_id !== null)
+      fd.append('barang_certificate_id', String(certificateForm.barang_certificate_id));
+    if (certificateForm.status) fd.append('status', certificateForm.status);
+    if (certificateForm.date_of_issue) fd.append('date_of_issue', certificateForm.date_of_issue);
+    if (certificateForm.date_of_expired) fd.append('date_of_expired', certificateForm.date_of_expired);
+    if (certificateForm.attachment) fd.append('attachment', certificateForm.attachment);
+    return fd;
+  }
+
+  async function fetchCertificateDependencies() {
+    try {
+      const res = await axiosClient.get('/certificates/getFormDependencies');
+      certificateProjects = res.data?.data?.projects ?? res.data?.projects ?? [];
+      certificateBarangOptions = res.data?.data?.barang_certificates ?? res.data?.barang_certificates ?? [];
+    } catch (err) {
+      console.error('Failed to fetch certificate dependencies', err);
+    }
+  }
 
   async function fetchCertificates() {
     if (!project?.id) return;
@@ -493,6 +576,9 @@
         params: {
           project_id: project.id,
           search: certificateSearch,
+          status: certificateStatusFilter,
+          date_from: certificateDateFromFilter,
+          date_to: certificateDateToFilter,
           page: certificateCurrentPage,
         },
       });
@@ -526,10 +612,112 @@
     }
   }
 
+  function handleCertificateFilterOrSearch() {
+    certificateCurrentPage = 1;
+    fetchCertificates();
+  }
+
+  function toggleCertificateDateFilter() {
+    showCertificateDateFilter = !showCertificateDateFilter;
+  }
+
+  function handleCertificateDateFilter() {
+    certificateCurrentPage = 1;
+    fetchCertificates();
+  }
+
   // Fetch certificates first time when tab is opened and project loaded
   $: if (activeTab === 'certificates' && project?.id && !certificatesInitialized) {
     certificatesInitialized = true;
     fetchCertificates();
+    if (!certificateDependenciesInitialized) {
+      certificateDependenciesInitialized = true;
+      fetchCertificateDependencies();
+    }
+  }
+
+  function openCreateCertificateModal() {
+    certificateForm = {
+      name: '',
+      no_certificate: '',
+      project_id: project?.id ?? '',
+      barang_certificate_id: '',
+      status: '',
+      date_of_issue: '',
+      date_of_expired: '',
+      attachment: null,
+    };
+    showCreateCertificateModal = true;
+  }
+
+  function openEditCertificateModal(item: ProjectCertificate) {
+    editingCertificate = { ...item };
+    certificateForm = {
+      name: item.name ?? '',
+      no_certificate: item.no_certificate ?? '',
+      project_id: project?.id ?? '',
+      barang_certificate_id: item.barang_certificate?.id ?? '',
+      status: item.status ?? '',
+      date_of_issue: item.date_of_issue ? new Date(item.date_of_issue).toISOString().split('T')[0] : '',
+      date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
+      attachment: null,
+    };
+    showEditCertificateModal = true;
+  }
+
+  function openCertificateDetailDrawer(item: ProjectCertificate) {
+    selectedCertificate = { ...item };
+    showCertificateDetailDrawer = true;
+  }
+
+  async function handleSubmitCreateCertificate() {
+    try {
+      const fd = buildCertificateFormData();
+      await axiosClient.post('/certificates', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      alert('Certificate berhasil ditambahkan');
+      showCreateCertificateModal = false;
+      fetchCertificates();
+    } catch (err: any) {
+      const messages = err.response?.data?.errors
+        ? (Object.values(err.response.data.errors) as any).flat().join('\n')
+        : err.response?.data?.message || 'Gagal menambahkan data.';
+      alert('Error:\n' + messages);
+      console.error('Create certificate failed:', err.response || err);
+    }
+  }
+
+  async function handleSubmitUpdateCertificate() {
+    if (!editingCertificate?.id) return;
+    try {
+      const fd = buildCertificateFormData();
+      fd.append('_method', 'PUT');
+      await axiosClient.post(`/certificates/${editingCertificate.id}`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      alert('Certificate berhasil diperbarui');
+      showEditCertificateModal = false;
+      fetchCertificates();
+    } catch (err: any) {
+      const messages = err.response?.data?.errors
+        ? (Object.values(err.response.data.errors) as any).flat().join('\n')
+        : err.response?.data?.message || 'Gagal memperbarui data.';
+      alert('Error:\n' + messages);
+      console.error('Update certificate failed:', err.response || err);
+    }
+  }
+
+  async function handleDeleteCertificate(id: number) {
+    if (!confirm('Yakin ingin menghapus certificate ini?')) return;
+    try {
+      await axiosClient.delete(`/certificates/${id}`);
+      alert('Certificate berhasil dihapus');
+      fetchCertificates();
+    } catch (err: any) {
+      alert('Gagal menghapus data: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
+      console.error('Delete certificate failed:', err.response || err);
+    }
   }
 </script>
 
@@ -973,6 +1161,14 @@
     {#if activeTab === 'certificates'}
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
+          <div class="flex w-full sm:w-auto space-x-2">
+            <select bind:value={certificateStatusFilter} on:change={handleCertificateFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+              <option value="">Filter Status: Semua</option>
+              {#each certificateStatuses as s}
+                <option value={s}>{s}</option>
+              {/each}
+            </select>
+          </div>
           <div class="w-full sm:w-auto flex-grow">
             <div class="relative w-full sm:w-auto">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -990,7 +1186,104 @@
             </div>
           </div>
           <div class="flex space-x-2 w-full sm:w-auto">
-            <button on:click={clearCertificateSearch} class="px-3 py-2 border rounded-md text-sm bg-white">Clear</button>
+            <div class="flex space-x-2 w-full sm:w-auto">
+              <button
+                on:click={openCreateCertificateModal}
+                class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Tambah Cert.
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mb-4">
+          <div class="p-1 bg-gray-200 rounded-lg inline-flex" role="tablist">
+            <button
+              on:click={() => (certificateView = 'table')}
+              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+              class:bg-white={certificateView === 'table'}
+              class:shadow={certificateView === 'table'}
+              class:text-gray-600={certificateView !== 'table'}
+              role="tab"
+              aria-selected={certificateView === 'table'}
+            >
+              Table
+            </button>
+            <button
+              on:click={() => (certificateView = 'list')}
+              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+              class:bg-white={certificateView === 'list'}
+              class:shadow={certificateView === 'list'}
+              class:text-gray-600={certificateView !== 'list'}
+              role="tab"
+              aria-selected={certificateView === 'list'}
+            >
+              Simple
+            </button>
+          </div>
+          <div class="relative certificate-date-filter-dropdown">
+            <button
+              on:click={toggleCertificateDateFilter}
+              class="certificate-date-filter-button inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class:bg-indigo-50={certificateDateFromFilter || certificateDateToFilter}
+              class:border-indigo-300={certificateDateFromFilter || certificateDateToFilter}
+              class:text-indigo-700={certificateDateFromFilter || certificateDateToFilter}
+            >
+              <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              Filter Tanggal
+              {#if certificateDateFromFilter || certificateDateToFilter}
+                <div class="w-2 h-2 bg-indigo-600 rounded-full ml-2"></div>
+              {/if}
+              <svg class="w-4 h-4 transition-transform" class:rotate-180={showCertificateDateFilter} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+
+            {#if showCertificateDateFilter}
+              <div class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                <div class="p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-medium text-gray-900">Filter Tanggal Sertifikat</h3>
+                    <button on:click={toggleCertificateDateFilter} aria-label="Tutup filter" class="text-gray-400 hover:text-gray-600">
+                      <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div class="space-y-3">
+                    <div>
+                      <label for="cert_filter_from" class="block text-sm font-medium text-gray-700 mb-1">Dari Tanggal Terbit</label>
+                      <input id="cert_filter_from" type="date" bind:value={certificateDateFromFilter} on:change={handleCertificateDateFilter} class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" />
+                    </div>
+                    <div>
+                      <label for="cert_filter_to" class="block text-sm font-medium text-gray-700 mb-1">Sampai Tanggal Terbit</label>
+                      <input id="cert_filter_to" type="date" bind:value={certificateDateToFilter} on:change={handleCertificateDateFilter} class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" />
+                    </div>
+                    {#if certificateDateFromFilter || certificateDateToFilter}
+                      <div class="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                        <strong>Filter Aktif:</strong><br />
+                        {#if certificateDateFromFilter && certificateDateToFilter}
+                          {new Date(certificateDateFromFilter).toLocaleDateString('id-ID')} - {new Date(certificateDateToFilter).toLocaleDateString('id-ID')}
+                        {:else if certificateDateFromFilter}
+                          Dari {new Date(certificateDateFromFilter).toLocaleDateString('id-ID')}
+                        {:else if certificateDateToFilter}
+                          Sampai {new Date(certificateDateToFilter).toLocaleDateString('id-ID')}
+                        {/if}
+                      </div>
+                    {/if}
+                  </div>
+
+                  <div class="flex justify-between mt-4 pt-3 border-t border-gray-200">
+                    <button type="button" on:click={() => { certificateDateFromFilter = ''; certificateDateToFilter = ''; handleCertificateFilterOrSearch(); }} class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">Clear All</button>
+                    <button type="button" on:click={toggleCertificateDateFilter} class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700">Close</button>
+                  </div>
+                </div>
+              </div>
+            {/if}
           </div>
         </div>
 
@@ -1007,30 +1300,67 @@
             </ul>
           </div>
         {:else}
+          {#if certificateView === 'list'}
+            <div class="bg-white shadow overflow-hidden sm:rounded-md">
+              <ul class="divide-y divide-gray-200">
+                {#each certificates as item (item.id)}
+                  <li>
+                    <a href={`/certificates/${item.id}`} class="block hover:bg-gray-50 px-4 py-4 sm:px-6">
+                      <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-indigo-600 truncate">{item.name}</p>
+                        <div class="ml-2 flex-shrink-0 flex">
+                          <span class={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getCertificateStatusBadgeClasses(item.status)}`}>{item.status}</span>
+                        </div>
+                      </div>
+                      <div class="mt-2 sm:flex sm:justify-between">
+                        <div class="sm:flex">
+                          <p class="flex items-center text-sm text-gray-500">Barang: {item.barang_certificate?.name || '-'} | No: {item.no_certificate}</p>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                          <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" /></svg>
+                          <p>Terbit: {new Date(item.date_of_issue).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                        </div>
+                      </div>
+                    </a>
+                    <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
+                      <button on:click|stopPropagation={() => openCertificateDetailDrawer(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">Detail</button>
+                      <button on:click|stopPropagation={() => openEditCertificateModal(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
+                      <button on:click|stopPropagation={() => handleDeleteCertificate(item.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700">Hapus</button>
+                    </div>
+                  </li>
+                {/each}
+              </ul>
+              {#if certificates.length > 0}
+                <Pagination currentPage={certificateCurrentPage} lastPage={certificateLastPage} onPageChange={goToCertificatePage} totalItems={totalCertificates} itemsPerPage={10} />
+              {/if}
+            </div>
+          {/if}
+
+          {#if certificateView === 'table'}
           <div class="mt-4 bg-white shadow-md rounded-lg">
             <div class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-300">
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Nama
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Nama Sertifikat
                     </th>
-                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       No. Sertifikat
                     </th>
-                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Status
                     </th>
-                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Terbit
                     </th>
-                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Expired
                     </th>
-                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Lampiran
                     </th>
-                    <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Aksi
                     </th>
                   </tr>
@@ -1038,7 +1368,7 @@
                 <tbody class="divide-y divide-gray-200 bg-white">
                   {#each certificates as item (item.id)}
                     <tr>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                      <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                         <a href={`/certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">
                           {item.name}
                         </a><br>
@@ -1049,8 +1379,8 @@
                       <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {item.no_certificate}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {item.status}
+                      <td class="whitespace-nowrap px-3 py-4 text-sm">
+                        <span class={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getCertificateStatusBadgeClasses(item.status)}`}>{item.status}</span>
                       </td>
                       <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {new Date(item.date_of_issue).toLocaleDateString('id-ID')}
@@ -1063,19 +1393,19 @@
                           <a href={item.attachment} target="_blank" rel="noreferrer" class="hover:underline">Lihat</a>
                         {:else}-{/if}
                       </td>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm">
+                      <td class="relative whitespace-nowrap px-3 py-4 text-sm">
                         <div class="flex items-center space-x-2">
-                          <button title="Detail" class="text-indigo-600 hover:text-indigo-900">
+                          <button title="Detail" class="text-indigo-600 hover:text-indigo-900" on:click={() => openCertificateDetailDrawer(item)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <span class="sr-only">Detail, {item.name}</span>
                           </button>
-                          <button title="Edit" class="text-blue-600 hover:text-blue-900">
+                          <button title="Edit" class="text-blue-600 hover:text-blue-900" on:click={() => openEditCertificateModal(item)}>
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
                             <span class="sr-only">Edit, {item.name}</span>
                           </button>
-                          <button title="Hapus" class="text-red-600 hover:text-red-900">
+                          <button title="Hapus" class="text-red-600 hover:text-red-900" on:click={() => handleDeleteCertificate(item.id)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                             <span class="sr-only">Hapus, {item.name}</span>
                           </button>
@@ -1096,6 +1426,7 @@
               />
             {/if}
           </div>
+          {/if}
         {/if}
       </div>
     {/if}
@@ -1408,4 +1739,119 @@
     on:close={() => showActivityDetailDrawer = false}
   >
     <ActivityDetail activity={selectedActivity} />
+  </Drawer>
+
+  <!-- Certificates: Create Modal -->
+  <Modal bind:show={showCreateCertificateModal} title="Tambah Certificate">
+    <form on:submit|preventDefault={handleSubmitCreateCertificate} class="space-y-4">
+      <div>
+        <label for="create_cert_name" class="block text-sm font-medium text-gray-900">Nama</label>
+        <input id="create_cert_name" type="text" bind:value={certificateForm.name} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+      </div>
+      <div>
+        <label for="create_cert_no" class="block text-sm font-medium text-gray-900">No. Sertifikat</label>
+        <input id="create_cert_no" type="text" bind:value={certificateForm.no_certificate} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+      </div>
+      <div>
+        <label for="create_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
+        <select id="create_cert_barang" bind:value={certificateForm.barang_certificate_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+          <option value="">Pilih Barang Certificate (opsional)</option>
+          {#each certificateBarangOptions as b}
+            <option value={b.id}>{b.name ?? b.title}</option>
+          {/each}
+        </select>
+      </div>
+      <div>
+        <label for="create_cert_status" class="block text-sm font-medium text-gray-900">Status</label>
+        <select id="create_cert_status" bind:value={certificateForm.status} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+          <option value="">Pilih Status</option>
+          {#each certificateStatuses as s}
+            <option value={s}>{s}</option>
+          {/each}
+        </select>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="create_cert_issue" class="block text-sm font-medium text-gray-900">Tanggal Terbit</label>
+          <input id="create_cert_issue" type="date" bind:value={certificateForm.date_of_issue} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        </div>
+        <div>
+          <label for="create_cert_expired" class="block text-sm font-medium text-gray-900">Tanggal Expired</label>
+          <input id="create_cert_expired" type="date" bind:value={certificateForm.date_of_expired} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        </div>
+      </div>
+      <div>
+        <label for="create_cert_attachment" class="block text-sm font-medium text-gray-900">Lampiran (Opsional)</label>
+        <input id="create_cert_attachment" type="file" accept="application/pdf,image/*" on:change={(e: Event) => {
+          const input = e.target as HTMLInputElement;
+          certificateForm.attachment = input.files && input.files[0] ? input.files[0] : null;
+        }} class="mt-1 block w-full text-sm" />
+      </div>
+      <div>
+        <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
+      </div>
+    </form>
+  </Modal>
+
+  <!-- Certificates: Edit Modal -->
+  <Modal bind:show={showEditCertificateModal} title="Edit Certificate">
+    {#if editingCertificate}
+      <form on:submit|preventDefault={handleSubmitUpdateCertificate} class="space-y-4">
+        <div>
+          <label for="edit_cert_name" class="block text-sm font-medium text-gray-900">Nama</label>
+          <input id="edit_cert_name" type="text" bind:value={certificateForm.name} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        </div>
+        <div>
+          <label for="edit_cert_no" class="block text-sm font-medium text-gray-900">No. Sertifikat</label>
+          <input id="edit_cert_no" type="text" bind:value={certificateForm.no_certificate} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        </div>
+        <div>
+          <label for="edit_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
+          <select id="edit_cert_barang" bind:value={certificateForm.barang_certificate_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <option value="">Pilih Barang Certificate (opsional)</option>
+            {#each certificateBarangOptions as b}
+              <option value={b.id}>{b.name ?? b.title}</option>
+            {/each}
+          </select>
+        </div>
+        <div>
+          <label for="edit_cert_status" class="block text-sm font-medium text-gray-900">Status</label>
+          <select id="edit_cert_status" bind:value={certificateForm.status} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <option value="">Pilih Status</option>
+            {#each certificateStatuses as s}
+              <option value={s}>{s}</option>
+            {/each}
+          </select>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="edit_cert_issue" class="block text-sm font-medium text-gray-900">Tanggal Terbit</label>
+            <input id="edit_cert_issue" type="date" bind:value={certificateForm.date_of_issue} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          </div>
+          <div>
+            <label for="edit_cert_expired" class="block text-sm font-medium text-gray-900">Tanggal Expired</label>
+            <input id="edit_cert_expired" type="date" bind:value={certificateForm.date_of_expired} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          </div>
+        </div>
+        <div>
+          <label for="edit_cert_attachment" class="block text-sm font-medium text-gray-900">Lampiran (Opsional)</label>
+          <input id="edit_cert_attachment" type="file" accept="application/pdf,image/*" on:change={(e: Event) => {
+            const input = e.target as HTMLInputElement;
+            certificateForm.attachment = input.files && input.files[0] ? input.files[0] : null;
+          }} class="mt-1 block w-full text-sm" />
+        </div>
+        <div>
+          <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>
+        </div>
+      </form>
+    {/if}
+  </Modal>
+
+  <!-- Certificates Detail Drawer -->
+  <Drawer 
+    bind:show={showCertificateDetailDrawer} 
+    title="Detail Sertifikat"
+    on:close={() => showCertificateDetailDrawer = false}
+  >
+    <CertificatesDetail certificates={selectedCertificate} />
   </Drawer>
