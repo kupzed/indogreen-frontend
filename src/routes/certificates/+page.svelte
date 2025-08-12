@@ -259,29 +259,58 @@
       <table class="min-w-full divide-y divide-gray-300">
         <thead class="bg-gray-50">
           <tr>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">No. Sertifikat</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Project</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Barang Cert.</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Terbit</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Expired</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Lampiran</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Aksi</th>
+            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Nama
+            </th>
+            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              No. Sertifikat
+            </th>
+            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Project
+            </th>
+            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Status
+            </th>
+            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Terbit
+            </th>
+            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Expired
+            </th>
+            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Lampiran
+            </th>
+            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              Aksi
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
           {#each items as item (item.id)}
             <tr>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                <a href={`/certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">{item.name}</a>
+                <a href={`/certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">
+                  {item.name}
+                </a><br>
+                <span class="text-xs text-gray-500">
+                  {item.barang_certificate?.name || '-'}
+                </span>
               </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.no_certificate}</td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.project?.name || '-'}</td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.barang_certificate?.name || '-'}</td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.status}</td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{new Date(item.date_of_issue).toLocaleDateString('id-ID')}</td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{new Date(item.date_of_expired).toLocaleDateString('id-ID')}</td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {item.no_certificate}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {item.project?.name || '-'}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {item.status}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {new Date(item.date_of_issue).toLocaleDateString('id-ID')}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {new Date(item.date_of_expired).toLocaleDateString('id-ID')}
+              </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-indigo-600">
                 {#if item.attachment}
                   <a href={item.attachment} target="_blank" rel="noreferrer" class="hover:underline">Lihat</a>
