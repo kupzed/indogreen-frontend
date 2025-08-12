@@ -424,6 +424,11 @@
               </div>
             </a>
             <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
+              <button 
+                on:click|stopPropagation={() => openDetailDrawer(project)} 
+                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">
+                Detail
+              </button>
               <button
                 on:click|stopPropagation={() => openEditModal(project)}
                 class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -518,7 +523,7 @@
                 </td>
                 <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                   <div class="flex items-left space-x-2">
-                    <button on:click={() => openDetailDrawer(project)} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                    <button on:click={() => openDetailDrawer(project)} class="text-yellow-600 hover:text-yellow-900" title="Detail">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {project.name}</span>
                     </button>
