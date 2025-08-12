@@ -276,18 +276,34 @@
         <table class="min-w-full divide-y divide-gray-300">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
-              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">No. Seri</th>
-              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Mitra</th>
-              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Aksi</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Nama
+              </th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+              >No. Seri
+            </th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Mitra
+              </th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Aksi
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white">
             {#each items as item (item.id)}
               <tr>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900"><a href={`/barang-certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">{item.name}</a></td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.no_seri}</td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.mitra?.nama || '-'}</td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                  <a href={`/barang-certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">
+                    {item.name}
+                  </a>
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  {item.no_seri}
+                </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                  {item.mitra?.nama || '-'}
+                </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex items-center space-x-2">
                     <button on:click={() => openDetailDrawer(item)} title="Detail" class="text-indigo-600 hover:text-indigo-900">
