@@ -278,7 +278,7 @@
       on:click={openCreateModal}
       class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
     >
-      Tambah Cert.
+      Tambah Sertif
     </button>
   </div>
 </div>
@@ -472,7 +472,7 @@
                 No. Sertifikat
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Project
+                Barang Sertifikat
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Status
@@ -494,19 +494,19 @@
           <tbody class="divide-y divide-gray-200 bg-white">
             {#each items as item (item.id)}
               <tr>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                   <a href={`/certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">
                     {item.name}
                   </a><br>
                   <span class="text-xs text-gray-500">
-                    {item.barang_certificate?.name || '-'}
+                    {item.project?.name || '-'}
                   </span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {item.no_certificate}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {item.project?.name || '-'}
+                  {item.barang_certificate?.name || '-'}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(item.status)}">
@@ -559,7 +559,7 @@
   {/if}
 {/if}
 
-<Modal bind:show={showCreateModal} title="Tambah Certificate">
+<Modal bind:show={showCreateModal} title="Tambah Sertifikat">
   <form on:submit|preventDefault={handleSubmitCreate} class="space-y-4">
     <div>
       <label for="create_name" class="block text-sm font-medium text-gray-900">Nama</label>
@@ -619,7 +619,7 @@
   </form>
 </Modal>
 
-<Modal bind:show={showEditModal} title="Edit Certificate">
+<Modal bind:show={showEditModal} title="Edit Sertifikat">
   {#if editingItem}
     <form on:submit|preventDefault={handleSubmitUpdate} class="space-y-4">
       <div>

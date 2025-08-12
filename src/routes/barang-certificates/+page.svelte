@@ -277,11 +277,11 @@
           <thead class="bg-gray-50">
             <tr>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Nama
+                Nama Barang
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
               >No. Seri
-            </th>
+              </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Mitra
               </th>
@@ -293,7 +293,7 @@
           <tbody class="divide-y divide-gray-200 bg-white">
             {#each items as item (item.id)}
               <tr>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                   <a href={`/barang-certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">
                     {item.name}
                   </a>

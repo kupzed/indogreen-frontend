@@ -163,7 +163,7 @@
       }
 
     } catch (err: any) {
-      errorProject = err.response?.data?.message || 'Gagal memuat detail proyek.';
+      errorProject = err.response?.data?.message || 'Gagal memuat proyek.';
       console.error('Error fetching project details:', err.response || err);
     } finally {
       loadingProject = false;
@@ -723,7 +723,7 @@
 
 
 {#if loadingProject}
-  <p>Memuat detail proyek...</p>
+  <p>Memuat proyek...</p>
 {:else if errorProject}
   <p class="text-red-500">{errorProject}</p>
 {:else if project}
@@ -1030,6 +1030,12 @@
                       </div>
                     </a>
                     <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
+                      <button 
+                        on:click|stopPropagation={() => openActivityDetailDrawer(activity)} 
+                        class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700"
+                        >
+                        Detail
+                      </button>
                       <button
                         on:click|stopPropagation={() => openEditActivityModal(activity)}
                         class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -1117,7 +1123,7 @@
                       </td>
                       <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                         <div class="flex items-left space-x-2">
-                          <button on:click={() => openActivityDetailDrawer(activity)} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                          <button on:click={() => openActivityDetailDrawer(activity)} class="text-yellow-600 hover:text-yellow-900" title="Detail">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <span class="sr-only">Detail, {activity.name}</span>
                           </button>
@@ -1191,7 +1197,7 @@
                 on:click={openCreateCertificateModal}
                 class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Tambah Cert.
+                Tambah Sertif
               </button>
             </div>
           </div>
@@ -1349,6 +1355,9 @@
                       No. Sertifikat
                     </th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Barang Sertifikat
+                    </th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Status
                     </th>
                     <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -1371,13 +1380,13 @@
                       <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
                         <a href={`/certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">
                           {item.name}
-                        </a><br>
-                        <span class="text-xs text-gray-500">
-                          {item.barang_certificate?.name || '-'}
-                        </span>
+                        </a>
                       </td>
                       <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {item.no_certificate}
+                      </td>
+                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {item.barang_certificate?.name || "-"}
                       </td>
                       <td class="whitespace-nowrap px-3 py-4 text-sm">
                         <span class={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getCertificateStatusBadgeClasses(item.status)}`}>{item.status}</span>
@@ -1395,7 +1404,7 @@
                       </td>
                       <td class="relative whitespace-nowrap px-3 py-4 text-sm">
                         <div class="flex items-center space-x-2">
-                          <button title="Detail" class="text-indigo-600 hover:text-indigo-900" on:click={() => openCertificateDetailDrawer(item)}>
+                          <button title="Detail" class="text-yellow-600 hover:text-yellow-900" on:click={() => openCertificateDetailDrawer(item)}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <span class="sr-only">Detail, {item.name}</span>
                           </button>
@@ -1742,7 +1751,7 @@
   </Drawer>
 
   <!-- Certificates: Create Modal -->
-  <Modal bind:show={showCreateCertificateModal} title="Tambah Certificate">
+  <Modal bind:show={showCreateCertificateModal} title="Tambah Sertifikat">
     <form on:submit|preventDefault={handleSubmitCreateCertificate} class="space-y-4">
       <div>
         <label for="create_cert_name" class="block text-sm font-medium text-gray-900">Nama</label>
@@ -1794,7 +1803,7 @@
   </Modal>
 
   <!-- Certificates: Edit Modal -->
-  <Modal bind:show={showEditCertificateModal} title="Edit Certificate">
+  <Modal bind:show={showEditCertificateModal} title="Edit Sertifikat">
     {#if editingCertificate}
       <form on:submit|preventDefault={handleSubmitUpdateCertificate} class="space-y-4">
         <div>
