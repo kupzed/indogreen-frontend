@@ -509,7 +509,9 @@
                   {item.project?.name || '-'}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {item.status}
+                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(item.status)}">
+                    {item.status}
+                  </span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {new Date(item.date_of_issue).toLocaleDateString('id-ID')}
