@@ -22,6 +22,7 @@
   let loading = true;
   let error = '';
   let search = '';
+  let mitraFilter: number | '' = '';
   let currentPage = 1;
   let lastPage = 1;
   let totalItems = 0;
@@ -34,6 +35,7 @@
   // Drawer state
   let showDetailDrawer = false;
   let selectedItem: BarangCertificate | null = null;
+  let activeView: 'table' | 'list' = 'table';
 
   // Form state
   let form: {
@@ -63,6 +65,7 @@
       const res = await axiosClient.get('/barang-certificates', {
         params: {
           search,
+          mitra_id: mitraFilter || undefined,
           page: currentPage
         }
       });
@@ -87,8 +90,7 @@
     fetchList();
   }
 
-  function clearSearch() {
-    search = '';
+  function handleFilterOrSearch() {
     currentPage = 1;
     fetchList();
   }
@@ -165,6 +167,14 @@
 </script>
 
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
+  <div class="flex w-full sm:w-auto space-x-2">
+    <select bind:value={mitraFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+      <option value="">Filter Mitra: Semua</option>
+      {#each mitras as m}
+        <option value={m.id}>{m.nama}</option>
+      {/each}
+    </select>
+  </div>
   <div class="w-full sm:w-auto flex-grow">
     <div class="relative w-full sm:w-auto">
       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -176,18 +186,44 @@
         type="text"
         placeholder="Cari barang certificate..."
         bind:value={search}
-        on:input={handleSearchChange}
+        on:input={handleFilterOrSearch}
         class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
       />
     </div>
   </div>
   <div class="flex space-x-2 w-full sm:w-auto">
-    <button on:click={clearSearch} class="px-3 py-2 border rounded-md text-sm bg-white">Clear</button>
     <button
       on:click={openCreateModal}
       class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
     >
-      Tambah
+      Tambah Barang
+    </button>
+  </div>
+</div>
+
+<div class="flex items-center justify-between mb-4">
+  <div class="p-1 bg-gray-200 rounded-lg inline-flex" role="tablist">
+    <button
+      on:click={() => (activeView = 'table')}
+      class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+      class:bg-white={activeView === 'table'}
+      class:shadow={activeView === 'table'}
+      class:text-gray-600={activeView !== 'table'}
+      role="tab"
+      aria-selected={activeView === 'table'}
+    >
+      Table
+    </button>
+    <button
+      on:click={() => (activeView = 'list')}
+      class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+      class:bg-white={activeView === 'list'}
+      class:shadow={activeView === 'list'}
+      class:text-gray-600={activeView !== 'list'}
+      role="tab"
+      aria-selected={activeView === 'list'}
+    >
+      Simple
     </button>
   </div>
 </div>
@@ -205,58 +241,79 @@
     </ul>
   </div>
 {:else}
-  <div class="mt-4 bg-white shadow-md rounded-lg">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-300">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">No. Seri</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Mitra</th>
-            <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 bg-white">
-          {#each items as item (item.id)}
-            <tr>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                <a href={`/barang-certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">{item.name}</a>
-              </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.no_seri}</td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.mitra?.nama || '-'}</td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm">
-                <div class="flex items-center space-x-2">
-                  <button on:click={() => openDetailDrawer(item)} title="Detail" class="text-indigo-600 hover:text-indigo-900">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    <span class="sr-only">Detail, {item.name}</span>
-                  </button>
-                  <button on:click={() => openEditModal(item)} title="Edit" class="text-blue-600 hover:text-blue-900">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    <span class="sr-only">Edit, {item.name}</span>
-                  </button>
-                  <button on:click={() => handleDelete(item.id)} title="Hapus" class="text-red-600 hover:text-red-900">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                    <span class="sr-only">Hapus, {item.name}</span>
-                  </button>
+  {#if activeView === 'list'}
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200">
+        {#each items as item (item.id)}
+          <li>
+            <a href={`/barang-certificates/${item.id}`} class="block hover:bg-gray-50 px-4 py-4 sm:px-6">
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-indigo-600 truncate">{item.name}</p>
+              </div>
+              <div class="mt-2 sm:flex sm:justify-between">
+                <div class="sm:flex">
+                  <p class="flex items-center text-sm text-gray-500">No. Seri: {item.no_seri} | Mitra: {item.mitra?.nama || '-'}</p>
                 </div>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+              </div>
+            </a>
+            <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
+              <button on:click|stopPropagation={() => openDetailDrawer(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-200">Detail</button>
+              <button on:click|stopPropagation={() => openEditModal(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
+              <button on:click|stopPropagation={() => handleDelete(item.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700">Hapus</button>
+            </div>
+          </li>
+        {/each}
+      </ul>
+      {#if items.length > 0}
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={10} />
+      {/if}
     </div>
-    {#if items.length > 0}
-      <Pagination
-        currentPage={currentPage}
-        lastPage={lastPage}
-        onPageChange={goToPage}
-        totalItems={totalItems}
-        itemsPerPage={10}
-      />
-    {/if}
-  </div>
+  {/if}
+
+  {#if activeView === 'table'}
+    <div class="mt-4 bg-white shadow-md rounded-lg">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-300">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">No. Seri</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Mitra</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 bg-white">
+            {#each items as item (item.id)}
+              <tr>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900"><a href={`/barang-certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">{item.name}</a></td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.no_seri}</td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.mitra?.nama || '-'}</td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <div class="flex items-center space-x-2">
+                    <button on:click={() => openDetailDrawer(item)} title="Detail" class="text-indigo-600 hover:text-indigo-900">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      <span class="sr-only">Detail, {item.name}</span>
+                    </button>
+                    <button on:click={() => openEditModal(item)} title="Edit" class="text-blue-600 hover:text-blue-900">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      <span class="sr-only">Edit, {item.name}</span>
+                    </button>
+                    <button on:click={() => handleDelete(item.id)} title="Hapus" class="text-red-600 hover:text-red-900">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                      <span class="sr-only">Hapus, {item.name}</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+      {#if items.length > 0}
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={10} />
+      {/if}
+    </div>
+  {/if}
 {/if}
 
 <Modal bind:show={showCreateModal} title="Tambah Barang Certificate">
