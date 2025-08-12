@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
-  import MitraDetail from '$lib/components/MitraDetail.svelte';
+  import MitraDetail from '$lib/components/detail/MitraDetail.svelte';
 
   let mitraId: string | null = null;
   let mitra: any = null;

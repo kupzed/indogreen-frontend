@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
-  import CertificatesDetail from '$lib/components/CertificatesDetail.svelte';
+  import CertificatesDetail from '$lib/components/detail/CertificatesDetail.svelte';
 
   type Option = { id: number; name?: string; title?: string };
 

@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
-  import ActivityDetail from '$lib/components/ActivityDetail.svelte';
+  import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
 
   let activityId: string | null = null;
   let activity: any = null;

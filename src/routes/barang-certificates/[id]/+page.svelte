@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
-  import BarangCertificatesDetail from '$lib/components/BarangCertificatesDetail.svelte';
+  import BarangCertificatesDetail from '$lib/components/detail/BarangCertificatesDetail.svelte';
 
   type Mitra = { id: number; nama: string };
 

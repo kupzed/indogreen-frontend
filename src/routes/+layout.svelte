@@ -5,9 +5,9 @@
 	import { page } from '$app/stores';
   
 	// Import komponen baru
-	import Sidebar from '$lib/components/Sidebar.svelte';
-	import TopNav from '$lib/components/TopNav.svelte';
-	import MobileSidebar from '$lib/components/MobileSidebar.svelte';
+	import Sidebar from '$lib/components/layout/Sidebar.svelte';
+	import TopNav from '$lib/components/layout/TopNav.svelte';
+	import MobileSidebar from '$lib/components/layout/MobileSidebar.svelte';
   
 	// State untuk mengontrol sidebar
 	let sidebarOpen: boolean = false; // Untuk mobile sidebar

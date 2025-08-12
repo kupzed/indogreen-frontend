@@ -5,7 +5,7 @@
   import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
-  import ActivityDetail from '$lib/components/ActivityDetail.svelte';
+  import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
 
   let activities: any[] = [];
   let projects: any[] = []; // For project dropdown in activity forms

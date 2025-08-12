@@ -4,7 +4,7 @@
   import Modal from '$lib/components/Modal.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
-  import CertificatesDetail from '$lib/components/CertificatesDetail.svelte';
+  import CertificatesDetail from '$lib/components/detail/CertificatesDetail.svelte';
 
   type Option = { id: number; name?: string; nama?: string; title?: string };
   type Certificate = {

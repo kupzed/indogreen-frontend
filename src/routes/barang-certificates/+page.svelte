@@ -4,7 +4,7 @@
   import Modal from '$lib/components/Modal.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
-  import BarangCertificatesDetail from '$lib/components/BarangCertificatesDetail.svelte';
+  import BarangCertificatesDetail from '$lib/components/detail/BarangCertificatesDetail.svelte';
 
   type Mitra = { id: number; nama: string };
   type BarangCertificate = {

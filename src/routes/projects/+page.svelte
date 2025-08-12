@@ -4,7 +4,7 @@
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
-  import ProjectDetail from '$lib/components/ProjectDetail.svelte';
+  import ProjectDetail from '$lib/components/detail/ProjectDetail.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
 
   let projects: any[] = [];

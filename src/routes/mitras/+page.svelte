@@ -4,7 +4,7 @@
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
-  import MitraDetail from '$lib/components/MitraDetail.svelte';
+  import MitraDetail from '$lib/components/detail/MitraDetail.svelte'; 
   import Pagination from '$lib/components/Pagination.svelte';
 
   let mitras: any[] = [];
