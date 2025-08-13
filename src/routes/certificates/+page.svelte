@@ -573,20 +573,20 @@
       <input id="create_no_certificate" type="text" bind:value={form.no_certificate} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
     </div>
     <div>
-      <label for="create_project" class="block text-sm font-medium text-gray-900">Project</label>
-      <select id="create_project" bind:value={form.project_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-        <option value="">Pilih Project</option>
-        {#each projects as p}
-          <option value={p.id}>{p.name ?? p.title}</option>
+      <label for="create_barang_certificate" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
+      <select id="create_barang_certificate" bind:value={form.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        <option value="">Pilih Barang Certificate</option>
+        {#each barangCertificates as b}
+          <option value={b.id}>{b.name ?? b.title}</option>
         {/each}
       </select>
     </div>
     <div>
-      <label for="create_barang_certificate" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-      <select id="create_barang_certificate" bind:value={form.barang_certificate_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-        <option value="">Pilih Barang Certificate</option>
-        {#each barangCertificates as b}
-          <option value={b.id}>{b.name ?? b.title}</option>
+      <label for="create_project" class="block text-sm font-medium text-gray-900">Project</label>
+      <select id="create_project" bind:value={form.project_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        <option value="">Pilih Project</option>
+        {#each projects as p}
+          <option value={p.id}>{p.name ?? p.title}</option>
         {/each}
       </select>
     </div>
@@ -647,20 +647,20 @@
         <input id="edit_no_certificate" type="text" bind:value={form.no_certificate} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
       <div>
-        <label for="edit_project" class="block text-sm font-medium text-gray-900">Project</label>
-        <select id="edit_project" bind:value={form.project_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-          <option value="">Pilih Project</option>
-          {#each projects as p}
-            <option value={p.id}>{p.name ?? p.title}</option>
+        <label for="edit_barang_certificate" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
+        <select id="edit_barang_certificate" bind:value={form.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+          <option value="">Pilih Barang Certificate</option>
+          {#each barangCertificates as b}
+            <option value={b.id}>{b.name ?? b.title}</option>
           {/each}
         </select>
       </div>
       <div>
-        <label for="edit_barang_certificate" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-        <select id="edit_barang_certificate" bind:value={form.barang_certificate_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-          <option value="">Pilih Barang Certificate</option>
-          {#each barangCertificates as b}
-            <option value={b.id}>{b.name ?? b.title}</option>
+        <label for="edit_project" class="block text-sm font-medium text-gray-900">Project</label>
+        <select id="edit_project" bind:value={form.project_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+          <option value="">Pilih Project</option>
+          {#each projects as p}
+            <option value={p.id}>{p.name ?? p.title}</option>
           {/each}
         </select>
       </div>

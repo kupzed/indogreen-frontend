@@ -344,7 +344,7 @@
     </div>
     <div>
       <label for="create_mitra" class="block text-sm font-medium text-gray-900">Mitra</label>
-      <select id="create_mitra" bind:value={form.mitra_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+      <select id="create_mitra" bind:value={form.mitra_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
         <option value="">Pilih Mitra</option>
         {#each mitras as m}
           <option value={m.id}>{m.nama}</option>
@@ -371,7 +371,7 @@
       </div>
       <div>
         <label for="edit_mitra" class="block text-sm font-medium text-gray-900">Mitra</label>
-        <select id="edit_mitra" bind:value={form.mitra_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        <select id="edit_mitra" bind:value={form.mitra_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
           <option value="">Pilih Mitra</option>
           {#each mitras as m}
             <option value={m.id}>{m.nama}</option>
