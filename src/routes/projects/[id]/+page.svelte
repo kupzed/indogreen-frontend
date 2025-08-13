@@ -560,7 +560,7 @@
 
   async function fetchCertificateDependencies() {
     try {
-      const res = await axiosClient.get('/certificates/getFormDependencies');
+      const res = await axiosClient.get('/certificate/getFormDependencies');
       certificateProjects = res.data?.data?.projects ?? res.data?.projects ?? [];
       certificateBarangOptions = res.data?.data?.barang_certificates ?? res.data?.barang_certificates ?? [];
     } catch (err) {
@@ -1758,8 +1758,8 @@
       </div>
       <div>
         <label for="create_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-        <select id="create_cert_barang" bind:value={certificateForm.barang_certificate_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-          <option value="">Pilih Barang Certificate (opsional)</option>
+        <select id="create_cert_barang" bind:value={certificateForm.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+          <option value="">Pilih Barang Certificate</option>
           {#each certificateBarangOptions as b}
             <option value={b.id}>{b.name ?? b.title}</option>
           {/each}
@@ -1824,8 +1824,8 @@
         </div>
         <div>
           <label for="edit_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-          <select id="edit_cert_barang" bind:value={certificateForm.barang_certificate_id} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-            <option value="">Pilih Barang Certificate (opsional)</option>
+          <select id="edit_cert_barang" bind:value={certificateForm.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            <option value="">Pilih Barang Certificate</option>
             {#each certificateBarangOptions as b}
               <option value={b.id}>{b.name ?? b.title}</option>
             {/each}
