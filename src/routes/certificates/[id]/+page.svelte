@@ -45,7 +45,7 @@
 
   async function fetchDependencies() {
     try {
-      const res = await axiosClient.get('/certificates/getFormDependencies');
+      const res = await axiosClient.get('/certificate/getFormDependencies');
       projects = res.data?.data?.projects ?? res.data?.projects ?? [];
       barangCertificates = res.data?.data?.barang_certificates ?? res.data?.barang_certificates ?? [];
     } catch (err) {
@@ -195,7 +195,7 @@
           <label for="edit_project" class="block text-sm/6 font-medium text-gray-900">Project</label>
           <div class="mt-2">
             <select id="edit_project" bind:value={form.project_id} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Project (opsional)</option>
+              <option value="">Pilih Project</option>
               {#each projects as p}
                 <option value={p.id}>{p.name ?? p.title}</option>
               {/each}
@@ -206,7 +206,7 @@
           <label for="edit_barang_certificate" class="block text-sm/6 font-medium text-gray-900">Barang Certificate</label>
           <div class="mt-2">
             <select id="edit_barang_certificate" bind:value={form.barang_certificate_id} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Barang Certificate (opsional)</option>
+              <option value="">Pilih Barang Certificate</option>
               {#each barangCertificates as b}
                 <option value={b.id}>{b.name ?? b.title}</option>
               {/each}
