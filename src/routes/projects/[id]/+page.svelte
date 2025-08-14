@@ -468,7 +468,7 @@
   let activityView: 'table' | 'list' = 'table';
 
   // Certificates state (per project)
-  type Option = { id: number; name?: string; nama?: string; title?: string };
+  type Option = { id: number; name?: string; nama?: string; title?: string; no_seri?: string };
   type ProjectCertificate = {
     id: number;
     name: string;
@@ -492,7 +492,6 @@
   let certificateDependenciesInitialized: boolean = false;
 
   const certificateStatuses = ['Belum', 'Tidak Aktif', 'Aktif'] as const;
-  let certificateProjects: Option[] = [];
   let certificateBarangOptions: Option[] = [];
 
   // Modal/Drawer state (certificates)
@@ -559,12 +558,15 @@
   }
 
   async function fetchCertificateDependencies() {
+    if (!project?.id) return;
+    
     try {
-      const res = await axiosClient.get('/certificate/getFormDependencies');
-      certificateProjects = res.data?.data?.projects ?? res.data?.projects ?? [];
-      certificateBarangOptions = res.data?.data?.barang_certificates ?? res.data?.barang_certificates ?? [];
+      // Get barang certificates based on project's mitra_id
+      const res = await axiosClient.get(`/certificate/getBarangCertificatesByProject/${project.id}`);
+      certificateBarangOptions = res.data?.data ?? [];
     } catch (err) {
       console.error('Failed to fetch certificate dependencies', err);
+      certificateBarangOptions = [];
     }
   }
 
@@ -1758,12 +1760,15 @@
       </div>
       <div>
         <label for="create_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-        <select id="create_cert_barang" bind:value={certificateForm.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-          <option value="">Pilih Barang Certificate</option>
+        <select id="create_cert_barang" bind:value={certificateForm.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" disabled={certificateBarangOptions.length === 0}>
+          <option value="">{certificateBarangOptions.length === 0 ? 'Tidak ada Barang Certificate untuk Project ini' : 'Pilih Barang Certificate'}</option>
           {#each certificateBarangOptions as b}
-            <option value={b.id}>{b.name ?? b.title}</option>
+            <option value={b.id}>{b.name ?? b.title} - {b.no_seri}</option>
           {/each}
         </select>
+        {#if certificateBarangOptions.length === 0}
+          <p class="mt-1 text-sm text-gray-500">Tidak ada Barang Certificate untuk mitra project ini</p>
+        {/if}
       </div>
       <div>
         <label for="create_cert_status" class="block text-sm font-medium text-gray-900">Status</label>
@@ -1824,12 +1829,15 @@
         </div>
         <div>
           <label for="edit_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-          <select id="edit_cert_barang" bind:value={certificateForm.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-            <option value="">Pilih Barang Certificate</option>
+          <select id="edit_cert_barang" bind:value={certificateForm.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" disabled={certificateBarangOptions.length === 0}>
+            <option value="">{certificateBarangOptions.length === 0 ? 'Tidak ada Barang Certificate untuk Project ini' : 'Pilih Barang Certificate'}</option>
             {#each certificateBarangOptions as b}
-              <option value={b.id}>{b.name ?? b.title}</option>
+              <option value={b.id}>{b.name ?? b.title} - {b.no_seri}</option>
             {/each}
           </select>
+          {#if certificateBarangOptions.length === 0}
+            <p class="mt-1 text-sm text-gray-500">Tidak ada Barang Certificate untuk mitra project ini</p>
+          {/if}
         </div>
         <div>
           <label for="edit_cert_status" class="block text-sm font-medium text-gray-900">Status</label>

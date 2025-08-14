@@ -6,7 +6,7 @@
   import Modal from '$lib/components/Modal.svelte';
   import CertificatesDetail from '$lib/components/detail/CertificatesDetail.svelte';
 
-  type Option = { id: number; name?: string; title?: string };
+  type Option = { id: number; name?: string; title?: string; no_seri?: string };
 
   let item: any = null;
   let loading = true;
@@ -15,6 +15,7 @@
   // Dependencies
   let projects: Option[] = [];
   let barangCertificates: Option[] = [];
+  let filteredBarangCertificates: Option[] = [];
 
   // Edit state
   let showEditModal = false;
@@ -48,9 +49,41 @@
       const res = await axiosClient.get('/certificate/getFormDependencies');
       projects = res.data?.data?.projects ?? res.data?.projects ?? [];
       barangCertificates = res.data?.data?.barang_certificates ?? res.data?.barang_certificates ?? [];
+      filteredBarangCertificates = [];
     } catch (err) {
       // ignore
     }
+  }
+
+  async function fetchBarangCertificatesByProject(projectId: number) {
+    if (!projectId) {
+      filteredBarangCertificates = [];
+      return;
+    }
+    
+    try {
+      const res = await axiosClient.get(`/certificate/getBarangCertificatesByProject/${projectId}`);
+      filteredBarangCertificates = res.data?.data ?? [];
+    } catch (err) {
+      console.error('Failed to fetch barang certificates by project', err);
+      filteredBarangCertificates = [];
+    }
+  }
+
+  function handleProjectChange(projectId: number | '' | null) {
+    if (projectId) {
+      fetchBarangCertificatesByProject(Number(projectId));
+      // Reset barang certificate selection when project changes
+      form.barang_certificate_id = '';
+    } else {
+      filteredBarangCertificates = [];
+      form.barang_certificate_id = '';
+    }
+  }
+
+  function closeEditModal() {
+    showEditModal = false;
+    filteredBarangCertificates = [];
   }
 
   async function fetchDetail() {
@@ -84,6 +117,14 @@
       attachment: null
     };
     formFileName = item.attachment ? String(item.attachment).split('/').pop() ?? '' : '';
+    
+    // Fetch barang certificates for the selected project
+    if (item.project_id && typeof item.project_id === 'number') {
+      fetchBarangCertificatesByProject(item.project_id);
+    } else {
+      filteredBarangCertificates = [];
+    }
+    
     showEditModal = true;
   }
 
@@ -108,7 +149,7 @@
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert('Data berhasil diperbarui!');
-      showEditModal = false;
+      closeEditModal();
       await fetchDetail();
       goto(`/certificates/${id}`);
     } catch (err: any) {
@@ -176,7 +217,7 @@
     </div>
   </div>
 
-  <Modal bind:show={showEditModal} title="Edit Certificate" maxWidth="max-w-xl">
+  <Modal bind:show={showEditModal} title="Edit Certificate" maxWidth="max-w-xl" on:close={closeEditModal}>
     <form on:submit|preventDefault={handleSubmitUpdate}>
       <div class="space-y-4">
         <div>
@@ -194,7 +235,7 @@
         <div>
           <label for="edit_project" class="block text-sm/6 font-medium text-gray-900">Project</label>
           <div class="mt-2">
-            <select id="edit_project" bind:value={form.project_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+            <select id="edit_project" bind:value={form.project_id} required on:change={(e) => handleProjectChange((e.target as HTMLSelectElement).value ? Number((e.target as HTMLSelectElement).value) : '')} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
               <option value="">Pilih Project</option>
               {#each projects as p}
                 <option value={p.id}>{p.name ?? p.title}</option>
@@ -205,12 +246,15 @@
         <div>
           <label for="edit_barang_certificate" class="block text-sm/6 font-medium text-gray-900">Barang Certificate</label>
           <div class="mt-2">
-            <select id="edit_barang_certificate" bind:value={form.barang_certificate_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Barang Certificate</option>
-              {#each barangCertificates as b}
-                <option value={b.id}>{b.name ?? b.title}</option>
+            <select id="edit_barang_certificate" bind:value={form.barang_certificate_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" disabled={filteredBarangCertificates.length === 0}>
+              <option value="">{filteredBarangCertificates.length === 0 ? 'Pilih Project terlebih dahulu' : 'Pilih Barang Certificate'}</option>
+              {#each filteredBarangCertificates as b}
+                <option value={b.id}>{b.name ?? b.title} - {b.no_seri}</option>
               {/each}
             </select>
+            {#if form.project_id && filteredBarangCertificates.length === 0}
+              <p class="mt-1 text-sm text-gray-500">Tidak ada Barang Certificate untuk Project ini</p>
+            {/if}
           </div>
         </div>
         <div>
