@@ -794,6 +794,15 @@
           Activity
         </button>
         <button
+          on:click={() => (activeTab = 'certificates')}
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+          class:bg-white={activeTab === 'certificates'}
+          class:shadow={activeTab === 'certificates'}
+          class:text-gray-600={activeTab !== 'certificates'}
+        >
+          Certificate
+        </button>
+        <!-- <button
           on:click={() => (activeTab = 'mitra')}
           class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
           class:bg-white={activeTab === 'mitra'}
@@ -803,16 +812,7 @@
           aria-selected={activeTab === 'mitra'}
         >
           Mitra
-        </button>
-        <button
-          on:click={() => (activeTab = 'certificates')}
-          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
-          class:bg-white={activeTab === 'certificates'}
-          class:shadow={activeTab === 'certificates'}
-          class:text-gray-600={activeTab !== 'certificates'}
-        >
-          List Barang
-        </button>
+        </button> -->
       </div>
     </div>
 
