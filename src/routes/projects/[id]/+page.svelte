@@ -88,6 +88,7 @@
     mitra_id: null as string | null,
     from: '',
     to: '',
+    attachment_removed: false,
   };
   let editActivityFileName = '';
   
@@ -375,6 +376,7 @@
       attachment: null,
       from: editingActivity.from || '',
       to: editingActivity.to || '',
+      attachment_removed: false,
     };
     
     editActivityFileName = activity.attachment ? activity.attachment.split('/').pop() : '';
@@ -394,6 +396,8 @@
         const typedKey = key as keyof typeof editActivityForm;
         if (typedKey === 'attachment' && editActivityForm.attachment) {
           formData.append(typedKey, editActivityForm.attachment);
+        } else if (typedKey === 'attachment_removed') {
+          formData.append(typedKey, editActivityForm.attachment_removed ? '1' : '0');
         } else if (editActivityForm[typedKey] !== null && editActivityForm[typedKey] !== undefined) {
           formData.append(typedKey, editActivityForm[typedKey] as string | Blob);
         }
@@ -508,10 +512,11 @@
     no_certificate: string;
     project_id: number | '' | null;
     barang_certificate_id: number | '' | null;
-    status: 'Belum' | 'Tidak Aktif' | 'Aktif' | '';
+    status: string;
     date_of_issue: string;
     date_of_expired: string;
     attachment: File | null;
+    attachment_removed: boolean;
   } = {
     name: '',
     no_certificate: '',
@@ -521,6 +526,7 @@
     date_of_issue: '',
     date_of_expired: '',
     attachment: null,
+    attachment_removed: false,
   };
   let certificateFormFileName = '';
 
@@ -555,6 +561,7 @@
     if (certificateForm.date_of_issue) fd.append('date_of_issue', certificateForm.date_of_issue);
     if (certificateForm.date_of_expired) fd.append('date_of_expired', certificateForm.date_of_expired);
     if (certificateForm.attachment) fd.append('attachment', certificateForm.attachment);
+    if (certificateForm.attachment_removed) fd.append('attachment_removed', '1');
     return fd;
   }
 
@@ -650,6 +657,7 @@
       date_of_issue: '',
       date_of_expired: '',
       attachment: null,
+      attachment_removed: false,
     };
     certificateFormFileName = '';
     showCreateCertificateModal = true;
@@ -666,6 +674,7 @@
       date_of_issue: item.date_of_issue ? new Date(item.date_of_issue).toISOString().split('T')[0] : '',
       date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
       attachment: null,
+      attachment_removed: false,
     };
     certificateFormFileName = item.attachment ? String(item.attachment).split('/').pop() ?? '' : '';
     showEditCertificateModal = true;
@@ -1711,9 +1720,15 @@
               label="Lampiran"
               bind:file={editActivityForm.attachment}
               bind:fileName={editActivityFileName}
+              showRemoveButton={true}
               on:change={(e) => {
                 editActivityForm.attachment = e.detail.file;
                 editActivityFileName = e.detail.fileName;
+              }}
+              on:remove={() => {
+                editActivityForm.attachment_removed = true;
+                editActivityForm.attachment = null;
+                editActivityFileName = '';
               }}
             />
           </div>
@@ -1783,9 +1798,15 @@
           label="Lampiran"
           bind:file={certificateForm.attachment}
           bind:fileName={certificateFormFileName}
+          showRemoveButton={true}
           on:change={(e) => {
             certificateForm.attachment = e.detail.file;
             certificateFormFileName = e.detail.fileName;
+          }}
+          on:remove={() => {
+            certificateForm.attachment_removed = true;
+            certificateForm.attachment = null;
+            certificateFormFileName = '';
           }}
         />
       <div>
@@ -1842,9 +1863,15 @@
             label="Lampiran"
             bind:file={certificateForm.attachment}
             bind:fileName={certificateFormFileName}
+            showRemoveButton={true}
             on:change={(e) => {
               certificateForm.attachment = e.detail.file;
               certificateFormFileName = e.detail.fileName;
+            }}
+            on:remove={() => {
+              certificateForm.attachment_removed = true;
+              certificateForm.attachment = null;
+              certificateFormFileName = '';
             }}
           />
         <div>
