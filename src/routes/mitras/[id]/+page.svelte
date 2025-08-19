@@ -143,10 +143,10 @@
   // Helper for badge colors
   function getKategoriBadgeColor(kategori: string) {
     switch (kategori) {
-      case 'Pribadi': return 'bg-red-900';
-      case 'Perusahaan': return 'bg-green-900';
-      case 'Customer': return 'bg-blue-900';
-      case 'Vendor': return 'bg-gray-900';
+      case 'Pribadi': return 'bg-indigo-600';
+      case 'Perusahaan': return 'bg-indigo-600';
+      case 'Customer': return 'bg-indigo-600';
+      case 'Vendor': return 'bg-indigo-600';
       default: return 'bg-gray-500';
     }
   }
