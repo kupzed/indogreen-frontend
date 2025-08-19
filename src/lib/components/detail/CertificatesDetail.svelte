@@ -8,7 +8,7 @@
         <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Nama</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {certificates.name}
+              {certificates.name}
             </dd>
         </div>
         <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -20,13 +20,25 @@
         <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-gray-500">Barang</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {certificates.barang_certificate?.name}
+            {#if certificates.barang_certificate}
+              <a href={`/barang-certificates/${certificates.barang_certificate.id}`} class="text-indigo-600 hover:text-indigo-900">
+                {certificates.barang_certificate.name}
+              </a>
+            {:else}
+              -
+            {/if}
           </dd>
         </div>
       <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Project</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-          {certificates.project?.name}
+          {#if certificates.project}
+            <a href={`/projects/${certificates.project.id}`} class="text-indigo-600 hover:text-indigo-900">
+              {certificates.project.name}
+            </a>
+          {:else}
+            -
+          {/if}
         </dd>
       </div>
       <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
