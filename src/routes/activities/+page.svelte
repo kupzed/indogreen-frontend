@@ -6,6 +6,7 @@
   import Drawer from '$lib/components/Drawer.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
+  import FileAttachment from '$lib/components/FileAttachment.svelte';
 
   let activities: any[] = [];
   let projects: any[] = []; // For project dropdown in activity forms
@@ -759,26 +760,16 @@
           <input type="date" id="create_activity_date" bind:value={form.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
         </div>
       </div>
-      <div>
-        <label for="create_attachment" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
-        <div class="mt-2">
-          <input 
-            type="file" 
-            id="create_attachment" 
-            accept="image/*,application/pdf" 
-            on:change={(e: Event) => {
-              const input = e.target as HTMLInputElement;
-              const file = input.files && input.files[0] ? input.files[0] : null;
-              form.attachment = file;
-              formFileName = file ? file.name : '';
-            }}
-            class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none" 
-          />
-          {#if formFileName}
-            <p class="text-xs text-gray-600 mt-1">File terpilih: {formFileName}</p>
-          {/if}
-        </div>
-      </div>
+      <FileAttachment
+        id="create_attachment"
+        label="Lampiran"
+        bind:file={form.attachment}
+        bind:fileName={formFileName}
+        on:change={(e) => {
+          form.attachment = e.detail.file;
+          formFileName = e.detail.fileName;
+        }}
+      />
     </div>
     <div class="mt-6">
       <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
@@ -870,28 +861,22 @@
             <input type="date" id="edit_activity_date" bind:value={form.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
           </div>
         </div>
-        <div>
-          <label for="edit_attachment" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
-          <div class="mt-2">
-            <input 
-              type="file"
-              id="edit_attachment"
-              accept="image/*,application/pdf"
-              on:change={(e: Event) => {
-                const input = e.target as HTMLInputElement;
-                const file = input.files && input.files[0] ? input.files[0] : null;
-                form.attachment = file;
-                formFileName = file ? file.name : '';
-              }}
-              class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none" />
-            {#if formFileName}
-              <p class="text-xs text-gray-600 mt-1">File saat ini: {formFileName}</p>
-              <button type="button" on:click={() => { form.attachment_removed = true; form.attachment = null; formFileName = ''; }} class="text-red-600 text-xs mt-1">Hapus File</button>
-            {:else}
-              <p class="text-xs text-gray-600 mt-1">Tidak ada file. PNG, JPG, GIF up to 10MB</p>
-            {/if}
-          </div>
-        </div>
+        <FileAttachment
+          id="edit_attachment"
+          label="Lampiran"
+          bind:file={form.attachment}
+          bind:fileName={formFileName}
+          showRemoveButton={true}
+          on:change={(e) => {
+            form.attachment = e.detail.file;
+            formFileName = e.detail.fileName;
+          }}
+          on:remove={() => {
+            form.attachment_removed = true;
+            form.attachment = null;
+            formFileName = '';
+          }}
+        />
       </div>
       <div class="mt-6">
         <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">

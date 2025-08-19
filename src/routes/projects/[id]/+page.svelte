@@ -9,6 +9,7 @@
   import ProjectDetail from '$lib/components/detail/ProjectDetail.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import CertificatesDetail from '$lib/components/detail/CertificatesDetail.svelte';
+  import FileAttachment from '$lib/components/FileAttachment.svelte';
 
   let projectId: string | null = null;
   let project: any = null;
@@ -1537,103 +1538,97 @@
     {/if}
   </Modal>
 
-  <Modal bind:show={showCreateActivityModal} title="Form Tambah Aktivitas" maxWidth="max-w-xl">
-    <h1 class="text-center text-base font-bold tracking-tight text-gray-900">
-      Project : {project.name}
-    </h1>
-    <h1 class="text-center text-base font-bold tracking-tight text-gray-900 mb-6">
-      Customer : {project.mitra?.nama || '-'}
-    </h1>
-    <form on:submit|preventDefault={handleSubmitCreateActivity}>
-      <div class="space-y-4">
-        <div>
-          <label for="activity_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
-          <div class="mt-2">
-            <input type="text" id="activity_name" bind:value={createActivityForm.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="modal_jenis" class="block text-sm/6 font-medium text-gray-900">Jenis</label>
-          <div class="mt-2">
-            <select id="modal_jenis" bind:value={createActivityForm.jenis} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Jenis</option>
-              {#each activityJenisList as jenis}
-                <option value={jenis}>{jenis}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-        {#if createActivityForm.jenis === 'Vendor'}
+    <Modal bind:show={showCreateActivityModal} title="Form Tambah Aktivitas" maxWidth="max-w-xl">
+      <h1 class="text-center text-base font-bold tracking-tight text-gray-900">
+        Project : {project.name}
+      </h1>
+      <h1 class="text-center text-base font-bold tracking-tight text-gray-900 mb-6">
+        Customer : {project.mitra?.nama || '-'}
+      </h1>
+      <form on:submit|preventDefault={handleSubmitCreateActivity}>
+        <div class="space-y-4">
           <div>
-            <label for="modal_mitra_id" class="block text-sm/6 font-medium text-gray-900">Vendor</label>
+            <label for="activity_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
             <div class="mt-2">
-              <select id="modal_mitra_id" bind:value={createActivityForm.mitra_id} required={createActivityForm.jenis === 'Vendor'} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                <option value="">Pilih Vendor</option>
-                {#each vendors as vendor (vendor.id)}
-                  <option value={vendor.id}>{vendor.nama}</option>
+              <input type="text" id="activity_name" bind:value={createActivityForm.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            </div>
+          </div>
+          <div>
+            <label for="modal_jenis" class="block text-sm/6 font-medium text-gray-900">Jenis</label>
+            <div class="mt-2">
+              <select id="modal_jenis" bind:value={createActivityForm.jenis} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                <option value="">Pilih Jenis</option>
+                {#each activityJenisList as jenis}
+                  <option value={jenis}>{jenis}</option>
                 {/each}
               </select>
             </div>
           </div>
-        {/if}
-        <div>
-          <label for="modal_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-          <div class="mt-2">
-            <select id="modal_kategori" bind:value={createActivityForm.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Kategori</option>
-              {#each activityKategoriList as kategori}
-                <option value={kategori}>{kategori}</option>
-              {/each}
-            </select>
+          {#if createActivityForm.jenis === 'Vendor'}
+            <div>
+              <label for="modal_mitra_id" class="block text-sm/6 font-medium text-gray-900">Vendor</label>
+              <div class="mt-2">
+                <select id="modal_mitra_id" bind:value={createActivityForm.mitra_id} required={createActivityForm.jenis === 'Vendor'} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                  <option value="">Pilih Vendor</option>
+                  {#each vendors as vendor (vendor.id)}
+                    <option value={vendor.id}>{vendor.nama}</option>
+                  {/each}
+                </select>
+              </div>
+            </div>
+          {/if}
+          <div>
+            <label for="modal_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
+            <div class="mt-2">
+              <select id="modal_kategori" bind:value={createActivityForm.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                <option value="">Pilih Kategori</option>
+                {#each activityKategoriList as kategori}
+                  <option value={kategori}>{kategori}</option>
+                {/each}
+              </select>
+            </div>
           </div>
-        </div>
-        <div>
-          <label for="activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
-          <div class="mt-2">
-            <textarea id="activity_from" bind:value={createActivityForm.from} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <div>
+            <label for="activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
+            <div class="mt-2">
+              <textarea id="activity_from" bind:value={createActivityForm.from} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+            </div>
           </div>
-        </div>
-        <div>
-          <label for="activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
-          <div class="mt-2">
-            <textarea id="activity_to" bind:value={createActivityForm.to} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <div>
+            <label for="activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
+            <div class="mt-2">
+              <textarea id="activity_to" bind:value={createActivityForm.to} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+            </div>
           </div>
-        </div>
-        <div>
-          <label for="activity_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
-          <div class="mt-2">
-            <textarea id="activity_description" bind:value={createActivityForm.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <div>
+            <label for="activity_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
+            <div class="mt-2">
+              <textarea id="activity_description" bind:value={createActivityForm.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+            </div>
           </div>
-        </div>
-        <div>
-          <label for="activity_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Aktivitas</label>
-          <div class="mt-2">
-            <input type="date" id="activity_date" bind:value={createActivityForm.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          <div>
+            <label for="activity_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Aktivitas</label>
+            <div class="mt-2">
+              <input type="date" id="activity_date" bind:value={createActivityForm.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            </div>
           </div>
+          <FileAttachment
+            id="create_attachment"
+            label="Lampiran"
+            bind:file={createActivityForm.attachment}
+            bind:fileName={createActivityFileName}
+            on:change={(e) => {
+                createActivityForm.attachment = e.detail.file;
+                createActivityFileName = e.detail.fileName;
+              }}
+          />
         </div>
-        <div>
-          <label for="file_upload" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
-          <div class="mt-2">
-            <input
-              id="file_upload"
-              name="attachment"
-              type="file"
-              accept="image/*,application/pdf"
-              on:change={handleAttachmentChange}
-              class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
-            />
-            {#if createActivityFileName}
-              <p class="text-xs text-gray-600 mt-1">File terpilih: {createActivityFileName}</p>
-            {/if}
-          </div>
+        <div class="mt-6">
+          <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            Tambah Aktivitas
+          </button>
         </div>
-      </div>
-      <div class="mt-6">
-        <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          Tambah Aktivitas
-        </button>
-      </div>
-          </form>
+            </form>
     </Modal>
 
     <Modal bind:show={showEditActivityModal} title="Edit Aktivitas" maxWidth="max-w-xl">
@@ -1711,22 +1706,16 @@
                 <input type="date" id="edit_activity_date" bind:value={editActivityForm.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
               </div>
             </div>
-            <div>
-              <label for="edit_file_upload" class="block text-sm/6 font-medium text-gray-900">Attachment File</label>
-              <div class="mt-2">
-                <input
-                  id="edit_file_upload"
-                  name="attachment"
-                  type="file"
-                  accept="image/*,application/pdf"
-                  on:change={handleEditAttachmentChange}
-                  class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
-                />
-                {#if editActivityFileName}
-                  <p class="text-xs text-gray-600 mt-1">File saat ini: {editActivityFileName}</p>
-                {/if}
-              </div>
-            </div>
+            <FileAttachment
+              id="create_attachment"
+              label="Lampiran"
+              bind:file={editActivityForm.attachment}
+              bind:fileName={editActivityFileName}
+              on:change={(e) => {
+                editActivityForm.attachment = e.detail.file;
+                editActivityFileName = e.detail.fileName;
+              }}
+            />
           </div>
           <div class="mt-6">
             <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
@@ -1789,26 +1778,16 @@
           <input id="create_cert_expired" type="date" bind:value={certificateForm.date_of_expired} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
         </div>
       </div>
-      <div>
-        <label for="create_cert_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
-        <div class="mt-2">
-          <input
-            id="create_cert_attachment"
-            type="file"
-            accept="image/*,application/pdf"
-            on:change={(e: Event) => {
-              const input = e.target as HTMLInputElement;
-              const file = input.files && input.files[0] ? input.files[0] : null;
-              certificateForm.attachment = file;
-              certificateFormFileName = file ? file.name : '';
-            }}
-            class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
-          />
-          {#if certificateFormFileName}
-            <p class="text-xs text-gray-600 mt-1">File terpilih: {certificateFormFileName}</p>
-          {/if}
-        </div>
-      </div>
+        <FileAttachment
+          id="create_attachment"
+          label="Lampiran"
+          bind:file={certificateForm.attachment}
+          bind:fileName={certificateFormFileName}
+          on:change={(e) => {
+            certificateForm.attachment = e.detail.file;
+            certificateFormFileName = e.detail.fileName;
+          }}
+        />
       <div>
         <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
       </div>
@@ -1858,26 +1837,16 @@
             <input id="edit_cert_expired" type="date" bind:value={certificateForm.date_of_expired} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
           </div>
         </div>
-          <div>
-            <label for="edit_cert_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
-            <div class="mt-2">
-              <input
-                id="edit_cert_attachment"
-                type="file"
-                accept="image/*,application/pdf"
-                on:change={(e: Event) => {
-                  const input = e.target as HTMLInputElement;
-                  const file = input.files && input.files[0] ? input.files[0] : null;
-                  certificateForm.attachment = file;
-                  certificateFormFileName = file ? file.name : '';
-                }}
-                class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
-              />
-              {#if certificateFormFileName}
-                <p class="text-xs text-gray-600 mt-1">File saat ini: {certificateFormFileName}</p>
-              {/if}
-            </div>
-          </div>
+          <FileAttachment
+            id="create_attachment"
+            label="Lampiran"
+            bind:file={certificateForm.attachment}
+            bind:fileName={certificateFormFileName}
+            on:change={(e) => {
+              certificateForm.attachment = e.detail.file;
+              certificateFormFileName = e.detail.fileName;
+            }}
+          />
         <div>
           <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>
         </div>

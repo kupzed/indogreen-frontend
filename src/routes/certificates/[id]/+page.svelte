@@ -4,7 +4,8 @@
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
-  import CertificatesDetail from '$lib/components/detail/CertificatesDetail.svelte';
+  import FileAttachment from '$lib/components/FileAttachment.svelte';
+  import CertificateDetail from '$lib/components/detail/CertificatesDetail.svelte';
 
   type Option = { id: number; name?: string; title?: string; no_seri?: string };
 
@@ -29,6 +30,7 @@
     date_of_issue: string;
     date_of_expired: string;
     attachment: File | null;
+    attachment_removed?: boolean;
   } = {
     name: '',
     no_certificate: '',
@@ -212,7 +214,7 @@
         <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Sertifikat</h3>
       </div>
       <div class="border-t border-gray-200">
-        <CertificatesDetail certificates={item} />
+        <CertificateDetail certificates={item} />
       </div>
     </div>
   </div>
@@ -282,26 +284,23 @@
             </div>
           </div>
         </div>
-        <div>
-          <label for="edit_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
-          <div class="mt-2">
-            <input
-              id="edit_attachment"
-              type="file"
-              accept="image/*,application/pdf"
-              on:change={(e: Event) => {
-                const input = e.target as HTMLInputElement;
-                const file = input.files && input.files[0] ? input.files[0] : null;
-                form.attachment = file;
-                formFileName = file ? file.name : '';
-              }}
-              class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
-            />
-            {#if formFileName}
-              <p class="text-xs text-gray-600 mt-1">File saat ini: {formFileName}</p>
-            {/if}
-          </div>
-        </div>
+        <FileAttachment
+          id="edit_attachment"
+          label="Lampiran"
+          optional={true}
+          bind:file={form.attachment}
+          bind:fileName={formFileName}
+          showRemoveButton={true}
+          on:change={(e) => {
+            form.attachment = e.detail.file;
+            formFileName = e.detail.fileName;
+          }}
+          on:remove={() => {
+            form.attachment_removed = true;
+            form.attachment = null;
+            formFileName = '';
+          }}
+        />
       </div>
       <div class="mt-6">
         <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">

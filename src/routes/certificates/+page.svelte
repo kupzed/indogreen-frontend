@@ -2,9 +2,10 @@
   import { onMount } from 'svelte';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
-  import Pagination from '$lib/components/Pagination.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
-  import CertificatesDetail from '$lib/components/detail/CertificatesDetail.svelte';
+  import Pagination from '$lib/components/Pagination.svelte';
+  import CertificateDetail from '$lib/components/detail/CertificatesDetail.svelte';
+  import FileAttachment from '$lib/components/FileAttachment.svelte';
 
   type Option = { id: number; name?: string; nama?: string; title?: string; no_seri?: string };
   type Certificate = {
@@ -649,26 +650,17 @@
         <input id="create_expired" type="date" bind:value={form.date_of_expired} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
     </div>
-    <div>
-      <label for="create_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
-      <div class="mt-2">
-        <input
-          id="create_attachment"
-          type="file"
-          accept="image/*,application/pdf"
-          on:change={(e: Event) => {
-            const input = e.target as HTMLInputElement;
-            const file = input.files && input.files[0] ? input.files[0] : null;
-            form.attachment = file;
-            formFileName = file ? file.name : '';
-          }}
-          class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
-        />
-        {#if formFileName}
-          <p class="text-xs text-gray-600 mt-1">File terpilih: {formFileName}</p>
-        {/if}
-      </div>
-    </div>
+    <FileAttachment
+      id="create_attachment"
+      label="Lampiran"
+      optional={true}
+      bind:file={form.attachment}
+      bind:fileName={formFileName}
+      on:change={(e) => {
+        form.attachment = e.detail.file;
+        formFileName = e.detail.fileName;
+      }}
+    />
     <div>
       <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
     </div>
@@ -726,26 +718,16 @@
           <input id="edit_expired" type="date" bind:value={form.date_of_expired} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
         </div>
       </div>
-      <div>
-        <label for="edit_attachment" class="block text-sm/6 font-medium text-gray-900">Lampiran (Opsional)</label>
-        <div class="mt-2">
-          <input
-            id="edit_attachment"
-            type="file"
-            accept="image/*,application/pdf"
-            on:change={(e: Event) => {
-              const input = e.target as HTMLInputElement;
-              const file = input.files && input.files[0] ? input.files[0] : null;
-              form.attachment = file;
-              formFileName = file ? file.name : '';
+      <FileAttachment
+            id="create_attachment"
+            label="Lampiran"
+            bind:file={form.attachment}
+            bind:fileName={formFileName}
+            on:change={(e) => {
+              form.attachment = e.detail.file;
+              formFileName = e.detail.fileName;
             }}
-            class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
           />
-          {#if formFileName}
-            <p class="text-xs text-gray-600 mt-1">File saat ini: {formFileName}</p>
-          {/if}
-        </div>
-      </div>
       <div>
         <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>
       </div>
@@ -758,7 +740,7 @@
   title="Detail Sertifikat"
   on:close={() => showDetailDrawer = false}
 >
-  <CertificatesDetail certificates={selectedItem} />
+  <CertificateDetail certificates={selectedItem} />
 </Drawer>
 
 
