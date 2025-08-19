@@ -7,7 +7,6 @@
   export let file: File | null = null;
   export let fileName: string = '';
   export let placeholder: string = 'PNG, JPG, GIF up to 10MB';
-  export let optional: boolean = false;
   export let showRemoveButton: boolean = false;
   export let removeButtonText: string = 'Hapus File';
   export let currentFileText: string = 'File saat ini';

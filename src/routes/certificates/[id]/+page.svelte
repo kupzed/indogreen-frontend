@@ -287,18 +287,11 @@
         <FileAttachment
           id="edit_attachment"
           label="Lampiran"
-          optional={true}
           bind:file={form.attachment}
           bind:fileName={formFileName}
-          showRemoveButton={true}
           on:change={(e) => {
             form.attachment = e.detail.file;
             formFileName = e.detail.fileName;
-          }}
-          on:remove={() => {
-            form.attachment_removed = true;
-            form.attachment = null;
-            formFileName = '';
           }}
         />
       </div>

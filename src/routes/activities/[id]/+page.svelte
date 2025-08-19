@@ -328,7 +328,7 @@
           </div>
         </div>
         <FileAttachment
-          id="edit_attachment_file"
+          id="edit_attachment"
           label="Lampiran"
           bind:file={form.attachment}
           bind:fileName={formFileName}

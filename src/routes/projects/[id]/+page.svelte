@@ -1838,7 +1838,7 @@
           </div>
         </div>
           <FileAttachment
-            id="create_attachment"
+            id="edit_attachment"
             label="Lampiran"
             bind:file={certificateForm.attachment}
             bind:fileName={certificateFormFileName}

@@ -653,7 +653,6 @@
     <FileAttachment
       id="create_attachment"
       label="Lampiran"
-      optional={true}
       bind:file={form.attachment}
       bind:fileName={formFileName}
       on:change={(e) => {
@@ -719,15 +718,15 @@
         </div>
       </div>
       <FileAttachment
-            id="create_attachment"
-            label="Lampiran"
-            bind:file={form.attachment}
-            bind:fileName={formFileName}
-            on:change={(e) => {
-              form.attachment = e.detail.file;
-              formFileName = e.detail.fileName;
-            }}
-          />
+        id="edit_attachment"
+        label="Lampiran"
+        bind:file={form.attachment}
+        bind:fileName={formFileName}
+        on:change={(e) => {
+          form.attachment = e.detail.file;
+          formFileName = e.detail.fileName;
+        }}
+      />
       <div>
         <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>
       </div>
