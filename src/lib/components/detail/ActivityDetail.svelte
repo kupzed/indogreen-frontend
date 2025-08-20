@@ -83,7 +83,7 @@
         <dt class="text-sm font-medium text-gray-500">Lampiran</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {#if activity.attachment}
-            <a href={`/storage/${activity.attachment}`} target="_blank" class="text-indigo-600 hover:underline">{activity.attachment.split('/').pop()}</a>
+            <a href={`/storage/${activity.attachment}`} target="_blank" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
           {:else}
             <span class="text-gray-500">Tidak ada file</span>
           {/if}

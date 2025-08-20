@@ -63,9 +63,9 @@
         <dt class="text-sm font-medium text-gray-500">Lampiran</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           {#if certificates.attachment}
-            <a href={certificates.attachment} target="_blank" rel="noreferrer" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
+            <a href={`/storage/${certificates.attachment}`} target="_blank" class="text-indigo-600 hover:text-indigo-900">Lihat</a>
           {:else}
-            -
+            <span class="text-gray-500">Tidak ada file</span>
           {/if}
         </dd>
       </div>
