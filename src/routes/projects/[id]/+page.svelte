@@ -33,6 +33,7 @@
   let activityDateFromFilter: string = '';
   let activityDateToFilter: string = '';
   let showActivityDateFilter: boolean = false;
+  let activitySortFilter: string = 'desc'; // default terbaru
 
   // Project Edit Modal
   let showEditProjectModal: boolean = false;
@@ -131,6 +132,7 @@
           search: activitySearch,
           date_from: activityDateFromFilter,
           date_to: activityDateToFilter,
+          sort: activitySortFilter,
           page: activityCurrentPage,
         }
       });
@@ -207,6 +209,8 @@
     activitySearch = '';
     activityDateFromFilter = '';
     activityDateToFilter = '';
+    activitySortFilter = 'desc';
+    showActivityDateFilter = false;
     activityCurrentPage = 1;
     fetchProjectDetails();
   }
@@ -490,6 +494,7 @@
   let errorCertificates: string = '';
   let certificateSearch: string = '';
   let certificateStatusFilter: '' | ProjectCertificate['status'] = '';
+  let certificateSortFilter: string = 'desc'; // default terbaru
   let certificateCurrentPage: number = 1;
   let certificateLastPage: number = 1;
   let totalCertificates: number = 0;
@@ -590,6 +595,7 @@
           status: certificateStatusFilter,
           date_from: certificateDateFromFilter,
           date_to: certificateDateToFilter,
+          sort: certificateSortFilter,
           page: certificateCurrentPage,
         },
       });
@@ -842,6 +848,10 @@
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
           <div class="flex w-full sm:w-auto space-x-2">
+            <select bind:value={activitySortFilter} on:change={handleActivityFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+              <option value="desc">Terbaru</option>
+              <option value="asc">Terlama</option>
+            </select>
             <select bind:value={activityJenisFilter} on:change={handleActivityFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
               <option value="">Filter Jenis: Semua</option>
               {#each activityJenisList as jenis}
@@ -1183,6 +1193,10 @@
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
           <div class="flex w-full sm:w-auto space-x-2">
+            <select bind:value={certificateSortFilter} on:change={handleCertificateFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+              <option value="desc">Terbaru</option>
+              <option value="asc">Terlama</option>
+            </select>
             <select bind:value={certificateStatusFilter} on:change={handleCertificateFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
               <option value="">Filter Status: Semua</option>
               {#each certificateStatuses as s}
@@ -1299,7 +1313,7 @@
                   </div>
 
                   <div class="flex justify-between mt-4 pt-3 border-t border-gray-200">
-                    <button type="button" on:click={() => { certificateDateFromFilter = ''; certificateDateToFilter = ''; handleCertificateFilterOrSearch(); }} class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">Clear All</button>
+                    <button type="button" on:click={() => { certificateStatusFilter = ''; certificateSortFilter = 'desc'; certificateDateFromFilter = ''; certificateDateToFilter = ''; handleCertificateFilterOrSearch(); }} class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200">Clear All</button>
                     <button type="button" on:click={toggleCertificateDateFilter} class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700">Close</button>
                   </div>
                 </div>

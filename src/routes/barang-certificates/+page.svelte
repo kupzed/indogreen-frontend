@@ -23,6 +23,7 @@
   let error = '';
   let search = '';
   let mitraFilter: number | '' = '';
+  let sortFilter = 'desc'; // default terbaru
   let currentPage = 1;
   let lastPage = 1;
   let totalItems = 0;
@@ -62,17 +63,18 @@
     loading = true;
     error = '';
     try {
-      const res = await axiosClient.get('/barang-certificates', {
+      const response = await axiosClient.get('/barang-certificates', {
         params: {
           search,
-          mitra_id: mitraFilter || undefined,
+          mitra_id: mitraFilter,
+          sort: sortFilter,
           page: currentPage
         }
       });
-      items = res.data?.data ?? [];
-      currentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
-      lastPage = res.data?.pagination?.last_page ?? res.data?.last_page ?? 1;
-      totalItems = res.data?.pagination?.total ?? res.data?.total ?? items.length;
+      items = response.data?.data ?? [];
+      currentPage = response.data?.pagination?.current_page ?? response.data?.current_page ?? 1;
+      lastPage = response.data?.pagination?.last_page ?? response.data?.last_page ?? 1;
+      totalItems = response.data?.pagination?.total ?? response.data?.total ?? items.length;
     } catch (err: any) {
       error = err?.response?.data?.message || 'Gagal memuat data.';
     } finally {
@@ -84,6 +86,14 @@
     fetchDependencies();
     fetchList();
   });
+
+  function clearFilters() {
+    search = '';
+    mitraFilter = '';
+    sortFilter = 'desc';
+    currentPage = 1;
+    fetchList();
+  }
 
   function handleSearchChange() {
     currentPage = 1;
@@ -168,6 +178,10 @@
 
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
+    <select bind:value={sortFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+      <option value="desc">Terbaru</option>
+      <option value="asc">Terlama</option>
+    </select>
     <select bind:value={mitraFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
       <option value="">Filter Mitra: Semua</option>
       {#each mitras as m}
