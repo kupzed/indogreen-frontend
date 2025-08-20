@@ -214,20 +214,12 @@
 
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
-    <button
-      on:click={() => { kategoriFilter = ''; handleFilterOrSearch(); }}
-      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold {kategoriFilter === '' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 border border-gray-300'}"
-    >
-      Semua Kategori
-    </button>
-    {#each mitraKategoriOptions as kategori}
-      <button
-        on:click={() => { kategoriFilter = kategori; handleFilterOrSearch(); }}
-        class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold {kategoriFilter === kategori ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 border border-gray-300'}"
-      >
-        {kategori.charAt(0).toUpperCase() + kategori.slice(1)}
-      </button>
-    {/each}
+    <select bind:value={kategoriFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+      <option value="">Filter Kategori: Semua</option>
+      {#each mitraKategoriOptions as kategori}
+        <option value={kategori}>{kategori.charAt(0).toUpperCase() + kategori.slice(1)}</option>
+      {/each}
+    </select>
   </div>
   <div class="w-full sm:w-auto flex-grow">
     <div class="relative w-full sm:w-auto">
