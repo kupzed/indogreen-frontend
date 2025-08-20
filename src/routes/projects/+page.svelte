@@ -17,7 +17,6 @@
   let dateFromFilter: string = '';
   let dateToFilter: string = '';
   let showDateFilter: boolean = false;
-  let sortFilter: string = 'desc'; // default terbaru
   let currentPage: number = 1;
   let lastPage: number = 1;
   let totalProjects: number = 0;
@@ -68,7 +67,6 @@
           kategori: kategoriFilter,
           date_from: dateFromFilter,
           date_to: dateToFilter,
-          sort: sortFilter,
           page: currentPage
         }
       });
@@ -117,7 +115,6 @@
     kategoriFilter = '';
     dateFromFilter = '';
     dateToFilter = '';
-    sortFilter = 'desc';
     showDateFilter = false;
     currentPage = 1;
     fetchProjects();
@@ -237,10 +234,6 @@
 
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
-    <select bind:value={sortFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
-      <option value="desc">Terbaru</option>
-      <option value="asc">Terlama</option>
-    </select>
     <select bind:value={statusFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
       <option value="">Filter Status: Semua</option>
       {#each projectStatuses as status}
