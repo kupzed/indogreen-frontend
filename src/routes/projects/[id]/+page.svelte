@@ -99,7 +99,7 @@
   // Dynamic lists for activity form
   const activityKategoriList = [
     'Expense Report', 'Invoice', 'Purchase Order', 'Payment', 'Quotation',
-    'Faktur Pajak', 'Kasbon', 'Laporan Teknis', 'Surat Masuk', 'Surat Keluar'
+    'Faktur Pajak', 'Kasbon', 'Laporan Teknis', 'Surat Masuk', 'Surat Keluar', 'Kontrak'
   ];
   const activityJenisList = ['Internal', 'Customer', 'Vendor'];
 
