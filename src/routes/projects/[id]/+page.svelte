@@ -2,6 +2,7 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import axios from 'axios';
   import axiosClient from '$lib/axiosClient';
   import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
@@ -20,6 +21,7 @@
   let loadingActivities = true;
   let errorProject = '';
   let errorActivities = '';
+  let activitiesInitialized: boolean = false;
 
   // Activity filter/search state
   let activityJenisFilter: string = '';
@@ -124,21 +126,8 @@
       return;
     }
     try {
-      const response = await axiosClient.get(`/projects/${projectId}`, {
-        params: {
-          jenis: activityJenisFilter,
-          kategori: activityKategoriFilter,
-          search: activitySearch,
-          date_from: activityDateFromFilter,
-          date_to: activityDateToFilter,
-          page: activityCurrentPage,
-        }
-      });
+      const response = await axiosClient.get(`/projects/${projectId}`);
       project = response.data.data.project;
-      activities = response.data.data.activities;
-      activityCurrentPage = response.data.data.activity_pagination.current_page;
-      activityLastPage = response.data.data.activity_pagination.last_page;
-      totalActivities = response.data.data.activity_pagination.total;
 
       // Pre-fill edit project form
       editProjectForm = {
@@ -169,11 +158,47 @@
       console.error('Error fetching project details:', err.response || err);
     } finally {
       loadingProject = false;
-      loadingActivities = false;
     }
   }
 
-  async function fetchFormDependencies() {
+  
+  async function fetchActivities() {
+    loadingActivities = true;
+    errorActivities = '';
+    try {
+      const pid = project?.id ?? $page.params.id;
+      if (!pid) {
+        errorActivities = 'Project ID tidak ditemukan.';
+        return;
+      }
+      const res = await axiosClient.get(`/projects/${pid}`, {
+        params: {
+          jenis: activityJenisFilter,
+          kategori: activityKategoriFilter,
+          search: activitySearch,
+          date_from: activityDateFromFilter,
+          date_to: activityDateToFilter,
+          page: activityCurrentPage,
+        }
+      });
+      const data = res.data?.data ?? {};
+      activities = data.activities ?? [];
+      activityCurrentPage = data.activity_pagination?.current_page ?? 1;
+      activityLastPage = data.activity_pagination?.last_page ?? 1;
+      totalActivities = data.activity_pagination?.total ?? (Array.isArray(activities) ? activities.length : 0);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error('Error fetching activities:', err.response || err);
+        errorActivities = (err.response?.data as any)?.message || err.message || 'Gagal memuat aktivitas.';
+      } else {
+        console.error('Error fetching activities:', err);
+        errorActivities = (err as Error).message || 'Gagal memuat aktivitas.';
+      }
+    } finally {
+      loadingActivities = false;
+    }
+  }
+async function fetchFormDependencies() {
     try {
       // Fetch only vendors for activity creation form if needed
       const response = await axiosClient.get('/mitra/vendors');
@@ -182,7 +207,7 @@
       // Fetch customers for project edit modal
       const customerResponse = await axiosClient.get('/mitra/customers');
       customers = customerResponse.data.data;
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch form dependencies:', err);
     }
   }
@@ -191,13 +216,13 @@
   function goToActivityPage(page: number) {
     if (page > 0 && page <= activityLastPage) {
       activityCurrentPage = page;
-      fetchProjectDetails();
+      fetchActivities();
     }
   }
 
   function handleActivityFilterOrSearch() {
     activityCurrentPage = 1; // Reset halaman saat filter/search berubah
-    fetchProjectDetails();
+    fetchActivities();
   }
 
   // Date filter functions
@@ -208,7 +233,7 @@
     activityDateFromFilter = '';
     activityDateToFilter = '';
     activityCurrentPage = 1;
-    fetchProjectDetails();
+    fetchActivities();
   }
 
   function toggleActivityDateFilter() {
@@ -217,7 +242,7 @@
 
   function handleActivityDateFilter() {
     activityCurrentPage = 1;
-    fetchProjectDetails();
+    fetchActivities();
   }
 
   function handleClickOutside(event: MouseEvent) {
@@ -232,6 +257,7 @@
 
   onMount(() => {
     fetchProjectDetails();
+    fetchActivities();
     fetchFormDependencies();
     
     // Add click outside listener for date filter dropdown
@@ -351,7 +377,7 @@
       alert('Aktivitas berhasil ditambahkan!');
       goto(`/projects/${project.id}`);
       showCreateActivityModal = false;
-      fetchProjectDetails(); // Refresh activities list
+      fetchActivities(); // Refresh activities list
     } catch (err: any) {
       const messages = err.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join('\n')
@@ -424,7 +450,7 @@
       alert('Aktivitas berhasil diperbarui!');
       goto(`/projects/${project.id}`);
       showEditActivityModal = false;
-      fetchProjectDetails(); // Refresh activities list
+      fetchActivities(); // Refresh activities list
     } catch (err: any) {
       const messages = err.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join('\n')
@@ -440,7 +466,7 @@
         await axiosClient.delete(`/activities/${activityId}`);
         alert('Aktivitas berhasil dihapus!');
         goto(`/projects/${project.id}`);
-        fetchProjectDetails(); // Refresh activities list
+        fetchActivities(); // Refresh activities list
       } catch (err: any) {
         alert('Gagal menghapus aktivitas: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
         console.error('Delete activity failed:', err.response || err);
@@ -467,7 +493,7 @@
   }
 
   // State untuk tab
-  let activeTab: 'detail' | 'activity' | 'mitra' | 'certificates' = 'detail';
+  let activeTab: 'detail' | 'activity' | 'certificates' = 'detail';
   
   // State untuk toggle tampilan activity
   let activityView: 'table' | 'list' = 'table';
@@ -572,7 +598,7 @@
       // Get barang certificates based on project's mitra_id
       const res = await axiosClient.get(`/certificate/getBarangCertificatesByProject/${project.id}`);
       certificateBarangOptions = res.data?.data ?? [];
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch certificate dependencies', err);
       certificateBarangOptions = [];
     }
@@ -610,12 +636,6 @@
     fetchCertificates();
   }
 
-  function clearCertificateSearch() {
-    certificateSearch = '';
-    certificateCurrentPage = 1;
-    fetchCertificates();
-  }
-
   function goToCertificatePage(page: number) {
     if (page > 0 && page <= certificateLastPage) {
       certificateCurrentPage = page;
@@ -637,7 +657,13 @@
     fetchCertificates();
   }
 
-  // Fetch certificates first time when tab is opened and project loaded
+  
+  // Fetch activities first time when tab is opened and project loaded
+  $: if (activeTab === 'activity' && project?.id && !activitiesInitialized) {
+    activitiesInitialized = true;
+    fetchActivities();
+  }
+// Fetch certificates first time when tab is opened and project loaded
   $: if (activeTab === 'certificates' && project?.id && !certificatesInitialized) {
     certificatesInitialized = true;
     fetchCertificates();
@@ -812,17 +838,6 @@
         >
           Certificate
         </button>
-        <!-- <button
-          on:click={() => (activeTab = 'mitra')}
-          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
-          class:bg-white={activeTab === 'mitra'}
-          class:shadow={activeTab === 'mitra'}
-          class:text-gray-600={activeTab !== 'mitra'}
-          role="tab"
-          aria-selected={activeTab === 'mitra'}
-        >
-          Mitra
-        </button> -->
       </div>
     </div>
 
@@ -1001,14 +1016,22 @@
           </div>
         </div>
 
-        {#if activityView === 'list'}
+        {#if loadingActivities}
+          <p>Memuat aktivitas...</p>
+        {:else if errorActivities}
+          <p class="text-red-500">{errorActivities}</p>
+        {:else if activities.length === 0}
           <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
             <ul class="divide-y divide-gray-200">
-              {#if activities.length === 0}
-                <li class="px-4 py-4 sm:px-6">
-                  <p class="text-sm text-gray-500">Belum ada aktivitas untuk project ini.</p>
-                </li>
-              {:else}
+              <li class="px-4 py-4 sm:px-6">
+                <p class="text-sm text-gray-500">Belum ada aktivitas untuk project ini.</p>
+              </li>
+            </ul>
+          </div>
+        {:else}
+          {#if activityView === 'list'}
+            <div class="mt-4 bg-white shadow overflow-hidden sm:rounded-md">
+              <ul class="divide-y divide-gray-200">
                 {#each activities as activity (activity.id)}
                   <li>
                     <a href={`/activities/${activity.id}`} class="block hover:bg-gray-50 px-4 py-4 sm:px-6">
@@ -1066,116 +1089,110 @@
                     </div>
                   </li>
                 {/each}
+              </ul>
+              {#if activities.length > 0}
+                <Pagination
+                  currentPage={activityCurrentPage}
+                  lastPage={activityLastPage}
+                  onPageChange={goToActivityPage}
+                  totalItems={totalActivities}
+                  itemsPerPage={10}
+                />
               {/if}
-            </ul>
-            {#if activities.length > 0}
-              <Pagination
-                currentPage={activityCurrentPage}
-                lastPage={activityLastPage}
-                onPageChange={goToActivityPage}
-                totalItems={totalActivities}
-                itemsPerPage={10}
-              />
-            {/if}
-          </div>
-        {/if}
-
-        {#if activityView === 'table'}
-          <div class="mt-4 bg-white shadow-md rounded-lg">
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-300">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Nama Aktivitas
-                    </th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Kategori
-                    </th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Jenis
-                    </th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Mitra
-                    </th>
-                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Tanggal Aktivitas
-                    </th>
-                    <th scope="col" class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                  {#each activities as activity (activity.id)}
-                    <tr>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                        <a href={`/activities/${activity.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
-                          {activity.name}
-                        </a>
-                        <br>
-                        <span class="text-xs text-gray-500">{activity.description.substring(0, 40)}{activity.description.length > 40 ? '...' : ''}</span>
-                      </td>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
-                          {activity.kategori}
-                        </span>
-                      </td>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {activity.jenis}
-                      </td>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {#if activity.jenis === 'Vendor' && activity.mitra}
-                          {activity.mitra.nama}
-                        {:else if activity.jenis === 'Customer' && activity.mitra}
-                          {activity.mitra.nama}
-                        {:else}
-                          -
-                        {/if}
-                      </td>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                      </td>
-                      <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
-                        <div class="flex items-left space-x-2">
-                          <button on:click={() => openActivityDetailDrawer(activity)} class="text-yellow-600 hover:text-yellow-900" title="Detail">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                            <span class="sr-only">Detail, {activity.name}</span>
-                          </button>
-                          <button on:click|stopPropagation={() => openEditActivityModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            <span class="sr-only">Edit, {activity.name}</span>
-                          </button>
-                          <button on:click|stopPropagation={() => handleDeleteActivity(activity.id)} title="Delete" class="text-red-600 hover:text-red-900">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                            <span class="sr-only">Hapus, {activity.name}</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  {/each}
-                </tbody>
-              </table>
             </div>
-            {#if activities.length > 0}
-              <Pagination
-                currentPage={activityCurrentPage}
-                lastPage={activityLastPage}
-                onPageChange={goToActivityPage}
-                totalItems={totalActivities}
-                itemsPerPage={10}
-              />
-            {/if}
-          </div>
-        {/if}
-      </div>
-    {/if}
+          {/if}
 
-    {#if activeTab === 'mitra'}
-      <div class="mb-8">
-        <h1>Mitra</h1>
+          {#if activityView === 'table'}
+            <div class="mt-4 bg-white shadow-md rounded-lg">
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-300">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Nama Aktivitas
+                      </th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Kategori
+                      </th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Jenis
+                      </th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Mitra
+                      </th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Tanggal Aktivitas
+                      </th>
+                      <th scope="col" class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200 bg-white">
+                    {#each activities as activity (activity.id)}
+                      <tr>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
+                          <a href={`/activities/${activity.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                            {activity.name}
+                          </a>
+                          <br>
+                          <span class="text-xs text-gray-500">{activity.description.substring(0, 40)}{activity.description.length > 40 ? '...' : ''}</span>
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
+                            {activity.kategori}
+                          </span>
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {activity.jenis}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {#if activity.jenis === 'Vendor' && activity.mitra}
+                            {activity.mitra.nama}
+                          {:else if activity.jenis === 'Customer' && activity.mitra}
+                            {activity.mitra.nama}
+                          {:else}
+                            -
+                          {/if}
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </td>
+                        <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
+                          <div class="flex items-left space-x-2">
+                            <button on:click={() => openActivityDetailDrawer(activity)} class="text-yellow-600 hover:text-yellow-900" title="Detail">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                              <span class="sr-only">Detail, {activity.name}</span>
+                            </button>
+                            <button on:click|stopPropagation={() => openEditActivityModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900">
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              <span class="sr-only">Edit, {activity.name}</span>
+                            </button>
+                            <button on:click|stopPropagation={() => handleDeleteActivity(activity.id)} title="Delete" class="text-red-600 hover:text-red-900">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                              <span class="sr-only">Hapus, {activity.name}</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    {/each}
+                  </tbody>
+                </table>
+              </div>
+              {#if activities.length > 0}
+                <Pagination
+                  currentPage={activityCurrentPage}
+                  lastPage={activityLastPage}
+                  onPageChange={goToActivityPage}
+                  totalItems={totalActivities}
+                  itemsPerPage={10}
+                />
+              {/if}
+            </div>
+          {/if}
+        {/if}
       </div>
     {/if}
 
