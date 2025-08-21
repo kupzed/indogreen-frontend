@@ -45,14 +45,18 @@
       <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Email</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-          {mitra.email}
+          {mitra.email || '-'}
         </dd>
       </div>
       <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Kontak 1</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-          {mitra.kontak_1}<br>
-          <span class="text-xs text-gray-500">Nama: {mitra.kontak_1_nama} | Jabatan: {mitra.kontak_1_jabatan}</span>
+          {#if mitra.kontak_1}
+            {mitra.kontak_1}<br>
+            <span class="text-xs text-gray-500">Nama: {mitra.kontak_1_nama} | Jabatan: {mitra.kontak_1_jabatan}</span>
+          {:else}
+            -
+          {/if}
         </dd>
       </div>
       <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
