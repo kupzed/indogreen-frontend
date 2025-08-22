@@ -192,6 +192,9 @@
   }
 </script>
 
+<svelte:head>
+  <title>Detail Activity - Indogreen</title>
+</svelte:head>
 
 {#if loadingActivity}
   <p>Memuat detail aktivitas...</p>

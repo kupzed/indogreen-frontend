@@ -262,6 +262,9 @@
   }
 </script>
 
+<svelte:head>
+  <title>Detail Mitra - Indogreen</title>
+</svelte:head>
 
 {#if loadingMitra}
   <p>Memuat detail mitra...</p>

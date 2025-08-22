@@ -38,6 +38,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Dashboard - Indogreen</title>
+</svelte:head>
+
 {#if loading}
   <p>Memuat data dashboard...</p>
 {:else if error}

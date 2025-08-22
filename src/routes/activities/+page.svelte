@@ -354,6 +354,9 @@
   }
 </script>
 
+<svelte:head>
+  <title>Daftar Activity - Indogreen</title>
+</svelte:head>
 
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">

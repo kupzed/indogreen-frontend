@@ -770,6 +770,9 @@ async function fetchFormDependencies() {
   }
 </script>
 
+<svelte:head>
+  <title>Detail Project - Indogreen</title>
+</svelte:head>
 
 {#if loadingProject}
   <p>Memuat proyek...</p>

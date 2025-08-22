@@ -176,6 +176,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Detail Sertifikat - Indogreen</title>
+</svelte:head>
+
 {#if loading}
   <p>Memuat detail...</p>
 {:else if error}
