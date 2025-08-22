@@ -1564,11 +1564,33 @@ async function fetchFormDependencies() {
               <input type="date" id="edit_project_finish_date" bind:value={editProjectForm.finish_date} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
-          <div class="flex items-center">
-            <input type="checkbox" id="edit_project_is_cert_projects" bind:checked={editProjectForm.is_cert_projects} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
-            <label for="edit_project_is_cert_projects" class="ml-2 block text-sm text-gray-900">
-              Project Certificate
+          <div class="mb-4">
+            <label for="edit_project_is_cert_projects" class="block text-sm font-medium text-gray-900 mb-2">
+              Proyek Bersertifikat?
             </label>
+            <div class="flex items-center space-x-3">
+              <!-- Toggle switch -->
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="edit_project_is_cert_projects"
+                  bind:checked={editProjectForm.is_cert_projects}
+                  class="sr-only peer"
+                />
+                <div
+                  class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer
+                        peer-checked:after:translate-x-5 peer-checked:after:border-white
+                        after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
+                        after:bg-white after:border-gray-300 after:border after:rounded-full 
+                        after:h-5 after:w-5 after:transition-all
+                        peer-checked:bg-indigo-600">
+                </div>
+              </label>
+              <!-- Label text -->
+              <span class="text-sm text-gray-900 font-medium">
+                Certificate Projects
+              </span>
+            </div>
           </div>
         </div>
         <div class="mt-6">
