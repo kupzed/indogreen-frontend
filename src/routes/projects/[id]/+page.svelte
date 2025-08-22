@@ -49,6 +49,7 @@
     lokasi: '',
     no_po: '',
     no_so: '',
+    is_cert_projects: false,
   };
   const projectStatuses = ['Ongoing', 'Prospect', 'Complete', 'Cancel'];
   const projectKategoris = [
@@ -141,6 +142,7 @@
         lokasi: project.lokasi || '',
         no_po: project.no_po || '',
         no_so: project.no_so || '',
+        is_cert_projects: project.is_cert_projects || false,
       };
       
       // Pre-fill create activity form project_id
@@ -663,7 +665,13 @@ async function fetchFormDependencies() {
     activitiesInitialized = true;
     fetchActivities();
   }
-// Fetch certificates first time when tab is opened and project loaded
+
+  // Change activeTab to 'detail' if user is on certificates tab but project is not a certificate project
+  $: if (activeTab === 'certificates' && project && !project.is_cert_projects) {
+    activeTab = 'detail';
+  }
+
+  // Fetch certificates first time when tab is opened and project loaded
   $: if (activeTab === 'certificates' && project?.id && !certificatesInitialized) {
     certificatesInitialized = true;
     fetchCertificates();
@@ -829,15 +837,17 @@ async function fetchFormDependencies() {
         >
           Activity
         </button>
-        <button
-          on:click={() => (activeTab = 'certificates')}
-          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
-          class:bg-white={activeTab === 'certificates'}
-          class:shadow={activeTab === 'certificates'}
-          class:text-gray-600={activeTab !== 'certificates'}
-        >
-          Certificate
-        </button>
+        {#if project?.is_cert_projects}
+          <button
+            on:click={() => (activeTab = 'certificates')}
+            class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+            class:bg-white={activeTab === 'certificates'}
+            class:shadow={activeTab === 'certificates'}
+            class:text-gray-600={activeTab !== 'certificates'}
+          >
+            Certificate
+          </button>
+        {/if}
       </div>
     </div>
 
@@ -1553,6 +1563,12 @@ async function fetchFormDependencies() {
             <div class="mt-2">
               <input type="date" id="edit_project_finish_date" bind:value={editProjectForm.finish_date} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
+          </div>
+          <div class="flex items-center">
+            <input type="checkbox" id="edit_project_is_cert_projects" bind:checked={editProjectForm.is_cert_projects} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+            <label for="edit_project_is_cert_projects" class="ml-2 block text-sm text-gray-900">
+              Project Certificate
+            </label>
           </div>
         </div>
         <div class="mt-6">

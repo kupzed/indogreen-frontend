@@ -14,6 +14,7 @@
   let search: string = '';
   let statusFilter: string = '';
   let kategoriFilter: string = '';
+  let certProjectFilter: boolean = false;
   let dateFromFilter: string = '';
   let dateToFilter: string = '';
   let showDateFilter: boolean = false;
@@ -45,6 +46,7 @@
     lokasi: '',
     no_po: '',
     no_so: '',
+    is_cert_projects: false,
   };
   const projectStatuses = ['Ongoing', 'Prospect', 'Complete', 'Cancel'];
   const projectKategoris = [
@@ -65,6 +67,7 @@
           search: search,
           status: statusFilter,
           kategori: kategoriFilter,
+          is_cert_projects: certProjectFilter || undefined,
           date_from: dateFromFilter,
           date_to: dateToFilter,
           page: currentPage
@@ -153,18 +156,19 @@
       lokasi: '',
       no_po: '',
       no_so: '',
+      is_cert_projects: false,
     };
     showCreateModal = true;
   }
 
   function openEditModal(project: any) {
     editingProject = { ...project };
-    // Copy data to avoid direct mutation
-    // Format tanggal ke YYYY-MM-DD
-    editingProject.start_date = project.start_date ? new Date(project.start_date).toISOString().split('T')[0] : '';
-    editingProject.finish_date = project.finish_date ? new Date(project.finish_date).toISOString().split('T')[0] : '';
     // Set form data
-    form = { ...editingProject, mitra_id: editingProject.mitra_id || '' };
+    form = { 
+      ...editingProject, 
+      mitra_id: editingProject.mitra_id || '',
+      is_cert_projects: editingProject.is_cert_projects || false,
+    };
     showEditModal = true;
   }
 
@@ -246,6 +250,12 @@
         <option value={kategori}>{kategori}</option>
       {/each}
     </select>
+    <div class="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+      <input type="checkbox" id="cert_project_filter" bind:checked={certProjectFilter} on:change={handleFilterOrSearch} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+      <label for="cert_project_filter" class="text-sm text-gray-900 whitespace-nowrap">
+        Certificate Project
+      </label>
+    </div>
   </div>
   <div class="w-full sm:w-auto flex-grow">
     <div class="relative w-full sm:w-auto">
@@ -399,12 +409,17 @@
                 <p class="text-sm font-medium text-indigo-600 truncate">
                   {project.name}
                 </p>
-                <div class="ml-2 flex-shrink-0 flex">
+                <div class="ml-2 flex-shrink-0 flex space-x-2">
                   <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
                     {getStatusBadgeClasses(project.status)}"
                   >
                     {project.status}
                   </span>
+                  {#if project.is_cert_projects}
+                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-purple-100 text-purple-800">
+                      Certificate
+                    </span>
+                  {/if}
                 </div>
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
@@ -506,11 +521,18 @@
                   {project.kategori || '-'}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
-                    {getStatusBadgeClasses(project.status)}"
-                  >
-                    {project.status}
-                  </span>
+                  <div class="flex items-center">
+                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
+                      {getStatusBadgeClasses(project.status)}"
+                    >
+                      {project.status}
+                    </span>
+                    {#if project.is_cert_projects}
+                      <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-purple-100 text-purple-800 ml-2">
+                        Certificate
+                      </span>
+                    {/if}
+                  </div>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {new Date(project.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -638,6 +660,12 @@
           <input type="date" id="create_finish_date" bind:value={form.finish_date} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
         </div>
       </div>
+      <div class="flex items-center space-x-2">
+        <input type="checkbox" id="create_cert_project" bind:checked={form.is_cert_projects} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+        <label for="create_cert_project" class="text-sm text-gray-900">
+          Certificate Projects
+        </label>
+      </div>
     </div>
     <div class="mt-6">
       <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
@@ -727,6 +755,12 @@
           <div class="mt-2">
             <input type="date" id="edit_finish_date" bind:value={form.finish_date} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
           </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="edit_cert_project" bind:checked={form.is_cert_projects} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+          <label for="edit_cert_project" class="text-sm text-gray-900">
+            Certificate Projects
+          </label>
         </div>
       </div>
       <div class="mt-6">
