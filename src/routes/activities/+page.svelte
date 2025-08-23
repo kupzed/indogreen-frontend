@@ -638,7 +638,7 @@
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {#if (activity.jenis === 'Vendor' || activity.jenis === 'Customer') && activity.mitra}
-                    {activity.mitra.nama}
+                    {activity.mitra?.nama.substring(0, 25)}{activity.mitra?.nama.length > 25 ? '...' : ''}
                   {:else}
                     -
                   {/if}
