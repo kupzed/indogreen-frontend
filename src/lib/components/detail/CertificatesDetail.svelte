@@ -50,13 +50,21 @@
       <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Tanggal Terbit</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {new Date(certificates.date_of_issue).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+          {#if certificates.date_of_issue}
+            {new Date(certificates.date_of_issue).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+          {:else}
+            <span class="text-gray-500">-</span>
+          {/if}
         </dd>
       </div>
       <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500">Tanggal Expired</dt>
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-          {new Date(certificates.date_of_expired).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+          {#if certificates.date_of_expired}
+            {new Date(certificates.date_of_expired).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+          {:else}
+            <span class="text-gray-500">-</span>
+          {/if}
         </dd>
       </div>
       <div class="bg-white px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">

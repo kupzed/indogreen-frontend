@@ -137,8 +137,8 @@
     if (form.project_id !== '' && form.project_id !== null) fd.append('project_id', String(form.project_id));
     if (form.barang_certificate_id !== '' && form.barang_certificate_id !== null) fd.append('barang_certificate_id', String(form.barang_certificate_id));
     if (form.status) fd.append('status', form.status);
-    if (form.date_of_issue) fd.append('date_of_issue', form.date_of_issue);
-    if (form.date_of_expired) fd.append('date_of_expired', form.date_of_expired);
+    fd.append('date_of_issue', form.date_of_issue || '');
+    fd.append('date_of_expired', form.date_of_expired || '');
     if (form.attachment) fd.append('attachment', form.attachment);
     return fd;
   }
@@ -278,13 +278,13 @@
           <div>
             <label for="edit_issue" class="block text-sm/6 font-medium text-gray-900">Tanggal Terbit</label>
             <div class="mt-2">
-              <input id="edit_issue" type="date" bind:value={form.date_of_issue} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input id="edit_issue" type="date" bind:value={form.date_of_issue} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
             <label for="edit_expired" class="block text-sm/6 font-medium text-gray-900">Tanggal Expired</label>
             <div class="mt-2">
-              <input id="edit_expired" type="date" bind:value={form.date_of_expired} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input id="edit_expired" type="date" bind:value={form.date_of_expired} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
         </div>

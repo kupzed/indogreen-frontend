@@ -218,8 +218,9 @@
     if (form.project_id !== '' && form.project_id !== null) fd.append('project_id', String(form.project_id));
     if (form.barang_certificate_id !== '' && form.barang_certificate_id !== null) fd.append('barang_certificate_id', String(form.barang_certificate_id));
     if (form.status) fd.append('status', form.status);
-    if (form.date_of_issue) fd.append('date_of_issue', form.date_of_issue);
-    if (form.date_of_expired) fd.append('date_of_expired', form.date_of_expired);
+    // Always append date fields, even if empty (for proper deletion)
+    fd.append('date_of_issue', form.date_of_issue || '');
+    fd.append('date_of_expired', form.date_of_expired || '');
     if (form.attachment) fd.append('attachment', form.attachment);
     return fd;
   }
@@ -472,9 +473,11 @@
                   <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                   </svg>
-                  <p>
-                    Terbit: {new Date(item.date_of_issue).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-                  </p>
+                  {#if item.date_of_issue}
+                    <p>Terbit: {new Date(item.date_of_issue).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                  {:else}
+                    <p>Terbit: -</p>
+                  {/if}
                 </div>
               </div>
             </a>
@@ -559,10 +562,18 @@
                   </span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {new Date(item.date_of_issue).toLocaleDateString('id-ID')}
+                  {#if item.date_of_issue}
+                    {new Date(item.date_of_issue).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  {:else}
+                    <span class="text-gray-500">-</span>
+                  {/if}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {new Date(item.date_of_expired).toLocaleDateString('id-ID')}
+                  {#if item.date_of_expired}
+                    {new Date(item.date_of_expired).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  {:else}
+                    <span class="text-gray-500">-</span>
+                  {/if}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-indigo-600">
                   {#if item.attachment}
@@ -647,11 +658,11 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <label for="create_issue" class="block text-sm font-medium text-gray-900">Tanggal Terbit</label>
-        <input id="create_issue" type="date" bind:value={form.date_of_issue} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        <input id="create_issue" type="date" bind:value={form.date_of_issue} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
       <div>
         <label for="create_expired" class="block text-sm font-medium text-gray-900">Tanggal Expired</label>
-        <input id="create_expired" type="date" bind:value={form.date_of_expired} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        <input id="create_expired" type="date" bind:value={form.date_of_expired} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
     </div>
     <FileAttachment
@@ -714,11 +725,11 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label for="edit_issue" class="block text-sm font-medium text-gray-900">Tanggal Terbit</label>
-          <input id="edit_issue" type="date" bind:value={form.date_of_issue} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <input id="edit_issue" type="date" bind:value={form.date_of_issue} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
         </div>
         <div>
           <label for="edit_expired" class="block text-sm font-medium text-gray-900">Tanggal Expired</label>
-          <input id="edit_expired" type="date" bind:value={form.date_of_expired} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <input id="edit_expired" type="date" bind:value={form.date_of_expired} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
         </div>
       </div>
       <FileAttachment
