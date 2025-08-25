@@ -739,16 +739,18 @@
           </select>
         </div>
       </div>
-      <div>
-        <label for="create_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
-        <div class="mt-2">
-          <textarea id="create_from" bind:value={form.from} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="create_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
+          <div class="mt-2">
+            <input id="create_from" bind:value={form.from} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          </div>
         </div>
-      </div>
-      <div>
-        <label for="create_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
-        <div class="mt-2">
-          <textarea id="create_to" bind:value={form.to} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+        <div>
+          <label for="create_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
+          <div class="mt-2">
+            <input id="create_to" bind:value={form.to} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+          </div>
         </div>
       </div>
       <div>
@@ -840,16 +842,18 @@
             </select>
           </div>
         </div>
-        <div>
-          <label for="edit_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
-          <div class="mt-2">
-            <textarea id="edit_from" bind:value={form.from} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="edit_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
+            <div class="mt-2">
+              <input id="edit_from" bind:value={form.from} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            </div>
           </div>
-        </div>
-        <div>
-          <label for="edit_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
-          <div class="mt-2">
-            <textarea id="edit_to" bind:value={form.to} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <div>
+            <label for="edit_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
+            <div class="mt-2">
+              <input id="edit_to" bind:value={form.to} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+            </div>
           </div>
         </div>
         <div>

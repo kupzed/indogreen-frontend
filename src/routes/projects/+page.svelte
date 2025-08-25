@@ -618,7 +618,18 @@
       <div>
         <label for="create_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
         <div class="mt-2">
-          <textarea id="create_lokasi" bind:value={form.lokasi} rows="2" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <input id="create_lokasi" bind:value={form.lokasi} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+        </div>
+      </div>
+      <div>
+        <label for="create_status" class="block text-sm/6 font-medium text-gray-900">Status</label>
+        <div class="mt-2">
+          <select id="create_status" bind:value={form.status} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+            <option value="">Pilih Status</option>
+            {#each projectStatuses as status}
+              <option value={status}>{status}</option>
+            {/each}
+          </select>
         </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -633,17 +644,6 @@
           <div class="mt-2">
             <input type="text" id="create_no_so" bind:value={form.no_so} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
           </div>
-        </div>
-      </div>
-      <div>
-        <label for="create_status" class="block text-sm/6 font-medium text-gray-900">Status</label>
-        <div class="mt-2">
-          <select id="create_status" bind:value={form.status} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-            <option value="">Pilih Status</option>
-            {#each projectStatuses as status}
-              <option value={status}>{status}</option>
-            {/each}
-          </select>
         </div>
       </div>
       <div>
@@ -714,7 +714,7 @@
         <div>
           <label for="edit_customer_id" class="block text-sm/6 font-medium text-gray-900">Customer</label>
           <div class="mt-2">
-            <select id="edit_customer_id" bind:value={form.mitra_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+            <select id="edit_customer_id" bind:value={form.mitra_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
               <option value="">Pilih Customer</option>
               {#each customers as customer (customer.id)}
                 <option value={customer.id}>{customer.nama}</option>
@@ -736,7 +736,7 @@
         <div>
           <label for="edit_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
           <div class="mt-2">
-            <textarea id="edit_lokasi" bind:value={form.lokasi} rows="2" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+            <input id="edit_lokasi" bind:value={form.lokasi} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

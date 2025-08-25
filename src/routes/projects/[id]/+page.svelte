@@ -1521,7 +1521,18 @@ async function fetchFormDependencies() {
           <div>
             <label for="edit_project_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
             <div class="mt-2">
-              <textarea id="edit_project_lokasi" bind:value={editProjectForm.lokasi} rows="2" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+              <input id="edit_project_lokasi" bind:value={editProjectForm.lokasi} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+            </div>
+          </div>
+          <div>
+            <label for="edit_project_status" class="block text-sm/6 font-medium text-gray-900">Status</label>
+            <div class="mt-2">
+              <select id="edit_project_status" bind:value={editProjectForm.status} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                <option value="">Pilih Status</option>
+                {#each projectStatuses as status}
+                  <option value={status}>{status}</option>
+                {/each}
+              </select>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1536,17 +1547,6 @@ async function fetchFormDependencies() {
               <div class="mt-2">
                 <input type="text" id="edit_project_no_so" bind:value={editProjectForm.no_so} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
               </div>
-            </div>
-          </div>
-          <div>
-            <label for="edit_project_status" class="block text-sm/6 font-medium text-gray-900">Status</label>
-            <div class="mt-2">
-              <select id="edit_project_status" bind:value={editProjectForm.status} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                <option value="">Pilih Status</option>
-                {#each projectStatuses as status}
-                  <option value={status}>{status}</option>
-                {/each}
-              </select>
             </div>
           </div>
           <div>
@@ -1655,16 +1655,18 @@ async function fetchFormDependencies() {
               </select>
             </div>
           </div>
-          <div>
-            <label for="activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
-            <div class="mt-2">
-              <textarea id="activity_from" bind:value={createActivityForm.from} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
+              <div class="mt-2">
+                <input id="activity_from" bind:value={createActivityForm.from} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              </div>
             </div>
-          </div>
-          <div>
-            <label for="activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
-            <div class="mt-2">
-              <textarea id="activity_to" bind:value={createActivityForm.to} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+            <div>
+              <label for="activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
+              <div class="mt-2">
+                <input id="activity_to" bind:value={createActivityForm.to} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+              </div>
             </div>
           </div>
           <div>
@@ -1695,7 +1697,7 @@ async function fetchFormDependencies() {
             Tambah Aktivitas
           </button>
         </div>
-            </form>
+      </form>
     </Modal>
 
     <Modal bind:show={showEditActivityModal} title="Edit Aktivitas" maxWidth="max-w-xl">
@@ -1749,16 +1751,18 @@ async function fetchFormDependencies() {
                 </select>
               </div>
             </div>
-            <div>
-              <label for="edit_activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
-              <div class="mt-2">
-                <textarea id="edit_activity_from" bind:value={editActivityForm.from} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="edit_activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
+                <div class="mt-2">
+                  <input id="edit_activity_from" bind:value={editActivityForm.from} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+                </div>
               </div>
-            </div>
-            <div>
-              <label for="edit_activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
-              <div class="mt-2">
-                <textarea id="edit_activity_to" bind:value={editActivityForm.to} rows="1" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+              <div>
+                <label for="edit_activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
+                <div class="mt-2">
+                  <input id="edit_activity_to" bind:value={editActivityForm.to} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm /6">
+                </div>
               </div>
             </div>
             <div>
