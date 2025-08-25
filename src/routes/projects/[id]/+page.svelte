@@ -477,13 +477,20 @@ async function fetchFormDependencies() {
   }
 
   // Update customer_id/mitra_id selection based on activity type
-  $: if (showCreateActivityModal && createActivityForm.jenis) {
+  let previousCreateActivityJenis = '';
+  $: if (showCreateActivityModal && createActivityForm.jenis && createActivityForm.jenis !== previousCreateActivityJenis) {
+    previousCreateActivityJenis = createActivityForm.jenis;
+    
     if (createActivityForm.jenis === 'Customer') {
       createActivityForm.mitra_id = project?.mitra_id || null;
     } else if (createActivityForm.jenis === 'Internal') {
       createActivityForm.mitra_id = '1'; // Placeholder for internal partner ID
-    } else if (createActivityForm.jenis === 'Vendor' && !vendors.some(v => v.id === createActivityForm.mitra_id)) {
-      // If selected 'Vendor' but current mitra_id is not a vendor or is empty, reset it
+    } else if (createActivityForm.jenis === 'Vendor') {
+      // Only reset if current mitra_id is not a valid vendor
+      if (!Array.isArray(vendors) || !vendors.some(v => v.id == createActivityForm.mitra_id)) {
+        createActivityForm.mitra_id = '';
+      }
+    } else {
       createActivityForm.mitra_id = '';
     }
   }
@@ -492,6 +499,7 @@ async function fetchFormDependencies() {
   $: if (!showCreateActivityModal) {
     createActivityForm.mitra_id = '';
     createActivityForm.jenis = '';
+    previousCreateActivityJenis = '';
   }
 
   // State untuk tab

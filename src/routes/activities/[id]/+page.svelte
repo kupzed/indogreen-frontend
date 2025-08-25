@@ -170,25 +170,36 @@
   }
 
   // Reactive logic for mitra_id dropdown in forms
-  $: if (form.jenis && projects.length > 0) { // Add projects.length check to ensure data is loaded
+  let previousJenis = '';
+  $: if (showEditModal && form.jenis && form.jenis !== previousJenis && projects.length > 0) {
+    previousJenis = form.jenis;
+    
     if (form.jenis === 'Customer') {
       const selectedProject = projects.find(p => p.id == form.project_id);
-      if (form.mitra_id !== (selectedProject?.mitra_id || null)) {
-        form.mitra_id = selectedProject?.mitra_id || null;
-      }
+      form.mitra_id = selectedProject?.mitra_id || null;
     } else if (form.jenis === 'Internal') {
-      if (form.mitra_id !== '1') {
-        form.mitra_id = '1';
-      }
+      form.mitra_id = '1';
     } else if (form.jenis === 'Vendor') {
-      if (Array.isArray(vendors) && !vendors.some(v => v.id === form.mitra_id)) {
+      // Only reset if current mitra_id is not a valid vendor
+      if (!Array.isArray(vendors) || !vendors.some(v => v.id == form.mitra_id)) {
         form.mitra_id = '';
       }
     } else {
-      if (form.mitra_id !== null && form.mitra_id !== '') {
-        form.mitra_id = null;
-      }
+      form.mitra_id = null;
     }
+  }
+
+  // Reactive logic for Customer project changes
+  $: if (form.jenis === 'Customer' && form.project_id && projects.length > 0) {
+    const selectedProject = projects.find(p => p.id == form.project_id);
+    if (selectedProject?.mitra_id && form.mitra_id !== selectedProject.mitra_id) {
+      form.mitra_id = selectedProject.mitra_id;
+    }
+  }
+
+  // Reset form saat modal ditutup
+  $: if (!showEditModal) {
+    previousJenis = '';
   }
 </script>
 
