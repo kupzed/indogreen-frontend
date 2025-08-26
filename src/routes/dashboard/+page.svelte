@@ -66,8 +66,13 @@
                     </p>
                     <div class="ml-2 flex-shrink-0 flex">
                       <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getProjectStatusBadgeClasses(project.status)}">
-                        {project.status}
+                        {project.status} 
                       </span>
+                      {#if project.is_cert_projects}
+                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-purple-100 text-purple-800">
+                          Certificate
+                        </span>
+                      {/if}
                     </div>
                   </div>
                   <div class="mt-2 sm:flex sm:justify-between">

@@ -340,11 +340,11 @@
   <form on:submit|preventDefault={handleSubmitCreate} class="space-y-4">
     <div>
       <label for="create_name" class="block text-sm font-medium text-gray-900">Nama</label>
-      <input id="create_name" type="text" bind:value={form.name} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+      <input id="create_name" type="text" bind:value={form.name} required placeholder="Masukkan nama barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
     </div>
     <div>
       <label for="create_no_seri" class="block text-sm font-medium text-gray-900">No. Seri</label>
-      <input id="create_no_seri" type="text" bind:value={form.no_seri} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+      <input id="create_no_seri" type="text" bind:value={form.no_seri} required placeholder="Masukkan no seri barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
     </div>
     <div>
       <label for="create_mitra" class="block text-sm font-medium text-gray-900">Mitra</label>
@@ -367,11 +367,11 @@
     <form on:submit|preventDefault={handleSubmitUpdate} class="space-y-4">
       <div>
         <label for="edit_name" class="block text-sm font-medium text-gray-900">Nama</label>
-        <input id="edit_name" type="text" bind:value={form.name} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        <input id="edit_name" type="text" bind:value={form.name} required placeholder="Masukkan nama barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
       <div>
         <label for="edit_no_seri" class="block text-sm font-medium text-gray-900">No. Seri</label>
-        <input id="edit_no_seri" type="text" bind:value={form.no_seri} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        <input id="edit_no_seri" type="text" bind:value={form.no_seri} required placeholder="Masukkan no seri barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
       <div>
         <label for="edit_mitra" class="block text-sm font-medium text-gray-900">Mitra</label>

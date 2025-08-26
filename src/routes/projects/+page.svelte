@@ -590,7 +590,7 @@
       <div>
         <label for="create_name" class="block text-sm/6 font-medium text-gray-900">Nama Project</label>
         <div class="mt-2">
-          <input type="text" id="create_name" bind:value={form.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+          <input type="text" id="create_name" bind:value={form.name} required placeholder="Masukkan nama project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
         </div>
       </div>
       <div>
@@ -618,7 +618,7 @@
       <div>
         <label for="create_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
         <div class="mt-2">
-          <input id="create_lokasi" bind:value={form.lokasi} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+          <input id="create_lokasi" bind:value={form.lokasi} required placeholder="Masukkan lokasi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
         </div>
       </div>
       <div>
@@ -636,20 +636,20 @@
         <div>
           <label for="create_no_po" class="block text-sm/6 font-medium text-gray-900">No. PO</label>
           <div class="mt-2">
-            <input type="text" id="create_no_po" bind:value={form.no_po} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            <input type="text" id="create_no_po" bind:value={form.no_po} placeholder="No. PO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
           </div>
         </div>
         <div>
           <label for="create_no_so" class="block text-sm/6 font-medium text-gray-900">No. SO</label>
           <div class="mt-2">
-            <input type="text" id="create_no_so" bind:value={form.no_so} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            <input type="text" id="create_no_so" bind:value={form.no_so} placeholder="No. SO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
           </div>
         </div>
       </div>
       <div>
         <label for="create_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
         <div class="mt-2">
-          <textarea id="create_description" bind:value={form.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+          <textarea id="create_description" bind:value={form.description} rows="4" required placeholder="Masukkan deskripsi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
         </div>
       </div>
       <div>
@@ -708,7 +708,7 @@
         <div>
           <label for="edit_name" class="block text-sm/6 font-medium text-gray-900">Nama Project</label>
           <div class="mt-2">
-            <input type="text" id="edit_name" bind:value={form.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+            <input type="text" id="edit_name" bind:value={form.name} required placeholder="Masukkan nama project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
           </div>
         </div>
         <div>
@@ -736,20 +736,20 @@
         <div>
           <label for="edit_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
           <div class="mt-2">
-            <input id="edit_lokasi" bind:value={form.lokasi} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+            <input id="edit_lokasi" bind:value={form.lokasi} required placeholder="Masukkan lokasi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label for="edit_no_po" class="block text-sm/6 font-medium text-gray-900">No. PO</label>
             <div class="mt-2">
-              <input type="text" id="edit_no_po" bind:value={form.no_po} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_no_po" bind:value={form.no_po} placeholder="No. PO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
             <label for="edit_no_so" class="block text-sm/6 font-medium text-gray-900">No. SO</label>
             <div class="mt-2">
-              <input type="text" id="edit_no_so" bind:value={form.no_so} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_no_so" bind:value={form.no_so} placeholder="No. SO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
         </div>
@@ -767,7 +767,7 @@
         <div>
           <label for="edit_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
           <div class="mt-2">
-            <textarea id="edit_description" bind:value={form.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+            <textarea id="edit_description" bind:value={form.description} rows="4" required placeholder="Masukkan deskripsi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
           </div>
         </div>
         <div>

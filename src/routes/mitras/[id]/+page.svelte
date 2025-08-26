@@ -505,7 +505,7 @@
           <div>
             <label for="edit_mitra_nama" class="block text-sm/6 font-medium text-gray-900">Nama</label>
             <div class="mt-2">
-              <input type="text" id="edit_mitra_nama" bind:value={form.nama} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_mitra_nama" bind:value={form.nama} required placeholder="Masukkan nama mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
@@ -521,55 +521,55 @@
           <div>
             <label for="edit_mitra_alamat" class="block text-sm/6 font-medium text-gray-900">Alamat</label>
             <div class="mt-2">
-              <textarea id="edit_mitra_alamat" bind:value={form.alamat} rows="2" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+              <textarea id="edit_mitra_alamat" bind:value={form.alamat} rows="2" required placeholder="Masukkan alamat mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
             </div>
           </div>
           <div>
             <label for="edit_mitra_website" class="block text-sm/6 font-medium text-gray-900">Website</label>
             <div class="mt-2">
-              <input type="text" id="edit_mitra_website" bind:value={form.website} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_mitra_website" bind:value={form.website} placeholder="Masukkan website mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
             <label for="edit_mitra_email" class="block text-sm/6 font-medium text-gray-900">Email</label>
             <div class="mt-2">
-              <input type="email" id="edit_mitra_email" bind:value={form.email} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="email" id="edit_mitra_email" bind:value={form.email} placeholder="Masukkan email mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
             <label for="edit_mitra_kontak_1" class="block text-sm/6 font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
             <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_1" bind:value={form.kontak_1} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_mitra_kontak_1" bind:value={form.kontak_1} placeholder="Masukkan kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
             <label for="edit_mitra_kontak_1_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 1</label>
             <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_1_nama" bind:value={form.kontak_1_nama} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_mitra_kontak_1_nama" bind:value={form.kontak_1_nama} placeholder="Masukkan nama kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
             <label for="edit_mitra_kontak_1_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 1</label>
             <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_mitra_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} placeholder="Masukkan jabatan kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
             <label for="edit_mitra_kontak_2" class="block text-sm/6 font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
             <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_2" bind:value={form.kontak_2} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_mitra_kontak_2" bind:value={form.kontak_2} placeholder="Masukkan kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
             <label for="edit_mitra_kontak_2_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 2</label>
             <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_2_nama" bind:value={form.kontak_2_nama} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_mitra_kontak_2_nama" bind:value={form.kontak_2_nama} placeholder="Masukkan nama kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
             <label for="edit_mitra_kontak_2_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 2</label>
             <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_mitra_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} placeholder="Masukkan jabatan kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
         </div>
@@ -587,11 +587,11 @@
     <form on:submit|preventDefault={bcHandleSubmitCreate} class="space-y-4">
       <div>
         <label for="bc_create_name" class="block text-sm font-medium text-gray-900">Nama</label>
-        <input id="bc_create_name" type="text" bind:value={bcForm.name} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        <input id="bc_create_name" type="text" bind:value={bcForm.name} required placeholder="Masukkan nama barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
       <div>
         <label for="bc_create_no_seri" class="block text-sm font-medium text-gray-900">No. Seri</label>
-        <input id="bc_create_no_seri" type="text" bind:value={bcForm.no_seri} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        <input id="bc_create_no_seri" type="text" bind:value={bcForm.no_seri} required placeholder="Masukkan no. seri barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
       <div>
         <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
@@ -605,11 +605,11 @@
       <form on:submit|preventDefault={bcHandleSubmitUpdate} class="space-y-4">
         <div>
           <label for="bc_edit_name" class="block text-sm font-medium text-gray-900">Nama</label>
-          <input id="bc_edit_name" type="text" bind:value={bcForm.name} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <input id="bc_edit_name" type="text" bind:value={bcForm.name} required placeholder="Masukkan nama barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
         </div>
         <div>
           <label for="bc_edit_no_seri" class="block text-sm font-medium text-gray-900">No. Seri</label>
-          <input id="bc_edit_no_seri" type="text" bind:value={bcForm.no_seri} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <input id="bc_edit_no_seri" type="text" bind:value={bcForm.no_seri} required placeholder="Masukkan no. seri barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
         </div>
         <div>
           <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>

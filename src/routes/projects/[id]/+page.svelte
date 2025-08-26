@@ -1464,7 +1464,7 @@ async function fetchFormDependencies() {
                       </td>
                       <td class="whitespace-nowrap px-3 py-4 text-sm text-indigo-600">
                         {#if item.attachment}
-                          <a href={item.attachment} target="_blank" rel="noreferrer" class="hover:underline">Lihat</a>
+                          <a href={item.attachment} target="_blank" rel="noreferrer" class="hover:text-indigo-900">Lihat</a>
                         {:else}-{/if}
                       </td>
                       <td class="relative whitespace-nowrap px-3 py-4 text-sm">
@@ -1513,7 +1513,7 @@ async function fetchFormDependencies() {
           <div>
             <label for="edit_project_name" class="block text-sm/6 font-medium text-gray-900">Nama Project</label>
             <div class="mt-2">
-              <input type="text" id="edit_project_name" bind:value={editProjectForm.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="edit_project_name" bind:value={editProjectForm.name} required placeholder="Masukkan nama project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
@@ -1541,7 +1541,7 @@ async function fetchFormDependencies() {
           <div>
             <label for="edit_project_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
             <div class="mt-2">
-              <input id="edit_project_lokasi" bind:value={editProjectForm.lokasi} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+              <input id="edit_project_lokasi" bind:value={editProjectForm.lokasi} required placeholder="Masukkan lokasi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
             </div>
           </div>
           <div>
@@ -1559,20 +1559,20 @@ async function fetchFormDependencies() {
             <div>
               <label for="edit_project_no_po" class="block text-sm/6 font-medium text-gray-900">No. PO</label>
               <div class="mt-2">
-                <input type="text" id="edit_project_no_po" bind:value={editProjectForm.no_po} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+                <input type="text" id="edit_project_no_po" bind:value={editProjectForm.no_po} placeholder="No. PO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
               </div>
             </div>
             <div>
               <label for="edit_project_no_so" class="block text-sm/6 font-medium text-gray-900">No. SO</label>
               <div class="mt-2">
-                <input type="text" id="edit_project_no_so" bind:value={editProjectForm.no_so} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+                <input type="text" id="edit_project_no_so" bind:value={editProjectForm.no_so} placeholder="No. SO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
               </div>
             </div>
           </div>
           <div>
             <label for="edit_project_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
             <div class="mt-2">
-              <textarea id="edit_project_description" bind:value={editProjectForm.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+              <textarea id="edit_project_description" bind:value={editProjectForm.description} rows="4" required placeholder="Masukkan deskripsi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
             </div>
           </div>
           <div>
@@ -1637,7 +1637,7 @@ async function fetchFormDependencies() {
           <div>
             <label for="activity_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
             <div class="mt-2">
-              <input type="text" id="activity_name" bind:value={createActivityForm.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+              <input type="text" id="activity_name" bind:value={createActivityForm.name} required placeholder="Masukkan nama aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
             </div>
           </div>
           <div>
@@ -1679,20 +1679,20 @@ async function fetchFormDependencies() {
             <div>
               <label for="activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
               <div class="mt-2">
-                <input id="activity_from" bind:value={createActivityForm.from} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+                <input id="activity_from" bind:value={createActivityForm.from} placeholder="Dari" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
               </div>
             </div>
             <div>
               <label for="activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
               <div class="mt-2">
-                <input id="activity_to" bind:value={createActivityForm.to} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
+                <input id="activity_to" bind:value={createActivityForm.to} placeholder="Ke" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
               </div>
             </div>
           </div>
           <div>
             <label for="activity_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
             <div class="mt-2">
-              <textarea id="activity_description" bind:value={createActivityForm.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+              <textarea id="activity_description" bind:value={createActivityForm.description} rows="4" required placeholder="Masukkan deskripsi aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
             </div>
           </div>
           <div>
@@ -1733,7 +1733,7 @@ async function fetchFormDependencies() {
             <div>
               <label for="edit_activity_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
               <div class="mt-2">
-                <input type="text" id="edit_activity_name" bind:value={editActivityForm.name} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+                <input type="text" id="edit_activity_name" bind:value={editActivityForm.name} required placeholder="Masukkan nama aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
               </div>
             </div>
             <div>
@@ -1775,20 +1775,20 @@ async function fetchFormDependencies() {
               <div>
                 <label for="edit_activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
                 <div class="mt-2">
-                  <input id="edit_activity_from" bind:value={editActivityForm.from} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
+                  <input id="edit_activity_from" bind:value={editActivityForm.from} placeholder="Dari" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
                 </div>
               </div>
               <div>
                 <label for="edit_activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
                 <div class="mt-2">
-                  <input id="edit_activity_to" bind:value={editActivityForm.to} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm /6">
+                  <input id="edit_activity_to" bind:value={editActivityForm.to} placeholder="Ke" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm /6">
                 </div>
               </div>
             </div>
             <div>
               <label for="edit_activity_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
               <div class="mt-2">
-                <textarea id="edit_activity_description" bind:value={editActivityForm.description} rows="4" required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
+                <textarea id="edit_activity_description" bind:value={editActivityForm.description} rows="4" required placeholder="Masukkan deskripsi aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
               </div>
             </div>
             <div>
@@ -1838,11 +1838,11 @@ async function fetchFormDependencies() {
     <form on:submit|preventDefault={handleSubmitCreateCertificate} class="space-y-4">
       <div>
         <label for="create_cert_name" class="block text-sm font-medium text-gray-900">Nama</label>
-        <input id="create_cert_name" type="text" bind:value={certificateForm.name} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        <input id="create_cert_name" type="text" bind:value={certificateForm.name} required placeholder="Masukkan nama sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
       <div>
         <label for="create_cert_no" class="block text-sm font-medium text-gray-900">No. Sertifikat</label>
-        <input id="create_cert_no" type="text" bind:value={certificateForm.no_certificate} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+        <input id="create_cert_no" type="text" bind:value={certificateForm.no_certificate} required placeholder="Masukkan no. sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
       </div>
       <div>
         <label for="create_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
@@ -1903,11 +1903,11 @@ async function fetchFormDependencies() {
       <form on:submit|preventDefault={handleSubmitUpdateCertificate} class="space-y-4">
         <div>
           <label for="edit_cert_name" class="block text-sm font-medium text-gray-900">Nama</label>
-          <input id="edit_cert_name" type="text" bind:value={certificateForm.name} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <input id="edit_cert_name" type="text" bind:value={certificateForm.name} required placeholder="Masukkan nama sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
         </div>
         <div>
           <label for="edit_cert_no" class="block text-sm font-medium text-gray-900">No. Sertifikat</label>
-          <input id="edit_cert_no" type="text" bind:value={certificateForm.no_certificate} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <input id="edit_cert_no" type="text" bind:value={certificateForm.no_certificate} required placeholder="Masukkan no. sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
         </div>
         <div>
           <label for="edit_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>

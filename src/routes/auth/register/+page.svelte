@@ -57,6 +57,7 @@
             name="name"
             id="name"
             required
+            placeholder="Masukkan nama lengkap"
             bind:value={name}
             class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
           />
@@ -72,6 +73,7 @@
             id="email"
             autocomplete="email"
             required
+            placeholder="Masukkan email"
             bind:value={email}
             class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
           />
@@ -86,6 +88,7 @@
             name="password"
             id="password"
             required
+            placeholder="Masukkan password"
             bind:value={password}
             class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
           />
@@ -100,6 +103,7 @@
             name="password_confirmation"
             id="password_confirmation"
             required
+            placeholder="Masukkan konfirmasi password"
             bind:value={password_confirmation}
             class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
           />
