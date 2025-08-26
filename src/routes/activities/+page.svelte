@@ -2,15 +2,15 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
-  import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
-  import FileAttachment from '$lib/components/FileAttachment.svelte';
+  import ActivityFormModal from '$lib/components/form/ActivityFormModal.svelte';
 
   let activities: any[] = [];
   let projects: any[] = []; // For project dropdown in activity forms
   let vendors: any[] = []; // For vendor dropdown (if 'jenis' is vendor)
+  let customers: any[] = []; // For resolving customer name from project.mitra_id
   let loading = true;
   let error = '';
   let search: string = '';
@@ -88,6 +88,26 @@
       const response = await axiosClient.get('/activity/getFormDependencies');
       projects = response.data.projects;
       vendors = response.data.vendors; // Perbaiki: ambil dari vendors, bukan mitras
+
+      // Also fetch customers to resolve customer names
+      try {
+        const custResp = await axiosClient.get('/mitra/customers');
+        customers = Array.isArray(custResp.data?.data) ? custResp.data.data : [];
+      } catch (e) {
+        customers = [];
+        console.warn('Fetch customers failed (optional):', e);
+      }
+
+      // Enrich projects with mitra object so modal can show customer name
+      if (Array.isArray(projects)) {
+        const mitraMap = new Map<any, any>();
+        if (Array.isArray(vendors)) vendors.forEach((v: any) => mitraMap.set(v.id, v));
+        if (Array.isArray(customers)) customers.forEach((c: any) => mitraMap.set(c.id, c));
+        projects = projects.map((p: any) => ({
+          ...p,
+          mitra: p.mitra || (p.mitra_id ? mitraMap.get(p.mitra_id) : (p.customer_id ? mitraMap.get(p.customer_id) : undefined))
+        }));
+      }
     } catch (err) {
       console.error('Failed to fetch form dependencies:', err);
     }
@@ -192,24 +212,6 @@
   function openDetailDrawer(activity: any) {
     selectedActivity = { ...activity };
     showDetailDrawer = true;
-  }
-
-  function handleAttachmentChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
-      form.attachment = target.files[0];
-      formFileName = target.files[0].name;
-      form.attachment_removed = false; // If new file selected, old one is implicitly replaced
-    } else {
-      form.attachment = null;
-      formFileName = '';
-      // If user clears the input without selecting a new file, it means they want to remove it
-      // This logic might need adjustment based on explicit "remove attachment" button in UI
-      // For now, if no file is selected, it implicitly means removal if one existed before.
-      if (editingActivity?.attachment) {
-        form.attachment_removed = true;
-      }
-    }
   }
 
   async function handleSubmitCreate() {
@@ -662,8 +664,8 @@
                     </button>
                     <button on:click|stopPropagation={() => openEditModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-											</svg>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                       <span class="sr-only">Edit, {activity.name}</span>
                     </button>
                     <button on:click|stopPropagation={() => handleDelete(activity.id)} title="Delete" class="text-red-600 hover:text-red-900">
@@ -690,217 +692,33 @@
   {/if}
 {/if}
 
-<Modal bind:show={showCreateModal} title="Form Aktivitas Baru" maxWidth="max-w-xl">
-  <form on:submit|preventDefault={handleSubmitCreate}>
-    <div class="space-y-4">
-      <div>
-        <label for="create_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
-        <div class="mt-2">
-          <input type="text" id="create_name" bind:value={form.name} required placeholder="Masukkan nama aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_project_id" class="block text-sm/6 font-medium text-gray-900">Project</label>
-        <div class="mt-2">
-          <select id="create_project_id" bind:value={form.project_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-            <option value="">Pilih Project</option>
-            {#each projects as project (project.id)}
-              <option value={project.id}>{project.name}</option>
-            {/each}
-          </select>
-        </div>
-      </div>
-      <div>
-        <label for="create_jenis" class="block text-sm/6 font-medium text-gray-900">Jenis</label>
-        <div class="mt-2">
-          <select id="create_jenis" bind:value={form.jenis} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-            <option value="">Pilih Jenis</option>
-            {#each activityJenisList as jenis}
-              <option value={jenis}>{jenis}</option>
-            {/each}
-          </select>
-        </div>
-      </div>
-      {#if form.jenis === 'Customer'}
-        <p class="text-sm text-gray-500">Customer akan otomatis dipilih berdasarkan Project.</p>
-      {:else if form.jenis === 'Vendor'}
-        <div>
-          <label for="create_mitra_id_vendor" class="block text-sm/6 font-medium text-gray-900">Vendor</label>
-          <div class="mt-2">
-            <select id="create_mitra_id_vendor" bind:value={form.mitra_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Vendor</option>
-              {#each vendors as vendor (vendor.id)}
-                <option value={vendor.id}>{vendor.nama}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-      {/if}
-      <div>
-        <label for="create_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-        <div class="mt-2">
-          <select id="create_kategori" bind:value={form.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-            <option value="">Pilih Kategori</option>
-            {#each activityKategoriList as kategori}
-              <option value={kategori}>{kategori}</option>
-            {/each}
-          </select>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label for="create_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
-          <div class="mt-2">
-            <input id="create_from" bind:value={form.from} placeholder="Dari" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="create_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
-          <div class="mt-2">
-            <input id="create_to" bind:value={form.to} placeholder="Ke" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-          </div>
-        </div>
-      </div>
-      <div>
-        <label for="create_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
-        <div class="mt-2">
-          <textarea id="create_description" bind:value={form.description} rows="4" required placeholder="Masukkan deskripsi aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-        </div>
-      </div>
-      <div>
-        <label for="create_activity_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Aktivitas</label>
-        <div class="mt-2">
-          <input type="date" id="create_activity_date" bind:value={form.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <FileAttachment
-        id="create_attachment"
-        label="Lampiran"
-        bind:file={form.attachment}
-        bind:fileName={formFileName}
-        on:change={(e) => {
-          form.attachment = e.detail.file;
-          formFileName = e.detail.fileName;
-        }}
-      />
-    </div>
-    <div class="mt-6">
-      <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-        Tambah Aktivitas
-      </button>
-    </div>
-  </form>
-</Modal>
+<ActivityFormModal
+  bind:show={showCreateModal}
+  title="Form Aktivitas Baru"
+  submitLabel="Tambah Aktivitas"
+  idPrefix="create"
+  {form}
+  {projects}
+  {vendors}
+  bind:currentFileName={formFileName}
+  allowRemoveAttachment={false}
+  onSubmit={handleSubmitCreate}
+/>
 
-<Modal bind:show={showEditModal} title="Edit Aktivitas" maxWidth="max-w-xl">
-  {#if editingActivity}
-    <form on:submit|preventDefault={handleSubmitUpdate}>
-      <div class="space-y-4">
-        <div>
-          <label for="edit_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
-          <div class="mt-2">
-            <input type="text" id="edit_name" bind:value={form.name} required placeholder="Masukkan nama aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_project_id" class="block text-sm/6 font-medium text-gray-900">Project</label>
-          <div class="mt-2">
-            <select id="edit_project_id" bind:value={form.project_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Project</option>
-              {#each projects as project (project.id)}
-                <option value={project.id}>{project.name}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-        <div>
-          <label for="edit_jenis" class="block text-sm/6 font-medium text-gray-900">Jenis</label>
-          <div class="mt-2">
-            <select id="edit_jenis" bind:value={form.jenis} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Jenis</option>
-              {#each activityJenisList as jenis}
-                <option value={jenis}>{jenis}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-        {#if form.jenis === 'Customer'}
-          <p class="text-sm text-gray-500">Customer akan otomatis dipilih berdasarkan Project.</p>
-        {:else if form.jenis === 'Vendor'}
-          <div>
-            <label for="edit_mitra_id_vendor" class="block text-sm/6 font-medium text-gray-900">Vendor</label>
-            <div class="mt-2">
-              <select id="edit_mitra_id_vendor" bind:value={form.mitra_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                <option value="">Pilih Vendor</option>
-                {#each vendors as vendor (vendor.id)}
-                  <option value={vendor.id}>{vendor.nama}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-        {/if}
-        <div>
-          <label for="edit_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-          <div class="mt-2">
-            <select id="edit_kategori" bind:value={form.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Kategori</option>
-              {#each activityKategoriList as kategori}
-                <option value={kategori}>{kategori}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="edit_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
-            <div class="mt-2">
-              <input id="edit_from" bind:value={form.from} placeholder="Dari" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
-            <div class="mt-2">
-              <input id="edit_to" bind:value={form.to} placeholder="Ke" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-            </div>
-          </div>
-        </div>
-        <div>
-          <label for="edit_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
-          <div class="mt-2">
-            <textarea id="edit_description" bind:value={form.description} rows="4" required placeholder="Masukkan deskripsi aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-          </div>
-        </div>
-        <div>
-          <label for="edit_activity_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Aktivitas</label>
-          <div class="mt-2">
-            <input type="date" id="edit_activity_date" bind:value={form.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <FileAttachment
-          id="edit_attachment"
-          label="Lampiran"
-          bind:file={form.attachment}
-          bind:fileName={formFileName}
-          showRemoveButton={true}
-          on:change={(e) => {
-            form.attachment = e.detail.file;
-            formFileName = e.detail.fileName;
-          }}
-          on:remove={() => {
-            form.attachment_removed = true;
-            form.attachment = null;
-            formFileName = '';
-          }}
-        />
-      </div>
-      <div class="mt-6">
-        <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          Update Aktivitas
-        </button>
-      </div>
-    </form>
-  {/if}
-</Modal>
+{#if editingActivity}
+  <ActivityFormModal
+    bind:show={showEditModal}
+    title="Edit Aktivitas"
+    submitLabel="Update Aktivitas"
+    idPrefix="edit"
+    {form}
+    {projects}
+    {vendors}
+    bind:currentFileName={formFileName}
+    allowRemoveAttachment={true}
+    onSubmit={handleSubmitUpdate}
+  />
+{/if}
 
 <!-- Activity Detail Drawer -->
 <Drawer 

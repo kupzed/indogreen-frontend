@@ -2,10 +2,10 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
-  import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import MitraDetail from '$lib/components/detail/MitraDetail.svelte'; 
   import Pagination from '$lib/components/Pagination.svelte';
+  import MitraFormModal from '$lib/components/form/MitraFormModal.svelte';
 
   let mitras: any[] = [];
   let loading = true;
@@ -495,8 +495,8 @@
                     </button>
                     <button on:click|stopPropagation={() => openEditModal(mitra)} title="Edit" class="text-blue-600 hover:text-blue-900">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-											</svg>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                       <span class="sr-only">Edit, {mitra.nama}</span>
                     </button>
                     <button on:click|stopPropagation={() => handleDelete(mitra.id)} title="Delete" class="text-red-600 hover:text-red-900">
@@ -523,171 +523,25 @@
   {/if}
 {/if}
 
-<Modal bind:show={showCreateModal} title="Tambah Mitra" maxWidth="max-w-xl">
-  <form on:submit|preventDefault={handleSubmitCreate}>
-    <div class="space-y-4">
-      <div>
-        <label for="create_nama" class="block text-sm/6 font-medium text-gray-900">Nama</label>
-        <div class="mt-2">
-          <input type="text" id="create_nama" bind:value={form.nama} required placeholder="Masukkan nama mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <!-- svelte-ignore a11y_label_has_associated_control -->
-        <label class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-        <div class="flex flex-wrap gap-4 mt-2">
-          <label><input type="checkbox" bind:checked={form.is_pribadi} class="mr-1"> Pribadi</label>
-          <label><input type="checkbox" bind:checked={form.is_perusahaan} class="mr-1"> Perusahaan</label>
-          <label><input type="checkbox" bind:checked={form.is_customer} class="mr-1"> Customer</label>
-          <label><input type="checkbox" bind:checked={form.is_vendor} class="mr-1"> Vendor</label>
-        </div>
-      </div>
-      <div>
-        <label for="create_alamat" class="block text-sm/6 font-medium text-gray-900">Alamat</label>
-        <div class="mt-2">
-          <textarea id="create_alamat" bind:value={form.alamat} rows="2" required placeholder="Masukkan alamat mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-        </div>
-      </div>
-      <div>
-        <label for="create_website" class="block text-sm/6 font-medium text-gray-900">Website</label>
-        <div class="mt-2">
-          <input type="text" id="create_website" bind:value={form.website} placeholder="Masukkan website mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_email" class="block text-sm/6 font-medium text-gray-900">Email</label>
-        <div class="mt-2">
-          <input type="email" id="create_email" bind:value={form.email} placeholder="Masukkan email mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_kontak_1" class="block text-sm/6 font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
-        <div class="mt-2">
-          <input type="text" id="create_kontak_1" bind:value={form.kontak_1} placeholder="Masukkan kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_kontak_1_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 1</label>
-        <div class="mt-2">
-          <input type="text" id="create_kontak_1_nama" bind:value={form.kontak_1_nama} placeholder="Masukkan nama kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_kontak_1_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 1</label>
-        <div class="mt-2">
-          <input type="text" id="create_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} placeholder="Masukkan jabatan kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_kontak_2" class="block text-sm/6 font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
-        <div class="mt-2">
-          <input type="text" id="create_kontak_2" bind:value={form.kontak_2} placeholder="Masukkan kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_kontak_2_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 2</label>
-        <div class="mt-2">
-          <input type="text" id="create_kontak_2_nama" bind:value={form.kontak_2_nama} placeholder="Masukkan nama kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_kontak_2_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 2</label>
-        <div class="mt-2">
-          <input type="text" id="create_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} placeholder="Masukkan jabatan kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-    </div>
-    <div class="mt-6">
-      <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-        Tambah Mitra
-      </button>
-    </div>
-  </form>
-</Modal>
+<MitraFormModal
+  bind:show={showCreateModal}
+  title="Tambah Mitra"
+  submitLabel="Tambah Mitra"
+  idPrefix="create"
+  {form}
+  onSubmit={handleSubmitCreate}
+/>
 
-<Modal bind:show={showEditModal} title="Edit Mitra" maxWidth="max-w-xl">
-  {#if editingMitra}
-    <form on:submit|preventDefault={handleSubmitUpdate}>
-      <div class="space-y-4">
-        <div>
-          <label for="edit_nama" class="block text-sm/6 font-medium text-gray-900">Nama</label>
-          <div class="mt-2">
-            <input type="text" id="edit_nama" bind:value={form.nama} required placeholder="Masukkan nama mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <!-- svelte-ignore a11y_label_has_associated_control -->
-          <label class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-          <div class="flex flex-wrap gap-4 mt-2">
-            <label><input type="checkbox" bind:checked={form.is_pribadi} class="mr-1"> Pribadi</label>
-            <label><input type="checkbox" bind:checked={form.is_perusahaan} class="mr-1"> Perusahaan</label>
-            <label><input type="checkbox" bind:checked={form.is_customer} class="mr-1"> Customer</label>
-            <label><input type="checkbox" bind:checked={form.is_vendor} class="mr-1"> Vendor</label>
-          </div>
-        </div>
-        <div>
-          <label for="edit_alamat" class="block text-sm/6 font-medium text-gray-900">Alamat</label>
-          <div class="mt-2">
-            <textarea id="edit_alamat" bind:value={form.alamat} rows="2" required placeholder="Masukkan alamat mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-          </div>
-        </div>
-        <div>
-          <label for="edit_website" class="block text-sm/6 font-medium text-gray-900">Website</label>
-          <div class="mt-2">
-            <input type="text" id="edit_website" bind:value={form.website} placeholder="Masukkan website mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_email" class="block text-sm/6 font-medium text-gray-900">Email</label>
-          <div class="mt-2">
-            <input type="email" id="edit_email" bind:value={form.email} placeholder="Masukkan email mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_kontak_1" class="block text-sm/6 font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
-          <div class="mt-2">
-            <input type="text" id="edit_kontak_1" bind:value={form.kontak_1} placeholder="Masukkan kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_kontak_1_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 1</label>
-          <div class="mt-2">
-            <input type="text" id="edit_kontak_1_nama" bind:value={form.kontak_1_nama} placeholder="Masukkan nama kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_kontak_1_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 1</label>
-          <div class="mt-2">
-            <input type="text" id="edit_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} placeholder="Masukkan jabatan kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_kontak_2" class="block text-sm/6 font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
-          <div class="mt-2">
-            <input type="text" id="edit_kontak_2" bind:value={form.kontak_2} placeholder="Masukkan kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_kontak_2_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 2</label>
-          <div class="mt-2">
-            <input type="text" id="edit_kontak_2_nama" bind:value={form.kontak_2_nama} placeholder="Masukkan nama kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_kontak_2_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 2</label>
-          <div class="mt-2">
-            <input type="text" id="edit_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} placeholder="Masukkan jabatan kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-      </div>
-      <div class="mt-6">
-        <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          Update Mitra
-        </button>
-      </div>
-    </form>
-  {/if}
-</Modal>
+{#if editingMitra}
+  <MitraFormModal
+    bind:show={showEditModal}
+    title="Edit Mitra"
+    submitLabel="Update Mitra"
+    idPrefix="edit"
+    {form}
+    onSubmit={handleSubmitUpdate}
+  />
+{/if}
 
 <!-- Mitra Detail Drawer -->
 <Drawer 

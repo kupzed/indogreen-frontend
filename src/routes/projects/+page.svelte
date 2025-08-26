@@ -2,10 +2,10 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
-  import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import ProjectDetail from '$lib/components/detail/ProjectDetail.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
+  import ProjectFormModal from '$lib/components/form/ProjectFormModal.svelte';
 
   let projects: any[] = [];
   let customers: any[] = [];
@@ -559,7 +559,9 @@
 											</svg>
                       <span class="sr-only">Edit, {project.name}</span>
                     </button>
-                    <button on:click|stopPropagation={() => handleDelete(project.id)} title="Delete" class="text-red-600 hover:text-red-900">
+                    <button
+                      on:click|stopPropagation={() => handleDelete(project.id)}
+                      title="Delete" class="text-red-600 hover:text-red-900">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                       <span class="sr-only">Hapus, {project.name}</span>
                     </button>
@@ -584,241 +586,31 @@
 {/if}
 
 
-<Modal bind:show={showCreateModal} title="Form Project Baru">
-  <form on:submit|preventDefault={handleSubmitCreate}>
-    <div class="space-y-4">
-      <div>
-        <label for="create_name" class="block text-sm/6 font-medium text-gray-900">Nama Project</label>
-        <div class="mt-2">
-          <input type="text" id="create_name" bind:value={form.name} required placeholder="Masukkan nama project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_customer_id" class="block text-sm/6 font-medium text-gray-900">Customer</label>
-        <div class="mt-2">
-          <select id="create_customer_id" bind:value={form.mitra_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-            <option value="">Pilih Customer</option>
-            {#each customers as customer (customer.id)}
-              <option value={customer.id}>{customer.nama}</option>
-            {/each}
-          </select>
-        </div>
-      </div>
-      <div>
-        <label for="create_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-        <div class="mt-2">
-          <select id="create_kategori" bind:value={form.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-            <option value="">Pilih Kategori</option>
-            {#each projectKategoris as kategori}
-              <option value={kategori}>{kategori}</option>
-            {/each}
-          </select>
-        </div>
-      </div>
-      <div>
-        <label for="create_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
-        <div class="mt-2">
-          <input id="create_lokasi" bind:value={form.lokasi} required placeholder="Masukkan lokasi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-        </div>
-      </div>
-      <div>
-        <label for="create_status" class="block text-sm/6 font-medium text-gray-900">Status</label>
-        <div class="mt-2">
-          <select id="create_status" bind:value={form.status} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-            <option value="">Pilih Status</option>
-            {#each projectStatuses as status}
-              <option value={status}>{status}</option>
-            {/each}
-          </select>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label for="create_no_po" class="block text-sm/6 font-medium text-gray-900">No. PO</label>
-          <div class="mt-2">
-            <input type="text" id="create_no_po" bind:value={form.no_po} placeholder="No. PO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="create_no_so" class="block text-sm/6 font-medium text-gray-900">No. SO</label>
-          <div class="mt-2">
-            <input type="text" id="create_no_so" bind:value={form.no_so} placeholder="No. SO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-      </div>
-      <div>
-        <label for="create_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
-        <div class="mt-2">
-          <textarea id="create_description" bind:value={form.description} rows="4" required placeholder="Masukkan deskripsi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-        </div>
-      </div>
-      <div>
-        <label for="create_start_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Mulai</label>
-        <div class="mt-2">
-          <input type="date" id="create_start_date" bind:value={form.start_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div>
-        <label for="create_finish_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Selesai (Opsional)</label>
-        <div class="mt-2">
-          <input type="date" id="create_finish_date" bind:value={form.finish_date} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-        </div>
-      </div>
-      <div class="mb-4">
-        <label for="create_cert_project" class="block text-sm font-medium text-gray-900 mb-2">
-          Proyek Bersertifikat?
-        </label>
-        <div class="flex items-center space-x-3">
-          <!-- Toggle switch -->
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              id="create_cert_project"
-              bind:checked={form.is_cert_projects}
-              class="sr-only peer"
-            />
-            <div
-              class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer
-                    peer-checked:after:translate-x-5 peer-checked:after:border-white
-                    after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
-                    after:bg-white after:border-gray-300 after:border after:rounded-full 
-                    after:h-5 after:w-5 after:transition-all
-                    peer-checked:bg-indigo-600">
-            </div>
-          </label>
-          <!-- Label text -->
-          <span class="text-sm text-gray-900 font-medium">
-            Certificate Projects
-          </span>
-        </div>
-      </div>
-    </div>
-    <div class="mt-6">
-      <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-        Tambah Project
-      </button>
-    </div>
-  </form>
-</Modal>
+<ProjectFormModal
+  bind:show={showCreateModal}
+  title="Form Project Baru"
+  submitLabel="Tambah Project"
+  idPrefix="create"
+  {form}
+  {customers}
+  {projectStatuses}
+  {projectKategoris}
+  onSubmit={handleSubmitCreate}
+/>
 
-<Modal bind:show={showEditModal} title="Edit Project">
-  {#if editingProject}
-    <form on:submit|preventDefault={handleSubmitUpdate}>
-      <div class="space-y-4">
-        <div>
-          <label for="edit_name" class="block text-sm/6 font-medium text-gray-900">Nama Project</label>
-          <div class="mt-2">
-            <input type="text" id="edit_name" bind:value={form.name} required placeholder="Masukkan nama project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_customer_id" class="block text-sm/6 font-medium text-gray-900">Customer</label>
-          <div class="mt-2">
-            <select id="edit_customer_id" bind:value={form.mitra_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Customer</option>
-              {#each customers as customer (customer.id)}
-                <option value={customer.id}>{customer.nama}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-        <div>
-          <label for="edit_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-          <div class="mt-2">
-            <select id="edit_kategori" bind:value={form.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Kategori</option>
-              {#each projectKategoris as kategori}
-                <option value={kategori}>{kategori}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-        <div>
-          <label for="edit_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
-          <div class="mt-2">
-            <input id="edit_lokasi" bind:value={form.lokasi} required placeholder="Masukkan lokasi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="edit_no_po" class="block text-sm/6 font-medium text-gray-900">No. PO</label>
-            <div class="mt-2">
-              <input type="text" id="edit_no_po" bind:value={form.no_po} placeholder="No. PO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_no_so" class="block text-sm/6 font-medium text-gray-900">No. SO</label>
-            <div class="mt-2">
-              <input type="text" id="edit_no_so" bind:value={form.no_so} placeholder="No. SO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-        </div>
-        <div>
-          <label for="edit_status" class="block text-sm/6 font-medium text-gray-900">Status</label>
-          <div class="mt-2">
-            <select id="edit_status" bind:value={form.status} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Status</option>
-              {#each projectStatuses as status}
-                <option value={status}>{status}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-        <div>
-          <label for="edit_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
-          <div class="mt-2">
-            <textarea id="edit_description" bind:value={form.description} rows="4" required placeholder="Masukkan deskripsi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-          </div>
-        </div>
-        <div>
-          <label for="edit_start_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Mulai</label>
-          <div class="mt-2">
-            <input type="date" id="edit_start_date" bind:value={form.start_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_finish_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Selesai (Opsional)</label>
-          <div class="mt-2">
-            <input type="date" id="edit_finish_date" bind:value={form.finish_date} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div class="mb-4">
-          <label for="create_cert_project" class="block text-sm font-medium text-gray-900 mb-2">
-            Proyek Bersertifikat?
-          </label>
-          <div class="flex items-center space-x-3">
-            <!-- Toggle switch -->
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                id="create_cert_project"
-                bind:checked={form.is_cert_projects}
-                class="sr-only peer"
-              />
-              <div
-                class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer
-                      peer-checked:after:translate-x-5 peer-checked:after:border-white
-                      after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
-                      after:bg-white after:border-gray-300 after:border after:rounded-full 
-                      after:h-5 after:w-5 after:transition-all
-                      peer-checked:bg-indigo-600">
-              </div>
-            </label>
-            <!-- Label text -->
-            <span class="text-sm text-gray-900 font-medium">
-              Certificate Projects
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="mt-6">
-        <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          Update Project
-        </button>
-      </div>
-    </form>
-  {/if}
-</Modal>
+{#if editingProject}
+  <ProjectFormModal
+    bind:show={showEditModal}
+    title="Edit Project"
+    submitLabel="Update Project"
+    idPrefix="edit"
+    {form}
+    {customers}
+    {projectStatuses}
+    {projectKategoris}
+    onSubmit={handleSubmitUpdate}
+  />
+{/if}
 
 <!-- Project Detail Drawer -->
 <Drawer 

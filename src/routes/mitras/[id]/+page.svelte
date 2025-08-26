@@ -3,11 +3,12 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
-  import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import BarangCertificatesDetail from '$lib/components/detail/BarangCertificatesDetail.svelte';
   import MitraDetail from '$lib/components/detail/MitraDetail.svelte';
+  import MitraFormModal from '$lib/components/form/MitraFormModal.svelte';
+  import BarangCertificateFormModal from '$lib/components/form/BarangCertificateFormModal.svelte';
 
   let mitraId: string | null = null;
   let mitra: any = null;
@@ -498,125 +499,38 @@
   </div>
 {/if}
 
-  <Modal bind:show={showEditModal} title="Edit Mitra" maxWidth="max-w-xl">
-    {#if mitra}
-      <form on:submit|preventDefault={handleSubmitUpdate}>
-        <div class="space-y-4">
-          <div>
-            <label for="edit_mitra_nama" class="block text-sm/6 font-medium text-gray-900">Nama</label>
-            <div class="mt-2">
-              <input type="text" id="edit_mitra_nama" bind:value={form.nama} required placeholder="Masukkan nama mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <!-- svelte-ignore a11y_label_has_associated_control -->
-            <label class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-            <div class="flex flex-wrap gap-4 mt-2">
-              <label><input type="checkbox" bind:checked={form.is_pribadi} class="mr-1"> Pribadi</label>
-              <label><input type="checkbox" bind:checked={form.is_perusahaan} class="mr-1"> Perusahaan</label>
-              <label><input type="checkbox" bind:checked={form.is_customer} class="mr-1"> Customer</label>
-              <label><input type="checkbox" bind:checked={form.is_vendor} class="mr-1"> Vendor</label>
-            </div>
-          </div>
-          <div>
-            <label for="edit_mitra_alamat" class="block text-sm/6 font-medium text-gray-900">Alamat</label>
-            <div class="mt-2">
-              <textarea id="edit_mitra_alamat" bind:value={form.alamat} rows="2" required placeholder="Masukkan alamat mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-            </div>
-          </div>
-          <div>
-            <label for="edit_mitra_website" class="block text-sm/6 font-medium text-gray-900">Website</label>
-            <div class="mt-2">
-              <input type="text" id="edit_mitra_website" bind:value={form.website} placeholder="Masukkan website mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_mitra_email" class="block text-sm/6 font-medium text-gray-900">Email</label>
-            <div class="mt-2">
-              <input type="email" id="edit_mitra_email" bind:value={form.email} placeholder="Masukkan email mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_mitra_kontak_1" class="block text-sm/6 font-medium text-gray-900">Kontak 1 (No. Telp/HP)</label>
-            <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_1" bind:value={form.kontak_1} placeholder="Masukkan kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_mitra_kontak_1_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 1</label>
-            <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_1_nama" bind:value={form.kontak_1_nama} placeholder="Masukkan nama kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_mitra_kontak_1_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 1</label>
-            <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_1_jabatan" bind:value={form.kontak_1_jabatan} placeholder="Masukkan jabatan kontak 1 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_mitra_kontak_2" class="block text-sm/6 font-medium text-gray-900">Kontak 2 (No. Telp/HP)</label>
-            <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_2" bind:value={form.kontak_2} placeholder="Masukkan kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_mitra_kontak_2_nama" class="block text-sm/6 font-medium text-gray-900">Nama Kontak 2</label>
-            <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_2_nama" bind:value={form.kontak_2_nama} placeholder="Masukkan nama kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_mitra_kontak_2_jabatan" class="block text-sm/6 font-medium text-gray-900">Jabatan Kontak 2</label>
-            <div class="mt-2">
-              <input type="text" id="edit_mitra_kontak_2_jabatan" bind:value={form.kontak_2_jabatan} placeholder="Masukkan jabatan kontak 2 mitra" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-        </div>
-        <div class="mt-6">
-          <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Update Mitra
-          </button>
-        </div>
-      </form>
-    {/if}
-  </Modal>
+  {#if mitra}
+    <MitraFormModal
+      bind:show={showEditModal}
+      title="Edit Mitra"
+      submitLabel="Update Mitra"
+      idPrefix="edit_mitra"
+      {form}
+      onSubmit={handleSubmitUpdate}
+    />
+  {/if}
 
   <!-- Barang Certificates: Create Modal -->
-  <Modal bind:show={bcShowCreateModal} title="Tambah Barang Certificate">
-    <form on:submit|preventDefault={bcHandleSubmitCreate} class="space-y-4">
-      <div>
-        <label for="bc_create_name" class="block text-sm font-medium text-gray-900">Nama</label>
-        <input id="bc_create_name" type="text" bind:value={bcForm.name} required placeholder="Masukkan nama barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-      <div>
-        <label for="bc_create_no_seri" class="block text-sm font-medium text-gray-900">No. Seri</label>
-        <input id="bc_create_no_seri" type="text" bind:value={bcForm.no_seri} required placeholder="Masukkan no. seri barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-      <div>
-        <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
-      </div>
-    </form>
-  </Modal>
+  <BarangCertificateFormModal
+    bind:show={bcShowCreateModal}
+    title="Tambah Barang Certificate"
+    submitLabel="Simpan"
+    idPrefix="bc_create"
+    form={bcForm}
+    showMitra={false}
+    onSubmit={bcHandleSubmitCreate}
+  />
 
   <!-- Barang Certificates: Edit Modal -->
-  <Modal bind:show={bcShowEditModal} title="Edit Barang Certificate">
-    {#if bcEditingItem}
-      <form on:submit|preventDefault={bcHandleSubmitUpdate} class="space-y-4">
-        <div>
-          <label for="bc_edit_name" class="block text-sm font-medium text-gray-900">Nama</label>
-          <input id="bc_edit_name" type="text" bind:value={bcForm.name} required placeholder="Masukkan nama barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-        </div>
-        <div>
-          <label for="bc_edit_no_seri" class="block text-sm font-medium text-gray-900">No. Seri</label>
-          <input id="bc_edit_no_seri" type="text" bind:value={bcForm.no_seri} required placeholder="Masukkan no. seri barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-        </div>
-        <div>
-          <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>
-        </div>
-      </form>
-    {/if}
-  </Modal>
+  <BarangCertificateFormModal
+    bind:show={bcShowEditModal}
+    title="Edit Barang Certificate"
+    submitLabel="Update"
+    idPrefix="bc_edit"
+    form={bcForm}
+    showMitra={false}
+    onSubmit={bcHandleSubmitUpdate}
+  />
 
   <!-- Barang Certificates Detail Drawer -->
   <Drawer 

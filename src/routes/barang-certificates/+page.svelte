@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import axiosClient from '$lib/axiosClient';
-  import Modal from '$lib/components/Modal.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import BarangCertificatesDetail from '$lib/components/detail/BarangCertificatesDetail.svelte';
+  import BarangCertificateFormModal from '$lib/components/form/BarangCertificateFormModal.svelte';
 
   type Mitra = { id: number; nama: string };
   type BarangCertificate = {
@@ -336,58 +336,27 @@
   {/if}
 {/if}
 
-<Modal bind:show={showCreateModal} title="Tambah Barang Certificate">
-  <form on:submit|preventDefault={handleSubmitCreate} class="space-y-4">
-    <div>
-      <label for="create_name" class="block text-sm font-medium text-gray-900">Nama</label>
-      <input id="create_name" type="text" bind:value={form.name} required placeholder="Masukkan nama barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-    </div>
-    <div>
-      <label for="create_no_seri" class="block text-sm font-medium text-gray-900">No. Seri</label>
-      <input id="create_no_seri" type="text" bind:value={form.no_seri} required placeholder="Masukkan no seri barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-    </div>
-    <div>
-      <label for="create_mitra" class="block text-sm font-medium text-gray-900">Mitra</label>
-      <select id="create_mitra" bind:value={form.mitra_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-        <option value="">Pilih Mitra</option>
-        {#each mitras as m}
-          <option value={m.id}>{m.nama}</option>
-        {/each}
-      </select>
-    </div>
-    <div>
-      <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
-    </div>
-  </form>
-  
-</Modal>
+<BarangCertificateFormModal
+  bind:show={showCreateModal}
+  title="Tambah Barang Certificate"
+  submitLabel="Simpan"
+  idPrefix="create"
+  {form}
+  {mitras}
+  showMitra={true}
+  onSubmit={handleSubmitCreate}
+/>
 
-<Modal bind:show={showEditModal} title="Edit Barang Certificate">
-  {#if editingItem}
-    <form on:submit|preventDefault={handleSubmitUpdate} class="space-y-4">
-      <div>
-        <label for="edit_name" class="block text-sm font-medium text-gray-900">Nama</label>
-        <input id="edit_name" type="text" bind:value={form.name} required placeholder="Masukkan nama barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-      <div>
-        <label for="edit_no_seri" class="block text-sm font-medium text-gray-900">No. Seri</label>
-        <input id="edit_no_seri" type="text" bind:value={form.no_seri} required placeholder="Masukkan no seri barang certificate" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-      <div>
-        <label for="edit_mitra" class="block text-sm font-medium text-gray-900">Mitra</label>
-        <select id="edit_mitra" bind:value={form.mitra_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-          <option value="">Pilih Mitra</option>
-          {#each mitras as m}
-            <option value={m.id}>{m.nama}</option>
-          {/each}
-        </select>
-      </div>
-      <div>
-        <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>
-      </div>
-    </form>
-  {/if}
-</Modal>
+<BarangCertificateFormModal
+  bind:show={showEditModal}
+  title="Edit Barang Certificate"
+  submitLabel="Update"
+  idPrefix="edit"
+  {form}
+  {mitras}
+  showMitra={true}
+  onSubmit={handleSubmitUpdate}
+/>
 
 <Drawer 
   bind:show={showDetailDrawer} 

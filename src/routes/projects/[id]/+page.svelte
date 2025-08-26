@@ -4,13 +4,14 @@
   import { goto } from '$app/navigation';
   import axios from 'axios';
   import axiosClient from '$lib/axiosClient';
-  import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
   import ProjectDetail from '$lib/components/detail/ProjectDetail.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import CertificatesDetail from '$lib/components/detail/CertificatesDetail.svelte';
-  import FileAttachment from '$lib/components/FileAttachment.svelte';
+  import CertificateFormModal from '$lib/components/form/CertificateFormModal.svelte';
+  import ActivityFormModal from '$lib/components/form/ActivityFormModal.svelte';
+  import ProjectFormModal from '$lib/components/form/ProjectFormModal.svelte';
 
   let projectId: string | null = null;
   let project: any = null;
@@ -1506,322 +1507,48 @@ async function fetchFormDependencies() {
     {/if}
   </div>
 
-  <Modal bind:show={showEditProjectModal} title="Edit Project">
-    {#if project}
-      <form on:submit|preventDefault={handleSubmitUpdateProject}>
-        <div class="space-y-4">
-          <div>
-            <label for="edit_project_name" class="block text-sm/6 font-medium text-gray-900">Nama Project</label>
-            <div class="mt-2">
-              <input type="text" id="edit_project_name" bind:value={editProjectForm.name} required placeholder="Masukkan nama project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_project_customer_id" class="block text-sm/6 font-medium text-gray-900">Customer</label>
-            <div class="mt-2">
-              <select id="edit_project_customer_id" bind:value={editProjectForm.mitra_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                <option value="">Pilih Customer</option>
-                {#each customers as customer (customer.id)}
-                  <option value={customer.id}>{customer.nama}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          <div>
-            <label for="edit_project_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-            <div class="mt-2">
-              <select id="edit_project_kategori" bind:value={editProjectForm.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                <option value="">Pilih Kategori</option>
-                {#each projectKategoris as kategori}
-                  <option value={kategori}>{kategori}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          <div>
-            <label for="edit_project_lokasi" class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
-            <div class="mt-2">
-              <input id="edit_project_lokasi" bind:value={editProjectForm.lokasi} required placeholder="Masukkan lokasi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-            </div>
-          </div>
-          <div>
-            <label for="edit_project_status" class="block text-sm/6 font-medium text-gray-900">Status</label>
-            <div class="mt-2">
-              <select id="edit_project_status" bind:value={editProjectForm.status} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                <option value="">Pilih Status</option>
-                {#each projectStatuses as status}
-                  <option value={status}>{status}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label for="edit_project_no_po" class="block text-sm/6 font-medium text-gray-900">No. PO</label>
-              <div class="mt-2">
-                <input type="text" id="edit_project_no_po" bind:value={editProjectForm.no_po} placeholder="No. PO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-              </div>
-            </div>
-            <div>
-              <label for="edit_project_no_so" class="block text-sm/6 font-medium text-gray-900">No. SO</label>
-              <div class="mt-2">
-                <input type="text" id="edit_project_no_so" bind:value={editProjectForm.no_so} placeholder="No. SO / dd-mm-yyyy" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-              </div>
-            </div>
-          </div>
-          <div>
-            <label for="edit_project_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
-            <div class="mt-2">
-              <textarea id="edit_project_description" bind:value={editProjectForm.description} rows="4" required placeholder="Masukkan deskripsi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-            </div>
-          </div>
-          <div>
-            <label for="edit_project_start_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Mulai</label>
-            <div class="mt-2">
-              <input type="date" id="edit_project_start_date" bind:value={editProjectForm.start_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="edit_project_finish_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Selesai (Opsional)</label>
-            <div class="mt-2">
-              <input type="date" id="edit_project_finish_date" bind:value={editProjectForm.finish_date} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div class="mb-4">
-            <label for="edit_project_is_cert_projects" class="block text-sm font-medium text-gray-900 mb-2">
-              Proyek Bersertifikat?
-            </label>
-            <div class="flex items-center space-x-3">
-              <!-- Toggle switch -->
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  id="edit_project_is_cert_projects"
-                  bind:checked={editProjectForm.is_cert_projects}
-                  class="sr-only peer"
-                />
-                <div
-                  class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer
-                        peer-checked:after:translate-x-5 peer-checked:after:border-white
-                        after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
-                        after:bg-white after:border-gray-300 after:border after:rounded-full 
-                        after:h-5 after:w-5 after:transition-all
-                        peer-checked:bg-indigo-600">
-                </div>
-              </label>
-              <!-- Label text -->
-              <span class="text-sm text-gray-900 font-medium">
-                Certificate Projects
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="mt-6">
-          <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Update Project
-          </button>
-        </div>
-      </form>
-    {/if}
-  </Modal>
+  {#if showEditProjectModal}
+    <ProjectFormModal
+      bind:show={showEditProjectModal}
+      title="Edit Project"
+      submitLabel="Update Project"
+      idPrefix="edit_project"
+      form={editProjectForm}
+    {customers}
+    {projectStatuses}
+    {projectKategoris}
+    onSubmit={handleSubmitUpdateProject}
+    />
+  {/if}
 
-    <Modal bind:show={showCreateActivityModal} title="Form Tambah Aktivitas" maxWidth="max-w-xl">
-      <h1 class="text-center text-base font-bold tracking-tight text-gray-900">
-        Project : {project.name}
-      </h1>
-      <h1 class="text-center text-base font-bold tracking-tight text-gray-900 mb-6">
-        Customer : {project.mitra?.nama || '-'}
-      </h1>
-      <form on:submit|preventDefault={handleSubmitCreateActivity}>
-        <div class="space-y-4">
-          <div>
-            <label for="activity_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
-            <div class="mt-2">
-              <input type="text" id="activity_name" bind:value={createActivityForm.name} required placeholder="Masukkan nama aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <div>
-            <label for="modal_jenis" class="block text-sm/6 font-medium text-gray-900">Jenis</label>
-            <div class="mt-2">
-              <select id="modal_jenis" bind:value={createActivityForm.jenis} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                <option value="">Pilih Jenis</option>
-                {#each activityJenisList as jenis}
-                  <option value={jenis}>{jenis}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          {#if createActivityForm.jenis === 'Vendor'}
-            <div>
-              <label for="modal_mitra_id" class="block text-sm/6 font-medium text-gray-900">Vendor</label>
-              <div class="mt-2">
-                <select id="modal_mitra_id" bind:value={createActivityForm.mitra_id} required={createActivityForm.jenis === 'Vendor'} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                  <option value="">Pilih Vendor</option>
-                  {#each vendors as vendor (vendor.id)}
-                    <option value={vendor.id}>{vendor.nama}</option>
-                  {/each}
-                </select>
-              </div>
-            </div>
-          {/if}
-          <div>
-            <label for="modal_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-            <div class="mt-2">
-              <select id="modal_kategori" bind:value={createActivityForm.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                <option value="">Pilih Kategori</option>
-                {#each activityKategoriList as kategori}
-                  <option value={kategori}>{kategori}</option>
-                {/each}
-              </select>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label for="activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
-              <div class="mt-2">
-                <input id="activity_from" bind:value={createActivityForm.from} placeholder="Dari" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-              </div>
-            </div>
-            <div>
-              <label for="activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
-              <div class="mt-2">
-                <input id="activity_to" bind:value={createActivityForm.to} placeholder="Ke" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              </div>
-            </div>
-          </div>
-          <div>
-            <label for="activity_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
-            <div class="mt-2">
-              <textarea id="activity_description" bind:value={createActivityForm.description} rows="4" required placeholder="Masukkan deskripsi aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-            </div>
-          </div>
-          <div>
-            <label for="activity_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Aktivitas</label>
-            <div class="mt-2">
-              <input type="date" id="activity_date" bind:value={createActivityForm.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-            </div>
-          </div>
-          <FileAttachment
-            id="create_attachment"
-            label="Lampiran"
-            bind:file={createActivityForm.attachment}
-            bind:fileName={createActivityFileName}
-            on:change={(e) => {
-                createActivityForm.attachment = e.detail.file;
-                createActivityFileName = e.detail.fileName;
-              }}
-          />
-        </div>
-        <div class="mt-6">
-          <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-            Tambah Aktivitas
-          </button>
-        </div>
-      </form>
-    </Modal>
+  <ActivityFormModal
+    bind:show={showCreateActivityModal}
+    title="Form Tambah Aktivitas"
+    submitLabel="Tambah Aktivitas"
+    idPrefix="create_activity"
+    form={createActivityForm}
+    projects={project ? [project] : []}
+    showProjectSelect={false}
+    {vendors}
+    bind:currentFileName={createActivityFileName}
+    allowRemoveAttachment={false}
+    onSubmit={handleSubmitCreateActivity}
+  />
 
-    <Modal bind:show={showEditActivityModal} title="Edit Aktivitas" maxWidth="max-w-xl">
-      {#if editingActivity}
-        <h1 class="text-center text-base font-bold tracking-tight text-gray-900">
-          Project : {project.name}
-        </h1>
-        <h1 class="text-center text-base font-bold tracking-tight text-gray-900 mb-6">
-          Customer : {project.mitra?.nama || '-'}
-        </h1>
-        <form on:submit|preventDefault={handleSubmitUpdateActivity}>
-          <div class="space-y-4">
-            <div>
-              <label for="edit_activity_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
-              <div class="mt-2">
-                <input type="text" id="edit_activity_name" bind:value={editActivityForm.name} required placeholder="Masukkan nama aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-              </div>
-            </div>
-            <div>
-              <label for="edit_modal_jenis" class="block text-sm/6 font-medium text-gray-900">Jenis</label>
-              <div class="mt-2">
-                <select id="edit_modal_jenis" bind:value={editActivityForm.jenis} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                  <option value="">Pilih Jenis</option>
-                  {#each activityJenisList as jenis}
-                    <option value={jenis}>{jenis}</option>
-                  {/each}
-                </select>
-              </div>
-            </div>
-            {#if editActivityForm.jenis === 'Vendor'}
-              <div>
-                <label for="edit_modal_mitra_id" class="block text-sm/6 font-medium text-gray-900">Vendor</label>
-                <div class="mt-2">
-                  <select id="edit_modal_mitra_id" bind:value={editActivityForm.mitra_id} required={editActivityForm.jenis === 'Vendor'} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                    <option value="">Pilih Vendor</option>
-                    {#each vendors as vendor (vendor.id)}
-                      <option value={vendor.id}>{vendor.nama}</option>
-                    {/each}
-                  </select>
-                </div>
-              </div>
-            {/if}
-            <div>
-              <label for="edit_modal_kategori" class="block text-sm/6 font-medium text-gray-900">Kategori</label>
-              <div class="mt-2">
-                <select id="edit_modal_kategori" bind:value={editActivityForm.kategori} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-                  <option value="">Pilih Kategori</option>
-                  {#each activityKategoriList as kategori}
-                    <option value={kategori}>{kategori}</option>
-                  {/each}
-                </select>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label for="edit_activity_from" class="block text-sm/6 font-medium text-gray-900">From (Optional)</label>
-                <div class="mt-2">
-                  <input id="edit_activity_from" bind:value={editActivityForm.from} placeholder="Dari" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-                </div>
-              </div>
-              <div>
-                <label for="edit_activity_to" class="block text-sm/6 font-medium text-gray-900">To (Optional)</label>
-                <div class="mt-2">
-                  <input id="edit_activity_to" bind:value={editActivityForm.to} placeholder="Ke" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm /6">
-                </div>
-              </div>
-            </div>
-            <div>
-              <label for="edit_activity_description" class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
-              <div class="mt-2">
-                <textarea id="edit_activity_description" bind:value={editActivityForm.description} rows="4" required placeholder="Masukkan deskripsi aktivitas" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
-              </div>
-            </div>
-            <div>
-              <label for="edit_activity_date" class="block text-sm/6 font-medium text-gray-900">Tanggal Aktivitas</label>
-              <div class="mt-2">
-                <input type="date" id="edit_activity_date" bind:value={editActivityForm.activity_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-              </div>
-            </div>
-            <FileAttachment
-              id="create_attachment"
-              label="Lampiran"
-              bind:file={editActivityForm.attachment}
-              bind:fileName={editActivityFileName}
-              showRemoveButton={true}
-              on:change={(e) => {
-                editActivityForm.attachment = e.detail.file;
-                editActivityFileName = e.detail.fileName;
-              }}
-              on:remove={() => {
-                editActivityForm.attachment_removed = true;
-                editActivityForm.attachment = null;
-                editActivityFileName = '';
-              }}
-            />
-          </div>
-          <div class="mt-6">
-            <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-              Update Aktivitas
-            </button>
-          </div>
-        </form>
-      {/if}
-    </Modal>
+  {#if editingActivity}
+    <ActivityFormModal
+      bind:show={showEditActivityModal}
+      title="Edit Aktivitas"
+      submitLabel="Update Aktivitas"
+      idPrefix="edit_activity"
+      form={editActivityForm}
+      projects={project ? [project] : []}
+      showProjectSelect={false}
+      {vendors}
+      bind:currentFileName={editActivityFileName}
+      allowRemoveAttachment={true}
+      onSubmit={handleSubmitUpdateActivity}
+    />
   {/if}
 
   <!-- Activity Detail Drawer -->
@@ -1834,134 +1561,38 @@ async function fetchFormDependencies() {
   </Drawer>
 
   <!-- Certificates: Create Modal -->
-  <Modal bind:show={showCreateCertificateModal} title="Tambah Sertifikat">
-    <form on:submit|preventDefault={handleSubmitCreateCertificate} class="space-y-4">
-      <div>
-        <label for="create_cert_name" class="block text-sm font-medium text-gray-900">Nama</label>
-        <input id="create_cert_name" type="text" bind:value={certificateForm.name} required placeholder="Masukkan nama sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-      <div>
-        <label for="create_cert_no" class="block text-sm font-medium text-gray-900">No. Sertifikat</label>
-        <input id="create_cert_no" type="text" bind:value={certificateForm.no_certificate} required placeholder="Masukkan no. sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-      <div>
-        <label for="create_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-        <select id="create_cert_barang" bind:value={certificateForm.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" disabled={certificateBarangOptions.length === 0}>
-          <option value="">{certificateBarangOptions.length === 0 ? 'Tidak ada Barang Certificate untuk Project ini' : 'Pilih Barang Certificate'}</option>
-          {#each certificateBarangOptions as b}
-            <option value={b.id}>{b.name ?? b.title} - {b.no_seri}</option>
-          {/each}
-        </select>
-        {#if certificateBarangOptions.length === 0}
-          <p class="mt-1 text-sm text-gray-500">Tidak ada Barang Certificate untuk mitra project ini</p>
-        {/if}
-      </div>
-      <div>
-        <label for="create_cert_status" class="block text-sm font-medium text-gray-900">Status</label>
-        <select id="create_cert_status" bind:value={certificateForm.status} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-          <option value="">Pilih Status</option>
-          {#each certificateStatuses as s}
-            <option value={s}>{s}</option>
-          {/each}
-        </select>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label for="create_cert_issue" class="block text-sm font-medium text-gray-900">Tanggal Terbit</label>
-          <input id="create_cert_issue" type="date" bind:value={certificateForm.date_of_issue} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-        </div>
-        <div>
-          <label for="create_cert_expired" class="block text-sm font-medium text-gray-900">Tanggal Expired</label>
-          <input id="create_cert_expired" type="date" bind:value={certificateForm.date_of_expired} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-        </div>
-      </div>
-        <FileAttachment
-          id="create_attachment"
-          label="Lampiran"
-          bind:file={certificateForm.attachment}
-          bind:fileName={certificateFormFileName}
-          showRemoveButton={true}
-          on:change={(e) => {
-            certificateForm.attachment = e.detail.file;
-            certificateFormFileName = e.detail.fileName;
-          }}
-          on:remove={() => {
-            certificateForm.attachment_removed = true;
-            certificateForm.attachment = null;
-            certificateFormFileName = '';
-          }}
-        />
-      <div>
-        <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
-      </div>
-    </form>
-  </Modal>
+  <CertificateFormModal
+    bind:show={showCreateCertificateModal}
+    title="Tambah Sertifikat"
+    submitLabel="Simpan"
+    idPrefix="create_cert"
+    form={certificateForm}
+    projects={[]}
+    barangOptions={certificateBarangOptions}
+    statuses={Array.from(certificateStatuses)}
+    bind:currentFileName={certificateFormFileName}
+    allowRemoveAttachment={true}
+    showProjectSelect={false}
+    onSubmit={handleSubmitCreateCertificate}
+  />
 
   <!-- Certificates: Edit Modal -->
-  <Modal bind:show={showEditCertificateModal} title="Edit Sertifikat">
-    {#if editingCertificate}
-      <form on:submit|preventDefault={handleSubmitUpdateCertificate} class="space-y-4">
-        <div>
-          <label for="edit_cert_name" class="block text-sm font-medium text-gray-900">Nama</label>
-          <input id="edit_cert_name" type="text" bind:value={certificateForm.name} required placeholder="Masukkan nama sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-        </div>
-        <div>
-          <label for="edit_cert_no" class="block text-sm font-medium text-gray-900">No. Sertifikat</label>
-          <input id="edit_cert_no" type="text" bind:value={certificateForm.no_certificate} required placeholder="Masukkan no. sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-        </div>
-        <div>
-          <label for="edit_cert_barang" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-          <select id="edit_cert_barang" bind:value={certificateForm.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" disabled={certificateBarangOptions.length === 0}>
-            <option value="">{certificateBarangOptions.length === 0 ? 'Tidak ada Barang Certificate untuk Project ini' : 'Pilih Barang Certificate'}</option>
-            {#each certificateBarangOptions as b}
-              <option value={b.id}>{b.name ?? b.title} - {b.no_seri}</option>
-            {/each}
-          </select>
-          {#if certificateBarangOptions.length === 0}
-            <p class="mt-1 text-sm text-gray-500">Tidak ada Barang Certificate untuk mitra project ini</p>
-          {/if}
-        </div>
-        <div>
-          <label for="edit_cert_status" class="block text-sm font-medium text-gray-900">Status</label>
-          <select id="edit_cert_status" bind:value={certificateForm.status} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-            <option value="">Pilih Status</option>
-            {#each certificateStatuses as s}
-              <option value={s}>{s}</option>
-            {/each}
-          </select>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="edit_cert_issue" class="block text-sm font-medium text-gray-900">Tanggal Terbit</label>
-            <input id="edit_cert_issue" type="date" bind:value={certificateForm.date_of_issue} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-          </div>
-          <div>
-            <label for="edit_cert_expired" class="block text-sm font-medium text-gray-900">Tanggal Expired</label>
-            <input id="edit_cert_expired" type="date" bind:value={certificateForm.date_of_expired} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-          </div>
-        </div>
-          <FileAttachment
-            id="edit_attachment"
-            label="Lampiran"
-            bind:file={certificateForm.attachment}
-            bind:fileName={certificateFormFileName}
-            showRemoveButton={true}
-            on:change={(e) => {
-              certificateForm.attachment = e.detail.file;
-              certificateFormFileName = e.detail.fileName;
-            }}
-            on:remove={() => {
-              certificateForm.attachment_removed = true;
-              certificateForm.attachment = null;
-              certificateFormFileName = '';
-            }}
-          />
-        <div>
-          <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>
-        </div>
-      </form>
-    {/if}
-  </Modal>
+  {#if editingCertificate}
+    <CertificateFormModal
+      bind:show={showEditCertificateModal}
+      title="Edit Sertifikat"
+      submitLabel="Update"
+      idPrefix="edit_cert"
+      form={certificateForm}
+      projects={[]}
+      barangOptions={certificateBarangOptions}
+      statuses={Array.from(certificateStatuses)}
+      bind:currentFileName={certificateFormFileName}
+      allowRemoveAttachment={true}
+      showProjectSelect={false}
+      onSubmit={handleSubmitUpdateCertificate}
+    />
+  {/if}
 
   <!-- Certificates Detail Drawer -->
   <Drawer 
@@ -1971,3 +1602,4 @@ async function fetchFormDependencies() {
   >
     <CertificatesDetail certificates={selectedCertificate} />
   </Drawer>
+{/if}

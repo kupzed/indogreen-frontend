@@ -1,11 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import axiosClient from '$lib/axiosClient';
-  import Modal from '$lib/components/Modal.svelte';
   import Drawer from '$lib/components/Drawer.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import CertificateDetail from '$lib/components/detail/CertificatesDetail.svelte';
-  import FileAttachment from '$lib/components/FileAttachment.svelte';
+  import CertificateFormModal from '$lib/components/form/CertificateFormModal.svelte';
 
   type Option = { id: number; name?: string; nama?: string; title?: string; no_seri?: string };
   type Certificate = {
@@ -615,139 +614,37 @@
   {/if}
 {/if}
 
-<Modal bind:show={showCreateModal} title="Tambah Sertifikat">
-  <form on:submit|preventDefault={handleSubmitCreate} class="space-y-4">
-    <div>
-      <label for="create_name" class="block text-sm font-medium text-gray-900">Nama</label>
-      <input id="create_name" type="text" bind:value={form.name} required placeholder="Masukkan nama sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-    </div>
-    <div>
-      <label for="create_no_certificate" class="block text-sm font-medium text-gray-900">No. Sertifikat</label>
-      <input id="create_no_certificate" type="text" bind:value={form.no_certificate} required placeholder="Masukkan no sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-    </div>
-    <div>
-      <label for="create_project" class="block text-sm font-medium text-gray-900">Project</label>
-      <select id="create_project" bind:value={form.project_id} required on:change={(e) => handleProjectChange((e.target as HTMLSelectElement).value ? Number((e.target as HTMLSelectElement).value) : '')} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-        <option value="">Pilih Project</option>
-        {#each projects as p}
-          <option value={p.id}>{p.name ?? p.title}</option>
-        {/each}
-      </select>
-    </div>
-    <div>
-      <label for="create_barang_certificate" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-      <select id="create_barang_certificate" bind:value={form.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" disabled={filteredBarangCertificates.length === 0}>
-        <option value="">{filteredBarangCertificates.length === 0 ? 'Pilih Project terlebih dahulu' : 'Pilih Barang Certificate'}</option>
-        {#each filteredBarangCertificates as b}
-          <option value={b.id}>{b.name ?? b.title} - {b.no_seri}</option>
-        {/each}
-      </select>
-      {#if form.project_id && filteredBarangCertificates.length === 0}
-        <p class="mt-1 text-sm text-gray-500">Tidak ada Barang Certificate untuk Project ini</p>
-      {/if}
-    </div>
-    <div>
-      <label for="create_status" class="block text-sm font-medium text-gray-900">Status</label>
-      <select id="create_status" bind:value={form.status} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-        <option value="">Pilih Status</option>
-        {#each statuses as s}
-          <option value={s}>{s}</option>
-        {/each}
-      </select>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <label for="create_issue" class="block text-sm font-medium text-gray-900">Tanggal Terbit</label>
-        <input id="create_issue" type="date" bind:value={form.date_of_issue} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-      <div>
-        <label for="create_expired" class="block text-sm font-medium text-gray-900">Tanggal Expired</label>
-        <input id="create_expired" type="date" bind:value={form.date_of_expired} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-    </div>
-    <FileAttachment
-      id="create_attachment"
-      label="Lampiran"
-      bind:file={form.attachment}
-      bind:fileName={formFileName}
-      on:change={(e) => {
-        form.attachment = e.detail.file;
-        formFileName = e.detail.fileName;
-      }}
-    />
-    <div>
-      <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Simpan</button>
-    </div>
-  </form>
-</Modal>
+<CertificateFormModal
+  bind:show={showCreateModal}
+  title="Tambah Sertifikat"
+  submitLabel="Simpan"
+  idPrefix="create"
+  {form}
+  {projects}
+  barangOptions={filteredBarangCertificates}
+  statuses={Array.from(statuses)}
+  handleProjectChange={handleProjectChange}
+  bind:currentFileName={formFileName}
+  allowRemoveAttachment={false}
+  onSubmit={handleSubmitCreate}
+/>
 
-<Modal bind:show={showEditModal} title="Edit Sertifikat">
-  {#if editingItem}
-    <form on:submit|preventDefault={handleSubmitUpdate} class="space-y-4">
-      <div>
-        <label for="edit_name" class="block text-sm font-medium text-gray-900">Nama</label>
-        <input id="edit_name" type="text" bind:value={form.name} required placeholder="Masukkan nama sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-      <div>
-        <label for="edit_no_certificate" class="block text-sm font-medium text-gray-900">No. Sertifikat</label>
-        <input id="edit_no_certificate" type="text" bind:value={form.no_certificate} required placeholder="Masukkan no sertifikat" class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-      </div>
-      <div>
-        <label for="edit_project" class="block text-sm font-medium text-gray-900">Project</label>
-        <select id="edit_project" bind:value={form.project_id} required on:change={(e) => handleProjectChange((e.target as HTMLSelectElement).value ? Number((e.target as HTMLSelectElement).value) : '')} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-          <option value="">Pilih Project</option>
-          {#each projects as p}
-            <option value={p.id}>{p.name ?? p.title}</option>
-          {/each}
-        </select>
-      </div>
-      <div>
-        <label for="edit_barang_certificate" class="block text-sm font-medium text-gray-900">Barang Certificate</label>
-        <select id="edit_barang_certificate" bind:value={form.barang_certificate_id} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" disabled={filteredBarangCertificates.length === 0}>
-          <option value="">{filteredBarangCertificates.length === 0 ? 'Pilih Project terlebih dahulu' : 'Pilih Barang Certificate'}</option>
-          {#each filteredBarangCertificates as b}
-            <option value={b.id}>{b.name ?? b.title} - {b.no_seri}</option>
-          {/each}
-        </select>
-        {#if form.project_id && filteredBarangCertificates.length === 0}
-          <p class="mt-1 text-sm text-gray-500">Tidak ada Barang Certificate untuk Project ini</p>
-        {/if}
-      </div>
-      <div>
-        <label for="edit_status" class="block text-sm font-medium text-gray-900">Status</label>
-        <select id="edit_status" bind:value={form.status} required class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500">
-          <option value="">Pilih Status</option>
-          {#each statuses as s}
-            <option value={s}>{s}</option>
-          {/each}
-        </select>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label for="edit_issue" class="block text-sm font-medium text-gray-900">Tanggal Terbit</label>
-          <input id="edit_issue" type="date" bind:value={form.date_of_issue} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-        </div>
-        <div>
-          <label for="edit_expired" class="block text-sm font-medium text-gray-900">Tanggal Expired</label>
-          <input id="edit_expired" type="date" bind:value={form.date_of_expired} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-        </div>
-      </div>
-      <FileAttachment
-        id="edit_attachment"
-        label="Lampiran"
-        bind:file={form.attachment}
-        bind:fileName={formFileName}
-        on:change={(e) => {
-          form.attachment = e.detail.file;
-          formFileName = e.detail.fileName;
-        }}
-      />
-      <div>
-        <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Update</button>
-      </div>
-    </form>
-  {/if}
-</Modal>
+{#if editingItem}
+  <CertificateFormModal
+    bind:show={showEditModal}
+    title="Edit Sertifikat"
+    submitLabel="Update"
+    idPrefix="edit"
+    {form}
+    {projects}
+    barangOptions={filteredBarangCertificates}
+    statuses={Array.from(statuses)}
+    handleProjectChange={handleProjectChange}
+    bind:currentFileName={formFileName}
+    allowRemoveAttachment={true}
+    onSubmit={handleSubmitUpdate}
+  />
+{/if}
 
 <Drawer 
   bind:show={showDetailDrawer} 

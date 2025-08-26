@@ -3,8 +3,8 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
-  import Modal from '$lib/components/Modal.svelte';
   import BarangCertificatesDetail from '$lib/components/detail/BarangCertificatesDetail.svelte';
+  import BarangCertificateFormModal from '$lib/components/form/BarangCertificateFormModal.svelte';
 
   type Mitra = { id: number; nama: string };
 
@@ -138,38 +138,14 @@
     </div>
   </div>
 
-  <Modal bind:show={showEditModal} title="Edit Barang Certificate" maxWidth="max-w-xl">
-    <form on:submit|preventDefault={handleSubmitUpdate}>
-      <div class="space-y-4">
-        <div>
-          <label for="edit_name" class="block text-sm/6 font-medium text-gray-900">Nama</label>
-          <div class="mt-2">
-            <input id="edit_name" type="text" bind:value={form.name} required placeholder="Masukkan nama barang certificate" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_no_seri" class="block text-sm/6 font-medium text-gray-900">No. Seri</label>
-          <div class="mt-2">
-            <input id="edit_no_seri" type="text" bind:value={form.no_seri} required placeholder="Masukkan no seri barang certificate" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
-          </div>
-        </div>
-        <div>
-          <label for="edit_mitra" class="block text-sm/6 font-medium text-gray-900">Mitra</label>
-          <div class="mt-2">
-            <select id="edit_mitra" bind:value={form.mitra_id} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
-              <option value="">Pilih Mitra</option>
-              {#each mitras as m}
-                <option value={m.id}>{m.nama}</option>
-              {/each}
-            </select>
-          </div>
-        </div>
-      </div>
-      <div class="mt-6">
-        <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          Update
-        </button>
-      </div>
-    </form>
-  </Modal>
+  <BarangCertificateFormModal
+    bind:show={showEditModal}
+    title="Edit Barang Certificate"
+    submitLabel="Update"
+    idPrefix="edit"
+    {form}
+    {mitras}
+    showMitra={true}
+    onSubmit={handleSubmitUpdate}
+  />
 {/if}
