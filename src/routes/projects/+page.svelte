@@ -257,7 +257,7 @@
     <div class="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
       <input type="checkbox" id="cert_project_filter" bind:checked={certProjectFilter} on:change={handleFilterOrSearch} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
       <label for="cert_project_filter" class="text-sm text-gray-900 whitespace-nowrap">
-        Certificate Project
+        Certificate
       </label>
     </div>
   </div>
