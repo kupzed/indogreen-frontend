@@ -5,23 +5,29 @@
   let email = '';
   let password = '';
   let showPassword = false;
-  let error = '';
+  let loading = false;
+  let error: string | null = null;
 
   async function handleSubmit() {
-    error = ''; // Reset error message on new submission
+    if (loading) return;
+    error = null;
+    loading = true;
     try {
-      const response = await axiosClient.post('/auth/login', { email, password });
-      const { access_token } = response.data;
-
-      // Simpan token di localStorage
-      localStorage.setItem('jwt_token', access_token);
-
-      alert('Login berhasil!');
-      goto('/dashboard'); // Arahkan ke halaman dashboard
+      const res = await axiosClient.post('/auth/login', { email, password });
+      // Backend bisa mengirim access_token atau token
+      const token = res?.data?.access_token ?? res?.data?.token;
+      if (!token) throw new Error('Token tidak ditemukan');
+      localStorage.setItem('jwt_token', token);
+      goto('/dashboard');
     } catch (err: any) {
-      // Tangani error dari API
-      error = err.response?.data?.error || err.response?.data?.message || 'Login gagal. Cek kredensial Anda.';
-      console.error('Login failed:', err.response || err);
+      error =
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        err?.message ||
+        'Login gagal. Cek kredensial Anda.';
+      console.error('Login failed:', err?.response || err);
+    } finally {
+      loading = false;
     }
   }
 </script>
@@ -36,16 +42,15 @@
   <div class="relative left-1/2 aspect-[1155/678] w-[36rem] -translate-x-1/2 bg-gradient-to-tr from-indigo-300 to-cyan-300 opacity-30"></div>
 </div>
 
-<div class="min-h-screen flex items-center justify-center px-6 py-12">
+<div class="min-h-screen flex items-center justify-center px-6">
   <div class="w-full max-w-md">
-    <!-- Logo / judul -->
-    <div class="text-center">
-      <h2 class="text-2xl font-bold tracking-tight text-gray-900">Login</h2>
-    </div>
-
     <!-- Kartu form -->
     <div class="mt-8 rounded-2xl border border-gray-100 bg-white/80 p-6 shadow-xl shadow-indigo-100/20 backdrop-blur">
-      <form class="space-y-5" on:submit|preventDefault={handleSubmit}>
+      <form class="space-y-5" on:submit|preventDefault={handleSubmit} aria-busy={loading}>
+        <!-- Judul -->
+        <div class="text-center">
+          <h2 class="text-2xl font-bold tracking-tight text-gray-900">Login</h2>
+        </div>
         <!-- Email -->
         <div>
           <label for="email" class="mb-1 block text-sm font-medium text-gray-700">Email</label>
@@ -58,7 +63,8 @@
               bind:value={email}
               autocomplete="email"
               required
-              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70"
+              disabled={loading}
             />
             <!-- ikon input -->
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -73,7 +79,7 @@
         <div>
           <div class="flex items-center justify-between">
             <label for="password" class="mb-1 block text-sm font-medium text-gray-700">Password</label>
-            <a href="/auth/forgot" class="text-xs font-medium text-indigo-600 hover:text-indigo-500">Lupa password?</a>
+            <!-- <a href="/auth/forgot" class="text-xs font-medium text-indigo-600 hover:text-indigo-500">Lupa password?</a> -->
           </div>
           <div class="relative">
             <input
@@ -84,7 +90,8 @@
               bind:value={password}
               autocomplete="current-password"
               required
-              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70"
+              disabled={loading}
             />
 
             <!-- ikon kunci kiri -->
@@ -97,8 +104,9 @@
             <!-- tombol mata kanan -->
             <button
               type="button"
-              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
               on:click={() => (showPassword = !showPassword)}
+              disabled={loading}
               aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
               title={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
             >
@@ -123,12 +131,23 @@
 
         <button
           type="submit"
-          class="group relative inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-indigo-300/40 transition hover:bg-indigo-500"
+          class="group relative inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-indigo-300/40 transition hover:bg-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed"
+          disabled={loading}
+          aria-disabled={loading}
         >
-          <span>Sign in</span>
-          <svg class="h-4 w-4 opacity-90 transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          {#if loading}
+            <!-- Spinner -->
+            <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            <span>Masuk...</span>
+          {:else}
+            <span>Masuk</span>
+            <svg class="h-4 w-4 opacity-90 transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          {/if}
         </button>
       </form>
 
