@@ -19,13 +19,27 @@
   // Optional mitra options (required when showMitra is true)
   export let mitras: Array<{ id: number; nama: string }> = [];
 
-  // Submit handler provided by parent
-  export let onSubmit: () => void;
+  // Submit handler provided by parent (boleh sync/async)
+  export let onSubmit: () => Promise<void> | void;
+
+  // Loading guard
+  let isSubmitting = false;
+
+  async function handleSubmit() {
+    if (isSubmitting) return;
+    isSubmitting = true;
+    try {
+      await onSubmit?.();
+    } finally {
+      isSubmitting = false;
+    }
+  }
 </script>
 
 <Modal bind:show={show} {title} maxWidth="max-w-xl">
-  <form on:submit|preventDefault={onSubmit}>
-    <div class="space-y-4">
+  <form on:submit|preventDefault={handleSubmit} autocomplete="off">
+    <!-- Disable semua field saat submit -->
+    <fieldset disabled={isSubmitting} class="space-y-4">
       <div>
         <label for="{idPrefix}_name" class="block text-sm/6 font-medium text-gray-900">Nama</label>
         <div class="mt-2">
@@ -72,14 +86,24 @@
           </div>
         </div>
       {/if}
-    </div>
+    </fieldset>
 
     <div class="mt-6">
       <button
         type="submit"
-        class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        class="flex w-full justify-center items-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed"
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
       >
-        {submitLabel}
+        {#if isSubmitting}
+          <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25" stroke-width="4" />
+            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" />
+          </svg>
+          <span>Menyimpan...</span>
+        {:else}
+          {submitLabel}
+        {/if}
       </button>
     </div>
   </form>

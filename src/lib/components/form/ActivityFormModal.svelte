@@ -48,11 +48,25 @@
   // Optional current file name for display on edit
   export let currentFileName: string = '';
 
-  // Submit handler provided by parent
-  export let onSubmit: () => void;
+  // Submit handler provided by parent (boleh sync atau async)
+  export let onSubmit: () => Promise<void> | void;
 
   // Ensure type-safe match between select-bound project_id (string) and projects[].id (number)
   $: selectedProject = projects.find((project) => project.id === Number(form.project_id));
+
+  // --- Loading/submit guard ---
+  let isSubmitting = false;
+
+  async function handleSubmit() {
+    if (isSubmitting) return; // cegah double click/Enter ganda
+    isSubmitting = true;
+    try {
+      // Jika onSubmit mengembalikan promise, tunggu hingga selesai
+      await onSubmit?.();
+    } finally {
+      isSubmitting = false;
+    }
+  }
 </script>
 
 <Modal bind:show={show} {title} maxWidth="max-w-xl">
@@ -64,8 +78,11 @@
         Customer : {selectedProject?.mitra?.nama}
     </h1>
   {/if}
-  <form on:submit|preventDefault={onSubmit}>
-    <div class="space-y-4">
+
+  <!-- gunakan handler baru -->
+  <form on:submit|preventDefault={handleSubmit} autocomplete="off">
+    <!-- fieldset akan men-disable seluruh input saat loading -->
+    <fieldset disabled={isSubmitting} class="space-y-4">
       <!-- Name -->
       <div>
         <label for="{idPrefix}_name" class="block text-sm/6 font-medium text-gray-900">Nama Aktivitas</label>
@@ -234,11 +251,25 @@
           }
         }}
       />
-    </div>
+    </fieldset>
 
     <div class="mt-6">
-      <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-        {submitLabel}
+      <button
+        type="submit"
+        class="flex w-full justify-center items-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed"
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
+      >
+        {#if isSubmitting}
+          <!-- spinner -->
+          <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25" stroke-width="4"></circle>
+            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"></path>
+          </svg>
+          <span>Menyimpan...</span>
+        {:else}
+          {submitLabel}
+        {/if}
       </button>
     </div>
   </form>

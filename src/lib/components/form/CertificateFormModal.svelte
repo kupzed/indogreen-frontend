@@ -49,11 +49,24 @@
   // Submit handler provided by parent
   export let onSubmit: () => void | Promise<void>;
 
+  // --- Loading/submit guard ---
+  let isSubmitting = false;
+
+  async function handleSubmit() {
+    if (isSubmitting) return; // cegah double submit/enter
+    isSubmitting = true;
+    try {
+      await onSubmit?.();
+    } finally {
+      isSubmitting = false;
+    }
+  }
 </script>
 
 <Modal bind:show={show} {title} maxWidth="max-w-xl" on:close={() => onClose?.()}>
-  <form on:submit|preventDefault={onSubmit}>
-    <div class="space-y-4">
+  <form on:submit|preventDefault={handleSubmit} autocomplete="off">
+    <!-- Disable semua field saat submit -->
+    <fieldset disabled={isSubmitting} class="space-y-4">
       <!-- Name -->
       <div>
         <label for="{idPrefix}_name" class="block text-sm font-medium text-gray-900">Nama</label>
@@ -87,7 +100,10 @@
             id="{idPrefix}_project"
             bind:value={form.project_id}
             required
-            on:change={(e) => handleProjectChange && handleProjectChange((e.target as HTMLSelectElement).value ? Number((e.target as HTMLSelectElement).value) : '')}
+            on:change={(e) =>
+              handleProjectChange &&
+              handleProjectChange((e.target as HTMLSelectElement).value ? Number((e.target as HTMLSelectElement).value) : '')
+            }
             class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           >
             <option value="">Pilih Project</option>
@@ -135,11 +151,21 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label for="{idPrefix}_issue" class="block text-sm font-medium text-gray-900">Tanggal Terbit</label>
-          <input id="{idPrefix}_issue" type="date" bind:value={form.date_of_issue} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <input
+            id="{idPrefix}_issue"
+            type="date"
+            bind:value={form.date_of_issue}
+            class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          />
         </div>
         <div>
           <label for="{idPrefix}_expired" class="block text-sm font-medium text-gray-900">Tanggal Expired</label>
-          <input id="{idPrefix}_expired" type="date" bind:value={form.date_of_expired} class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+          <input
+            id="{idPrefix}_expired"
+            type="date"
+            bind:value={form.date_of_expired}
+            class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-sm text-gray-900 border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          />
         </div>
       </div>
 
@@ -162,10 +188,25 @@
           }
         }}
       />
-    </div>
+    </fieldset>
 
     <div>
-      <button type="submit" class="w-full justify-center rounded-md bg-indigo-600 mt-5 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">{submitLabel}</button>
+      <button
+        type="submit"
+        class="w-full justify-center rounded-md bg-indigo-600 mt-5 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
+      >
+        {#if isSubmitting}
+          <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25" stroke-width="4" />
+            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" />
+          </svg>
+          <span>Menyimpan...</span>
+        {:else}
+          {submitLabel}
+        {/if}
+      </button>
     </div>
   </form>
 </Modal>

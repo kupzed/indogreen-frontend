@@ -36,17 +36,32 @@
 
   // Submit handler
   export let onSubmit: () => void | Promise<void>;
+
+  // --- Loading/submit guard ---
+  let isSubmitting = false;
+
+  async function handleSubmit() {
+    if (isSubmitting) return; // cegah double submit
+    isSubmitting = true;
+    try {
+      await onSubmit?.();
+    } finally {
+      isSubmitting = false;
+    }
+  }
 </script>
 
 <Modal bind:show={show} {title} maxWidth="max-w-xl">
-  <form on:submit|preventDefault={onSubmit}>
-    <div class="space-y-4">
+  <form on:submit|preventDefault={handleSubmit} autocomplete="off">
+    <!-- Disable semua field saat submit -->
+    <fieldset disabled={isSubmitting} class="space-y-4">
       <div>
         <label for={`${idPrefix}_name`} class="block text-sm/6 font-medium text-gray-900">Nama Project</label>
         <div class="mt-2">
           <input type="text" id={`${idPrefix}_name`} bind:value={form.name} required placeholder="Masukkan nama project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
         </div>
       </div>
+
       <div>
         <label for={`${idPrefix}_customer_id`} class="block text-sm/6 font-medium text-gray-900">Customer</label>
         <div class="mt-2">
@@ -58,6 +73,7 @@
           </select>
         </div>
       </div>
+
       <div>
         <label for={`${idPrefix}_kategori`} class="block text-sm/6 font-medium text-gray-900">Kategori</label>
         <div class="mt-2">
@@ -69,12 +85,14 @@
           </select>
         </div>
       </div>
+
       <div>
         <label for={`${idPrefix}_lokasi`} class="block text-sm/6 font-medium text-gray-900">Lokasi</label>
         <div class="mt-2">
           <input id={`${idPrefix}_lokasi`} bind:value={form.lokasi} required placeholder="Masukkan lokasi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6">
         </div>
       </div>
+
       <div>
         <label for={`${idPrefix}_status`} class="block text-sm/6 font-medium text-gray-900">Status</label>
         <div class="mt-2">
@@ -86,6 +104,7 @@
           </select>
         </div>
       </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label for={`${idPrefix}_no_po`} class="block text-sm/6 font-medium text-gray-900">No. PO</label>
@@ -100,24 +119,28 @@
           </div>
         </div>
       </div>
+
       <div>
         <label for={`${idPrefix}_description`} class="block text-sm/6 font-medium text-gray-900">Deskripsi</label>
         <div class="mt-2">
           <textarea id={`${idPrefix}_description`} bind:value={form.description} rows="4" required placeholder="Masukkan deskripsi project" class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"></textarea>
         </div>
       </div>
+
       <div>
         <label for={`${idPrefix}_start_date`} class="block text-sm/6 font-medium text-gray-900">Tanggal Mulai</label>
         <div class="mt-2">
           <input type="date" id={`${idPrefix}_start_date`} bind:value={form.start_date} required class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
         </div>
       </div>
+
       <div>
         <label for={`${idPrefix}_finish_date`} class="block text-sm/6 font-medium text-gray-900">Tanggal Selesai (Opsional)</label>
         <div class="mt-2">
           <input type="date" id={`${idPrefix}_finish_date`} bind:value={form.finish_date} class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6" />
         </div>
       </div>
+
       <div class="mb-4">
         <label for={`${idPrefix}_is_cert_projects`} class="block text-sm font-medium text-gray-900 mb-2">
           Proyek Bersertifikat?
@@ -133,23 +156,36 @@
             />
             <div
               class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer
-                    peer-checked:after:translate-x-5 peer-checked:after:border-white
-                    after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
-                    after:bg-white after:border-gray-300 after:border after:rounded-full 
-                    after:h-5 after:w-5 after:transition-all
-                    peer-checked:bg-indigo-600">
+                     peer-checked:after:translate-x-5 peer-checked:after:border-white
+                     after:content-[''] after:absolute after:top-0.5 after:left-[2px]
+                     after:bg-white after:border-gray-300 after:border after:rounded-full
+                     after:h-5 after:w-5 after:transition-all
+                     peer-checked:bg-indigo-600">
             </div>
           </label>
-          <!-- Label text -->
           <span class="text-sm text-gray-900 font-medium">
             Certificate Projects
           </span>
         </div>
       </div>
-    </div>
+    </fieldset>
+
     <div class="mt-6">
-      <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-        {submitLabel}
+      <button
+        type="submit"
+        class="flex w-full justify-center items-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed"
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
+      >
+        {#if isSubmitting}
+          <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25" stroke-width="4"></circle>
+            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"></path>
+          </svg>
+          <span>Menyimpan...</span>
+        {:else}
+          {submitLabel}
+        {/if}
       </button>
     </div>
   </form>
