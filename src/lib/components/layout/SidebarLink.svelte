@@ -13,14 +13,14 @@
   
     $: linkClasses = `
       group flex items-center px-2 py-2 text-base font-medium rounded-md
-      ${isActive ? 'bg-gray-200 text-gray-900' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}
+      ${isActive ? 'bg-gray-200 dark:bg-neutral-800 text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-900 hover:text-gray-900 dark:hover:text-white'}
       ${collapsed ? 'justify-center' : ''}
       transition-colors duration-200
     `;
   
     $: iconClasses = `
       mx-2 flex-shrink-0 h-6 w-6
-      ${isActive ? 'text-indigo-600' : 'text-gray-500 group-hover:text-indigo-600'}
+      ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}
       ${collapsed ? 'mx-2' : ''}
       transition-transform duration-200
     `;
@@ -35,7 +35,7 @@
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={icon} />
     </svg>
     {#if !collapsed}
-      <span class="whitespace-nowrap">
+      <span class="whitespace-nowrap dark:text-white">
         <slot></slot> </span>
     {/if}
   </a>

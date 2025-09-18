@@ -3,14 +3,47 @@
 
 @import '@fontsource/fira-mono';
 
-/* Hapus atau komentari gaya global kustom yang mungkin bertentangan */
-/* Contoh:
+/* Aktifkan dark mode berbasis class .dark di elemen html */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* (opsional) style global ringan */
+
 :root {
-	--font-body: ...;
+	--sb-track: theme(colors.white);
+	--sb-thumb: theme(colors.gray.300);
+	--sb-size: 10px;
+}
+.dark {
+	--sb-track: theme(colors.black);
+	--sb-thumb: theme(colors.gray.500);
+}
+
+/* Firefox */
+html {
+	scrollbar-width: thin; /* auto | thin | none */
+	scrollbar-color: var(--sb-thumb) var(--sb-track); /* thumb track */
+}
+
+/* WebKit (Chromium, Safari) */
+*::-webkit-scrollbar {
+	width: var(--sb-size);
+	height: var(--sb-size);
+}
+*::-webkit-scrollbar-track {
+	background: var(--sb-track);
+}
+*::-webkit-scrollbar-thumb {
+	background-color: var(--sb-thumb);
+	border-radius: 9999px;
+	border: 2px solid transparent; /* biar ada padding */
+	background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+	background-color: theme(colors.gray.500);
+}
+.dark *::-webkit-scrollbar-thumb:hover {
+	background-color: theme(colors.gray.500);
 }
 body {
-    min-height: 100vh;
-    margin: 0;
-    background-color: var(--color-bg-1);
+	min-height: 100%;
 }
-*/

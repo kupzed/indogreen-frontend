@@ -3,6 +3,14 @@
   import axiosClient from '$lib/axiosClient';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { onMount } from 'svelte';
+  import { theme } from '$lib/stores/theme';
+
+  onMount(() => {
+    // Berlangganan tanpa menggunakan nilainya; ini memastikan efek samping dijalankan
+    const unsubscribe = theme.subscribe(() => {});
+    return unsubscribe;
+  });
 
   // Import komponen layout
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
@@ -88,13 +96,13 @@
         on:logout={logout}
       >
         <svelte:fragment slot="topnav-title">
-          <h1 class="text-2xl font-semibold text-gray-900">
+          <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
             {getPageTitle($page.url.pathname)}
           </h1>
         </svelte:fragment>
       </TopNav>
 
-      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-neutral-900 p-6">
         <div class="mx-auto">
           <slot></slot>
         </div>

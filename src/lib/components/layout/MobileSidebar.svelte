@@ -33,23 +33,23 @@
         class="fixed inset-0 z-50 flex"
       >
         <div
-          class="relative flex w-full max-w-xs flex-1 flex-col bg-white text-gray-700"
+          class="relative flex w-full max-w-xs flex-1 flex-col bg-white dark:bg-black text-gray-700 dark:text-white shadow-lg"
           in:slide="{{ axis: 'x', duration: 300 }}"
           out:slide="{{ axis: 'x', duration: 300 }}"
         >
           <div class="flex h-full flex-col overflow-y-auto pt-5 pb-4">
             <div class="flex flex-shrink-0 items-center justify-between px-4">
-              <svg class="h-8 w-8 text-indigo-600" viewBox="0 0 24 24" fill="none">
+              <svg class="h-8 w-8 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none">
                 <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span class="text-xl font-bold ml-2 text-indigo-600">INDOGREEN</span>
+              <span class="text-xl font-bold ml-2 text-indigo-600 dark:text-indigo-400 whitespace-nowrap">INDOGREEN</span>
   
               <!-- svelte-ignore a11y_consider_explicit_label -->
               <button
                 type="button"
-                class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-gray-500 hover:text-gray-900"
+                class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                 on:click={closeSidebar}
               >
                 <span class="sr-only">Close panel</span>
@@ -96,9 +96,6 @@
             </div>
           </div>
         </div>
-  
-        <div class="flex-shrink-0 w-14">
-          </div>
       </div>
     </div>
   {/if}

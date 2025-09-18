@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition'; // Untuk transisi dropdown
   import { page } from '$app/stores';
+  import { theme, toggleTheme } from '$lib/stores/theme';
 
   const dispatch = createEventDispatcher();
 
@@ -26,11 +27,11 @@
   }
 </script>
 
-<header class="sticky top-0 z-10 flex h-16 flex-shrink-0 bg-white shadow">
+<header class="sticky top-0 z-10 flex h-16 flex-shrink-0 bg-white dark:bg-black text-gray-900 dark:text-white shadow">
   <!-- svelte-ignore a11y_consider_explicit_label -->
   <button
     type="button"
-    class="ml-4 text-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:ring-offset-2 lg:hidden"
+    class="ml-4 text-gray-500 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:ring-offset-2 lg:hidden"
     on:click={toggleMobileSidebar}
   >
     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,20 +45,40 @@
     </div>
 
     <div class="ml-4 flex items-center md:ml-6">
+      <!-- Toggle dark/light mode -->
+      <button
+      aria-label="Toggle dark mode"
+      class="mr-2 p-1 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+      on:click={toggleTheme}
+      >
+      {#if $theme === 'dark'}
+        <!-- Ikon matahari untuk mode gelap -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 2v2m6 4l-1.41 1.41M20 12h-2m-4 6l1.41 1.41M12 20v-2m-6-4l1.41-1.41M4 12H2m4-4L4.59 6.59M12 8a4 4 0 100 8 4 4 0 000-8z" />
+        </svg>
+      {:else}
+        <!-- Ikon bulan untuk mode terang -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 12.79A9 9 0 1111.21 3c-.09.88.27 1.75.92 2.4a5 5 0 006.47 6.47c.65.65 1.52 1.01 2.4.92z" />
+        </svg>
+      {/if}
+      </button>
       <div class="relative" id="user-dropdown-container">
         <div>
           <!-- svelte-ignore a11y_consider_explicit_label -->
           <button
             type="button"
-            class="flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:ring-offset-2"
+            class="flex max-w-xs items-center rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:ring-offset-2"
             id="user-menu-button"
             aria-expanded={showUserDropdown}
             on:click={() => (showUserDropdown = !showUserDropdown)}
           >
-            <svg class="size-10 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg class="size-10 text-gray-500 dark:text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
             </svg>
-            <svg class="ml-1 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="ml-1 h-5 w-5 text-gray-500 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
@@ -66,7 +87,7 @@
         {#if showUserDropdown}
           <div
             id="user-dropdown-menu"
-            class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-hidden"
+            class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-black py-1 shadow-lg ring-1 ring-black/5 focus:outline-hidden"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby="user-menu-button"
