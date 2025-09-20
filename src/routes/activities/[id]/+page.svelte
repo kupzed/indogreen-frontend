@@ -8,15 +8,13 @@
 
   let activityId: string | null = null;
   let activity: any = null;
-  let projects: any[] = []; // For project dropdown in activity forms
-  let vendors: any[] = []; // For vendor dropdown (if 'jenis' is vendor)
+  let projects: any[] = [];
+  let vendors: any[] = [];
   let loadingActivity = true;
   let errorActivity = '';
 
-  // Modal state for Update
   let showEditModal: boolean = false;
 
-  // Form data for Update
   let form = {
     name: '',
     description: '',
@@ -28,69 +26,54 @@
     mitra_id: null as string | null,
     from: '',
     to: '',
-    attachment_removed: false, // Flag to indicate if attachment was removed
+    attachment_removed: false,
   };
-  let formFileName = ''; // To display selected file name
+  let formFileName = '';
 
   const activityKategoriList = [
-    'Expense Report', 'Invoice', 'Purchase Order', 'Payment', 'Quotation',
-    'Faktur Pajak', 'Kasbon', 'Laporan Teknis', 'Surat Masuk', 'Surat Keluar', 'Kontrak'
+    'Expense Report','Invoice','Purchase Order','Payment','Quotation',
+    'Faktur Pajak','Kasbon','Laporan Teknis','Surat Masuk','Surat Keluar','Kontrak'
   ];
-  const activityJenisList = ['Internal', 'Customer', 'Vendor'];
+  const activityJenisList = ['Internal','Customer','Vendor'];
 
   async function fetchActivityDetails() {
-    loadingActivity = true;
-    errorActivity = '';
+    loadingActivity = true; errorActivity = '';
     activityId = $page.params.id;
-    if (!activityId) {
-      errorActivity = 'Activity ID tidak ditemukan.';
-      loadingActivity = false;
-      return;
-    }
+    if (!activityId) { errorActivity = 'Activity ID tidak ditemukan.'; loadingActivity = false; return; }
     try {
       const response = await axiosClient.get(`/activities/${activityId}`);
       activity = response.data.data;
 
-      // Pre-fill edit activity form
       form = {
         name: activity.name,
         description: activity.description,
         project_id: activity.project_id || '',
         kategori: activity.kategori || '',
         activity_date: activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '',
-        attachment: null, // Clear file input for edit, new file will replace
+        attachment: null,
         jenis: activity.jenis || '',
         mitra_id: activity.mitra_id || null,
         from: activity.from || '',
         to: activity.to || '',
         attachment_removed: false,
       };
-      
-      // If jenis is Customer, set mitra_id to the project's mitra_id
       if (form.jenis === 'Customer' && form.project_id) {
         const selectedProject = projects.find(p => p.id == form.project_id);
-        if (selectedProject?.mitra_id) {
-          form.mitra_id = selectedProject.mitra_id;
-        }
+        if (selectedProject?.mitra_id) form.mitra_id = selectedProject.mitra_id;
       }
-      
-      formFileName = activity.attachment ? activity.attachment.split('/').pop() : ''; // Display current attachment name
-
+      formFileName = activity.attachment ? activity.attachment.split('/').pop() : '';
     } catch (err: any) {
       errorActivity = err.response?.data?.message || 'Gagal memuat detail aktivitas.';
       console.error('Error fetching activity details:', err.response || err);
-    } finally {
-      loadingActivity = false;
-    }
+    } finally { loadingActivity = false; }
   }
 
   async function fetchFormDependencies() {
     try {
       const response = await axiosClient.get('/activity/getFormDependencies');
       projects = response.data.projects;
-      vendors = response.data.vendors; // Perbaiki: ambil dari vendors, bukan mitras
+      vendors = response.data.vendors;
 
-      // Enrich projects with mitra object so modal/header can show customer name
       if (Array.isArray(projects) && Array.isArray(vendors)) {
         const vendorMap = new Map(vendors.map((v: any) => [v.id, v]));
         projects = projects.map((p: any) => ({
@@ -108,9 +91,7 @@
     fetchFormDependencies();
   });
 
-  function openEditModal() {
-    showEditModal = true;
-  }
+  function openEditModal() { showEditModal = true; }
 
   async function handleSubmitUpdate() {
     if (!activity?.id) return;
@@ -118,46 +99,28 @@
       const formData = new FormData();
       for (const key in form) {
         const typedKey = key as keyof typeof form;
-        if (typedKey === 'attachment' && form.attachment) {
-          formData.append(typedKey, form.attachment);
-        } else if (typedKey === 'attachment_removed') {
-          formData.append(typedKey, form.attachment_removed ? '1' : '0');
-        } else if (form[typedKey] !== null && form[typedKey] !== undefined) {
-          formData.append(typedKey, form[typedKey] as string | Blob);
-        }
+        if (typedKey === 'attachment' && form.attachment) formData.append(typedKey, form.attachment);
+        else if (typedKey === 'attachment_removed') formData.append(typedKey, form.attachment_removed ? '1' : '0');
+        else if (form[typedKey] !== null && form[typedKey] !== undefined) formData.append(typedKey, form[typedKey] as string | Blob);
       }
 
-      // Handle dynamic mitra_id based on jenis for activity
-      if (form.jenis === 'Internal') {
-        formData.set('mitra_id', '1'); // Asumsi mitra_id 1 adalah 'Internal'
-      } else if (form.jenis === 'Customer') {
+      if (form.jenis === 'Internal') formData.set('mitra_id','1');
+      else if (form.jenis === 'Customer') {
         const selectedProject = projects.find(p => p.id == form.project_id);
-        if (selectedProject?.mitra_id) { // Using project's mitra_id
-          formData.set('mitra_id', selectedProject.mitra_id);
-        } else {
-          formData.delete('mitra_id');
-        }
-      } else if (form.jenis === 'Vendor' && form.mitra_id) {
-        formData.set('mitra_id', form.mitra_id);
-      } else {
-        formData.delete('mitra_id');
-      }
+        if (selectedProject?.mitra_id) formData.set('mitra_id', selectedProject.mitra_id);
+        else formData.delete('mitra_id');
+      } else if (form.jenis === 'Vendor' && form.mitra_id) formData.set('mitra_id', form.mitra_id);
+      else formData.delete('mitra_id');
 
-      formData.append('_method', 'PUT'); // For Laravel to recognize PUT with FormData
+      formData.append('_method', 'PUT');
 
-      await axiosClient.post(`/activities/${activity.id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await axiosClient.post(`/activities/${activity.id}`, formData, { headers: { 'Content-Type':'multipart/form-data' } });
       alert('Aktivitas berhasil diperbarui!');
       goto(`/activities/${activity.id}`);
       showEditModal = false;
-      fetchActivityDetails(); // Refresh details
+      fetchActivityDetails();
     } catch (err: any) {
-      const messages = err.response?.data?.errors
-        ? Object.values(err.response.data.errors).flat().join('\n')
-        : err.response?.data?.message || 'Gagal memperbarui aktivitas.';
+      const messages = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join('\n') : err.response?.data?.message || 'Gagal memperbarui aktivitas.';
       alert('Error:\n' + messages);
       console.error('Update activity failed:', err.response || err);
     }
@@ -165,50 +128,36 @@
 
   async function handleDelete() {
     if (!activity?.id) return;
-    if (confirm('Apakah Anda yakin ingin menghapus aktivitas ini?')) {
-      try {
-        await axiosClient.delete(`/activities/${activity.id}`);
-        alert('Aktivitas berhasil dihapus!');
-        goto('/activities'); // Redirect to activity list
-      } catch (err: any) {
-        alert('Gagal menghapus aktivitas: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
-        console.error('Delete activity failed:', err.response || err);
-      }
+    if (!confirm('Apakah Anda yakin ingin menghapus aktivitas ini?')) return;
+    try {
+      await axiosClient.delete(`/activities/${activity.id}`);
+      alert('Aktivitas berhasil dihapus!');
+      goto('/activities');
+    } catch (err: any) {
+      alert('Gagal menghapus aktivitas: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
+      console.error('Delete activity failed:', err.response || err);
     }
   }
 
-  // Reactive logic for mitra_id dropdown in forms
   let previousJenis = '';
   $: if (showEditModal && form.jenis && form.jenis !== previousJenis && projects.length > 0) {
     previousJenis = form.jenis;
-    
     if (form.jenis === 'Customer') {
       const selectedProject = projects.find(p => p.id == form.project_id);
       form.mitra_id = selectedProject?.mitra_id || null;
     } else if (form.jenis === 'Internal') {
       form.mitra_id = '1';
     } else if (form.jenis === 'Vendor') {
-      // Only reset if current mitra_id is not a valid vendor
-      if (!Array.isArray(vendors) || !vendors.some(v => v.id == form.mitra_id)) {
-        form.mitra_id = '';
-      }
+      if (!Array.isArray(vendors) || !vendors.some(v => v.id == form.mitra_id)) form.mitra_id = '';
     } else {
       form.mitra_id = null;
     }
   }
-
-  // Reactive logic for Customer project changes
   $: if (form.jenis === 'Customer' && form.project_id && projects.length > 0) {
     const selectedProject = projects.find(p => p.id == form.project_id);
-    if (selectedProject?.mitra_id && form.mitra_id !== selectedProject.mitra_id) {
-      form.mitra_id = selectedProject.mitra_id;
-    }
+    if (selectedProject?.mitra_id && form.mitra_id !== selectedProject.mitra_id) form.mitra_id = selectedProject.mitra_id;
   }
-
-  // Reset form saat modal ditutup
-  $: if (!showEditModal) {
-    previousJenis = '';
-  }
+  $: if (!showEditModal) { previousJenis = ''; }
 </script>
 
 <svelte:head>
@@ -216,25 +165,25 @@
 </svelte:head>
 
 {#if loadingActivity}
-  <p>Memuat detail aktivitas...</p>
+  <p class="text-gray-900 dark:text-white">Memuat detail aktivitas...</p>
 {:else if errorActivity}
   <p class="text-red-500">{errorActivity}</p>
 {:else if activity}
   <div class="max-w-1xl mx-auto mb-8">
     <div class="flex justify-between items-center mb-4">
       <div class="flex-1 min-w-0">
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-2xl">
+        <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
           {activity.name}
         </h2>
         <div class="my-2 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
-          <div class="my-2 flex items-center text-sm text-gray-500">
+          <div class="my-2 flex items-center text-sm text-gray-500 dark:text-gray-300">
             <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
             </svg>
             Aktivitas: {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
           </div>
-          <div class="my-2 flex items-center text-sm text-gray-900">
-            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 text-gray-900">
+          <div class="my-2 flex items-center text-sm">
+            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-300">
               {activity.kategori}
             </span>
           </div>
@@ -243,24 +192,24 @@
       <div class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4">
         <button
           on:click={openEditModal}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
           Edit Aktivitas
         </button>
         <button
           on:click={handleDelete}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">
           Hapus Aktivitas
         </button>
       </div>
     </div>
 
-    <div class="bg-white shadow overflow-hidden">
+    <div class="bg-white dark:bg-black shadow overflow-hidden">
       <div class="px-4 py-5 sm:px-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Aktivitas</h3>
+        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Informasi Aktivitas</h3>
       </div>
-      <div class="border-t border-gray-200">
+      <div class="border-t border-gray-200 dark:border-gray-700">
         <ActivityDetail activity={activity} />
       </div>
     </div>
