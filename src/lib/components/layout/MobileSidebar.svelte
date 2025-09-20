@@ -23,7 +23,7 @@
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
-        class="fixed inset-0 bg-black/25"
+        class="fixed inset-0 bg-black/25 dark:bg-neutral-800/40"
         on:click={closeSidebar}
         transition:fade="{{ duration: 150 }}"
       ></div>
