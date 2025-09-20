@@ -1,10 +1,16 @@
 <script lang="ts">
-  // Anda bisa menambahkan script untuk CSS atau logic global spesifik untuk halaman auth
-  // Misalnya, mengimport app.css global jika styling Tailwind CSS diimport di sana
-  import '../../app.css'; 
+  import '../../app.css';
+  import { onMount } from 'svelte';
+  import { theme } from '$lib/stores/theme';
+
+  // Pastikan efek 'html.dark' terpasang juga di layout auth
+  onMount(() => {
+    const unsub = theme.subscribe(() => {});
+    return unsub;
+  });
 </script>
 
-<main class="min-h-screen bg-gray-100">
+<main class="min-h-screen bg-gray-100 text-gray-900 dark:bg-neutral-950 dark:text-gray-100">
   <slot></slot>
 </main>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import axiosClient from '$lib/axiosClient';
+  import { theme, toggleTheme } from '$lib/stores/theme';
 
   let name = '';
   let email = '';
@@ -14,7 +15,6 @@
   async function handleSubmit() {
     if (loading) return;
     error = null;
-    // Validasi sederhana di sisi UI (opsional)
     if (password !== password_confirmation) {
       error = 'Konfirmasi password tidak cocok.';
       return;
@@ -22,15 +22,11 @@
     loading = true;
     try {
       const response = await axiosClient.post('/auth/register', {
-        name,
-        email,
-        password,
-        password_confirmation
+        name, email, password, password_confirmation
       });
       alert('Registrasi berhasil! Silakan login.');
       goto('/auth/login');
     } catch (err: any) {
-      // Tangani error validasi dari Laravel
       const apiErrors = err?.response?.data?.errors;
       if (apiErrors) {
         error = Object.values(apiErrors).flat().join('\n');
@@ -48,23 +44,51 @@
   <title>Register - Indogreen</title>
 </svelte:head>
 
-<div class="absolute inset-0 -z-10 bg-gradient-to-br from-cyan-50 via-white to-indigo-50"></div>
+<!-- Background dengan varian dark -->
+<div class="absolute inset-0 -z-10 bg-gradient-to-br from-cyan-50 via-white to-indigo-50
+            dark:from-neutral-900 dark:via-neutral-950 dark:to-black"></div>
 <div class="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl">
-  <div class="relative left-1/3 aspect-[1155/678] w-[36rem] -translate-x-1/3 bg-gradient-to-tr from-cyan-300 to-indigo-300 opacity-30"></div>
+  <div class="relative left-1/3 aspect-[1155/678] w-[36rem] -translate-x-1/3
+              bg-gradient-to-tr from-cyan-300 to-indigo-300 opacity-30
+              dark:from-cyan-700/40 dark:to-indigo-700/40"></div>
 </div>
 
 <div class="min-h-screen flex items-center justify-center px-6 py-12">
   <div class="w-full max-w-md">
-    
-    <div class="mt-8 rounded-2xl border border-gray-100 bg-white/80 p-6 shadow-xl shadow-cyan-100/30 backdrop-blur">
+    <div class="mt-8 rounded-2xl border border-gray-100 bg-white/80 p-6 shadow-xl shadow-cyan-100/30 backdrop-blur
+                dark:bg-neutral-900/80 dark:border-gray-700 dark:shadow-black/20">
+
+      <!-- Toggle Tema di atas judul -->
+      <div class="flex justify-center mb-3">
+        <button
+          aria-label="Toggle dark mode"
+          class="p-2 rounded-full text-gray-600 hover:bg-gray-100
+                 dark:text-gray-300 dark:hover:bg-neutral-800"
+          on:click={toggleTheme}
+          title={$theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+        >
+          {#if $theme === 'dark'}
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v2m4.95 2.05-1.41 1.41M21 12h-2m-4 6l1.41 1.41M12 19v2M6.46 17.95l1.41-1.41M5 12H3m3.05-4.95L7.46 8.46M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+            </svg>
+          {:else}
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 12.79A9 9 0 1111.21 3c-.09.88.27 1.75.92 2.4a5 5 0 006.47 6.47c.65.65 1.52 1.01 2.4.92z"/>
+            </svg>
+          {/if}
+        </button>
+      </div>
+
       <form class="space-y-5" on:submit|preventDefault={handleSubmit} aria-busy={loading}>
-        <!-- Judul -->
         <div class="text-center">
-          <h2 class="text-2xl font-bold tracking-tight text-gray-900">Register</h2>
+          <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Register</h2>
         </div>
+
         <!-- Nama -->
         <div>
-          <label for="name" class="mb-1 block text-sm font-medium text-gray-700">Nama Lengkap</label>
+          <label for="name" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Lengkap</label>
           <div class="relative">
             <input
               id="name"
@@ -73,10 +97,12 @@
               placeholder="Nama Lengkap"
               bind:value={name}
               required
-              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70"
+              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400
+                     focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70
+                     dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700"
               disabled={loading}
             />
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
               <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M12 14c3.866 0 7 1.79 7 4v2H5v-2c0-2.21 3.134-4 7-4z"/><circle cx="12" cy="7" r="4"/>
               </svg>
@@ -86,7 +112,7 @@
 
         <!-- Email -->
         <div>
-          <label for="email" class="mb-1 block text-sm font-medium text-gray-700">Email</label>
+          <label for="email" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
           <div class="relative">
             <input
               id="email"
@@ -96,10 +122,12 @@
               bind:value={email}
               autocomplete="email"
               required
-              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70"
+              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400
+                     focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70
+                     dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700"
               disabled={loading}
             />
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
               <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M4 6l8 5 8-5"/><path d="M4 6v12h16V6"/>
               </svg>
@@ -109,7 +137,7 @@
 
         <!-- Password -->
         <div>
-          <label for="password" class="mb-1 block text-sm font-medium text-gray-700">Password</label>
+          <label for="password" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
           <div class="relative">
             <input
               id="password"
@@ -118,17 +146,19 @@
               placeholder="Minimal 8 karakter"
               bind:value={password}
               required
-              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70"
+              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400
+                     focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70
+                     dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700"
               disabled={loading}
             />
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
               <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M12 15v2m-6 1h12a2 2 0 002-2v-3a2 2 0 00-2-2H6a2 2 0 00-2 2v3a2 2 0 002 2z"/><path d="M8 11V7a4 4 0 118 0v4"/>
               </svg>
             </div>
             <button
               type="button"
-              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 disabled:cursor-not-allowed"
               on:click={() => (showPassword = !showPassword)}
               disabled={loading}
               aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
@@ -149,7 +179,7 @@
 
         <!-- Konfirmasi Password -->
         <div>
-          <label for="password_confirmation" class="mb-1 block text-sm font-medium text-gray-700">Konfirmasi Password</label>
+          <label for="password_confirmation" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Konfirmasi Password</label>
           <div class="relative">
             <input
               id="password_confirmation"
@@ -158,17 +188,19 @@
               placeholder="Ulangi password"
               bind:value={password_confirmation}
               required
-              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70"
+              class="peer block w-full rounded-xl border border-gray-300 bg-white px-11 py-3 text-gray-900 placeholder:text-gray-400
+                     focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 disabled:opacity-70
+                     dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700"
               disabled={loading}
             />
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
               <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M12 15v2m-6 1h12a2 2 0 002-2v-3a2 2 0 00-2-2H6a2 2 0 00-2 2v3a2 2 0 002 2z"/><path d="M8 11V7a4 4 0 118 0v4"/>
               </svg>
             </div>
             <button
               type="button"
-              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
+              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-200 disabled:cursor-not-allowed"
               on:click={() => (showPassword2 = !showPassword2)}
               disabled={loading}
               aria-label={showPassword2 ? 'Sembunyikan konfirmasi' : 'Tampilkan konfirmasi'}
@@ -188,19 +220,20 @@
         </div>
 
         {#if error}
-          <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 whitespace-pre-line">
+          <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 whitespace-pre-line
+                      dark:bg-red-900/30 dark:border-red-800 dark:text-red-200">
             {error}
           </div>
         {/if}
 
         <button
           type="submit"
-          class="group relative inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-indigo-300/40 transition hover:bg-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed"
+          class="group relative inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white shadow-lg shadow-indigo-300/40 transition hover:bg-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed
+                 dark:shadow-indigo-900/30"
           disabled={loading}
           aria-disabled={loading}
         >
           {#if loading}
-            <!-- Spinner -->
             <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
@@ -215,9 +248,9 @@
         </button>
       </form>
 
-      <p class="mt-6 text-center text-sm text-gray-600">
+      <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
         Sudah punya akun?
-        <a href="/auth/login" class="font-semibold text-indigo-600 hover:text-indigo-500">Login disini</a>
+        <a href="/auth/login" class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">Login disini</a>
       </p>
     </div>
   </div>
