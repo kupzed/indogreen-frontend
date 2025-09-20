@@ -22,19 +22,19 @@
   let lastPage: number = 1;
   let totalProjects: number = 0;
 
-  // State baru untuk toggle tampilan
+  // toggle tampilan
   let activeView: 'table' | 'list' = 'table';
 
-  // Modal state for Create/Update
-  let showCreateModal: boolean = false;
-  let showEditModal: boolean = false;
-  let editingProject: any = null; // Data project yang sedang diedit
-  
-  // Drawer state for project detail
-  let showDetailDrawer: boolean = false;
-  let selectedProject: any = null; // Data project yang dipilih untuk detail
+  // modal
+  let showCreateModal = false;
+  let showEditModal = false;
+  let editingProject: any = null;
 
-  // Form data for Create/Update
+  // drawer
+  let showDetailDrawer = false;
+  let selectedProject: any = null;
+
+  // form
   let form = {
     name: '',
     description: '',
@@ -48,13 +48,14 @@
     no_so: '',
     is_cert_projects: false,
   };
+
   const projectStatuses = ['Ongoing', 'Prospect', 'Complete', 'Cancel'];
   const projectKategoris = [
-    'PLTS Hybrid', 
-    'PLTS Ongrid', 
-    'PLTS Offgrid', 
-    'PJUTS All In One', 
-    'PJUTS Two In One', 
+    'PLTS Hybrid',
+    'PLTS Ongrid',
+    'PLTS Offgrid',
+    'PJUTS All In One',
+    'PJUTS Two In One',
     'PJUTS Konvensional'
   ];
 
@@ -64,7 +65,7 @@
     try {
       const response = await axiosClient.get('/projects', {
         params: {
-          search: search,
+          search,
           status: statusFilter,
           kategori: kategoriFilter,
           is_cert_projects: certProjectFilter || undefined,
@@ -88,27 +89,21 @@
   async function fetchCustomers() {
     try {
       const response = await axiosClient.get('/mitra/customers');
-      console.log('DATA CUSTOMERS:', response.data.data);
       customers = response.data.data;
     } catch (err) {
       console.error('Failed to fetch customers:', err);
-      // Handle error, maybe show a message to the user
     }
   }
 
   onMount(() => {
     fetchProjects();
     fetchCustomers();
-    
-    // Add click outside listener
     document.addEventListener('click', handleClickOutside);
-    
-      return () => {
-    document.removeEventListener('click', handleClickOutside);
-  };
+    return () => document.removeEventListener('click', handleClickOutside);
   });
+
   function handleFilterOrSearch() {
-    currentPage = 1; // Reset halaman saat filter/search berubah
+    currentPage = 1;
     fetchProjects();
   }
 
@@ -134,8 +129,6 @@
     }
   }
 
-
-
   function goToPage(page: number) {
     if (page > 0 && page <= lastPage) {
       currentPage = page;
@@ -144,7 +137,6 @@
   }
 
   function openCreateModal() {
-    // Reset form for new project
     form = {
       name: '',
       description: '',
@@ -163,9 +155,8 @@
 
   function openEditModal(project: any) {
     editingProject = { ...project };
-    // Set form data
-    form = { 
-      ...editingProject, 
+    form = {
+      ...editingProject,
       mitra_id: editingProject.mitra_id || '',
       is_cert_projects: editingProject.is_cert_projects || false,
     };
@@ -183,7 +174,7 @@
       alert('Project berhasil ditambahkan!');
       goto(`/projects`);
       showCreateModal = false;
-      fetchProjects(); // Refresh daftar
+      fetchProjects();
     } catch (err: any) {
       const messages = err.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join('\n')
@@ -200,7 +191,7 @@
       alert('Project berhasil diperbarui!');
       goto(`/projects`);
       showEditModal = false;
-      fetchProjects(); // Refresh daftar
+      fetchProjects();
     } catch (err: any) {
       const messages = err.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join('\n')
@@ -216,7 +207,7 @@
         await axiosClient.delete(`/projects/${projectId}`);
         alert('Project berhasil dihapus!');
         goto(`/projects`);
-        fetchProjects(); // Refresh daftar
+        fetchProjects();
       } catch (err: any) {
         alert('Gagal menghapus project: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
         console.error('Delete project failed:', err.response || err);
@@ -224,14 +215,14 @@
     }
   }
 
-  // Helper function for badge colors (from existing code)
+  // === Konsisten dengan dashboard: badge status dark ===
   function getStatusBadgeClasses(status: string) {
     switch (status) {
-      case 'Complete': return 'bg-green-100 text-green-800';
-      case 'Ongoing': return 'bg-blue-100 text-blue-800';
-      case 'Prospect': return 'bg-yellow-100 text-yellow-800';
-      case 'Cancel': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Complete': return 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200';
+      case 'Ongoing': return 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200';
+      case 'Prospect': return 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200';
+      case 'Cancel': return 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200';
+      default: return 'bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200';
     }
   }
 </script>
@@ -240,27 +231,51 @@
   <title>Daftar Project - Indogreen</title>
 </svelte:head>
 
+<!-- Filter bar -->
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
-    <select bind:value={statusFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+    <select
+      bind:value={statusFilter}
+      on:change={handleFilterOrSearch}
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold
+             bg-white text-gray-900 border border-gray-300
+             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+    >
       <option value="">Filter Status: Semua</option>
       {#each projectStatuses as status}
         <option value={status}>{status}</option>
       {/each}
     </select>
-    <select bind:value={kategoriFilter} on:change={handleFilterOrSearch} class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
+
+    <select
+      bind:value={kategoriFilter}
+      on:change={handleFilterOrSearch}
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold
+             bg-white text-gray-900 border border-gray-300
+             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+    >
       <option value="">Filter Kategori: Semua</option>
       {#each projectKategoris as kategori}
         <option value={kategori}>{kategori}</option>
       {/each}
     </select>
-    <div class="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300">
-      <input type="checkbox" id="cert_project_filter" bind:checked={certProjectFilter} on:change={handleFilterOrSearch} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
-      <label for="cert_project_filter" class="text-sm text-gray-900 whitespace-nowrap">
+
+    <div class="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-semibold
+                bg-white text-gray-900 border border-gray-300
+                dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
+      <input
+        type="checkbox"
+        id="cert_project_filter"
+        bind:checked={certProjectFilter}
+        on:change={handleFilterOrSearch}
+        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded dark:border-gray-700"
+      />
+      <label for="cert_project_filter" class="text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
         Certificate
       </label>
     </div>
   </div>
+
   <div class="w-full sm:w-auto flex-grow">
     <div class="relative w-full sm:w-auto">
       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -273,26 +288,34 @@
         placeholder="Cari project..."
         bind:value={search}
         on:input={handleFilterOrSearch}
-        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        class="block w-full pl-10 pr-3 py-2 border rounded-md leading-5
+               bg-white text-gray-900 placeholder-gray-500 border-gray-300
+               focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm
+               dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700"
       />
     </div>
   </div>
+
   <button
     on:click={openCreateModal}
-    class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+    class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm
+           text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+           dark:focus:ring-offset-gray-800"
   >
     Tambah Project
   </button>
 </div>
 
+<!-- Switch Table/Simple -->
 <div class="flex items-center justify-between mb-4">
-  <div class="p-1 bg-gray-200 rounded-lg inline-flex" role="tablist">
+  <div class="p-1 bg-gray-200 dark:bg-gray-700 rounded-lg inline-flex" role="tablist">
     <button
       on:click={() => (activeView = 'table')}
-      class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
-      class:bg-white={activeView === 'table'}
+      class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200
+             text-gray-700 dark:text-gray-200"
       class:shadow={activeView === 'table'}
-      class:text-gray-600={activeView !== 'table'}
+      class:bg-white={activeView === 'table'}
+      class:dark:bg-neutral-900={activeView === 'table'}
       role="tab"
       aria-selected={activeView === 'table'}
     >
@@ -300,27 +323,28 @@
     </button>
     <button
       on:click={() => (activeView = 'list')}
-      class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
-      class:bg-white={activeView === 'list'}
+      class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200
+             text-gray-700 dark:text-gray-200"
       class:shadow={activeView === 'list'}
-      class:text-gray-600={activeView !== 'list'}
+      class:bg-white={activeView === 'list'}
+      class:dark:bg-neutral-900={activeView === 'list'}
       role="tab"
       aria-selected={activeView === 'list'}
     >
       Simple
     </button>
   </div>
-  
+
+  <!-- Date filter -->
   <div class="relative">
     <button
       on:click={toggleDateFilter}
-      class="date-filter-button px-3 py-2 rounded-md text-sm font-semibold border hover:bg-gray-50 flex items-center space-x-1 transition-colors"
+      class="date-filter-button px-3 py-2 rounded-md text-sm font-semibold border flex items-center space-x-1 transition-colors
+             bg-white text-gray-900 border-gray-300 hover:bg-gray-50
+             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-neutral-800"
       class:bg-indigo-50={dateFromFilter || dateToFilter}
       class:border-indigo-300={dateFromFilter || dateToFilter}
       class:text-indigo-700={dateFromFilter || dateToFilter}
-      class:bg-white={!dateFromFilter && !dateToFilter}
-      class:border-gray-300={!dateFromFilter && !dateToFilter}
-      class:text-gray-900={!dateFromFilter && !dateToFilter}
     >
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -333,14 +357,15 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
       </svg>
     </button>
-    
+
     {#if showDateFilter}
-      <div 
-        class="date-filter-dropdown absolute right-0 mt-2 w-80 bg-white border border-gray-300 rounded-md shadow-lg z-10 p-4"
+      <div
+        class="date-filter-dropdown absolute right-0 mt-2 w-80 bg-white border border-gray-300 rounded-md shadow-lg z-10 p-4
+               dark:bg-neutral-900 dark:border-gray-700"
       >
         <div class="space-y-3">
           {#if dateFromFilter || dateToFilter}
-            <div class="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+            <div class="text-xs text-gray-500 bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 p-2 rounded">
               {#if dateFromFilter && dateToFilter}
                 Filter: {new Date(dateFromFilter).toLocaleDateString('id-ID')} - {new Date(dateToFilter).toLocaleDateString('id-ID')}
               {:else if dateFromFilter}
@@ -352,28 +377,31 @@
           {/if}
           <div>
             <!-- svelte-ignore a11y_label_has_associated_control -->
-            <label class="block text-sm font-medium text-gray-700 mb-1">Dari Tanggal</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal</label>
             <input
               type="date"
               bind:value={dateFromFilter}
               on:change={handleFilterOrSearch}
-              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
+                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
             />
           </div>
           <div>
             <!-- svelte-ignore a11y_label_has_associated_control -->
-            <label class="block text-sm font-medium text-gray-700 mb-1">Sampai Tanggal</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sampai Tanggal</label>
             <input
               type="date"
               bind:value={dateToFilter}
               on:change={handleFilterOrSearch}
-              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
+                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
             />
           </div>
           <div class="flex space-x-2 pt-2">
             <button
               on:click={clearFilters}
-              class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200"
+              class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200
+                     dark:text-gray-200 dark:bg-neutral-800 dark:border-gray-700 dark:hover:bg-neutral-700"
             >
               Clear All
             </button>
@@ -391,36 +419,34 @@
 </div>
 
 {#if loading}
-  <p>Memuat project...</p>
+  <p class="text-gray-900 dark:text-white">Memuat project...</p>
 {:else if error}
   <p class="text-red-500">{error}</p>
 {:else if projects.length === 0}
-  <div class="bg-white shadow overflow-hidden sm:rounded-md">
-    <ul class="divide-y divide-gray-200">
+  <div class="bg-white dark:bg-black shadow overflow-hidden sm:rounded-md">
+    <ul class="divide-y divide-gray-200 dark:divide-gray-700">
       <li class="px-4 py-4 sm:px-6">
-        <p class="text-sm text-gray-500">Belum ada project.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-300">Belum ada project.</p>
       </li>
     </ul>
   </div>
 {:else}
   {#if activeView === 'list'}
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-      <ul class="divide-y divide-gray-200">
+    <div class="bg-white dark:bg-black shadow overflow-hidden sm:rounded-md">
+      <ul class="divide-y divide-gray-200 dark:divide-gray-700">
         {#each projects as project (project.id)}
           <li>
-            <a href={`/projects/${project.id}`} class="block hover:bg-gray-50 px-4 py-4 sm:px-6">
+            <a href={`/projects/${project.id}`} class="block hover:bg-gray-50 dark:hover:bg-neutral-950 px-4 py-4 sm:px-6">
               <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-indigo-600 truncate">
+                <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">
                   {project.name}
                 </p>
                 <div class="ml-2 flex-shrink-0 flex space-x-2">
-                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
-                    {getStatusBadgeClasses(project.status)}"
-                  >
+                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(project.status)}">
                     {project.status}
                   </span>
                   {#if project.is_cert_projects}
-                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-purple-100 text-purple-800">
+                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
                       Certificate
                     </span>
                   {/if}
@@ -428,11 +454,11 @@
               </div>
               <div class="mt-2 sm:flex sm:justify-between">
                 <div class="sm:flex">
-                  <p class="flex items-center text-sm text-gray-500">
+                  <p class="flex items-center text-sm text-gray-500 dark:text-gray-300">
                     Customer: {project.mitra?.nama || '-'} | Deskripsi: {project.description.substring(0, 50)}{project.description.length > 50 ? '...' : ''}
                   </p>
                 </div>
-                <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-300 sm:mt-0">
                   <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                   </svg>
@@ -442,105 +468,81 @@
                 </div>
               </div>
             </a>
+
             <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
-              <button 
-                on:click|stopPropagation={() => openDetailDrawer(project)} 
-                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">
+              <button on:click|stopPropagation={() => openDetailDrawer(project)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">
                 Detail
               </button>
-              <button
-                on:click|stopPropagation={() => openEditModal(project)}
-                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
+              <button on:click|stopPropagation={() => openEditModal(project)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
                 Edit
               </button>
-              <button
-                on:click|stopPropagation={() => handleDelete(project.id)}
-                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
+              <button on:click|stopPropagation={() => handleDelete(project.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">
                 Hapus
               </button>
             </div>
           </li>
         {/each}
       </ul>
+
       {#if projects.length > 0}
-        <Pagination 
-          currentPage={currentPage} 
-          lastPage={lastPage} 
-          onPageChange={goToPage} 
-          totalItems={totalProjects} 
-          itemsPerPage={10} 
+        <Pagination
+          currentPage={currentPage}
+          lastPage={lastPage}
+          onPageChange={goToPage}
+          totalItems={totalProjects}
+          itemsPerPage={10}
         />
       {/if}
     </div>
   {/if}
 
   {#if activeView === 'table'}
-    <div class="mt-4 bg-white shadow-md rounded-lg">
+    <div class="mt-4 bg-white dark:bg-black shadow-md rounded-lg">
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-300">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-neutral-900">
             <tr>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Nama Project
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Lokasi
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Tahun
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Kategori
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Status
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Dilaksanakan
-              </th>
-              <th scope="col" class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Aksi
-              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Nama Project</th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Lokasi</th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Tahun</th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Kategori</th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Status</th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Dilaksanakan</th>
+              <th scope="col" class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Aksi</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 bg-white">
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-black">
             {#each projects as project (project.id)}
               <tr>
-                <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                  <a href={`/projects/${project.id}`} class="text-indigo-600 hover:text-indigo-900" title="Detail">
+                <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <a href={`/projects/${project.id}`} class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300" title="Detail">
                     {project.name}
-                  </a>
-                  <br>
-                  <span class="text-xs text-gray-500">{project.mitra.nama}</span>
+                  </a><br>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">{project.mitra.nama}</span>
                 </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   {project.lokasi.substring(0, 40)}{project.lokasi.length > 40 ? '...' : ''}
                 </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   {new Date(project.start_date).toLocaleDateString('id-ID', { year: 'numeric' })}
                 </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   {project.kategori || '-'}
                 </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   <div class="flex items-center">
-                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5
-                      {getStatusBadgeClasses(project.status)}"
-                    >
+                    <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(project.status)}">
                       {project.status}
                     </span>
                     {#if project.is_cert_projects}
-                      <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-purple-100 text-purple-800 ml-2">
+                      <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 ml-2">
                         Certificate
                       </span>
                     {/if}
                   </div>
                 </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {new Date(project.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  <br>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
+                  {new Date(project.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}<br>
                   {#if project.finish_date}
                     {new Date(project.finish_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                   {:else}
@@ -549,19 +551,17 @@
                 </td>
                 <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                   <div class="flex items-left space-x-2">
-                    <button on:click={() => openDetailDrawer(project)} class="text-yellow-600 hover:text-yellow-900" title="Detail">
+                    <button on:click={() => openDetailDrawer(project)} class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" title="Detail">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {project.name}</span>
                     </button>
-                    <button on:click|stopPropagation={() => openEditModal(project)} title="Edit" class="text-blue-600 hover:text-blue-900">
+                    <button on:click|stopPropagation={() => openEditModal(project)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-											</svg>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                       <span class="sr-only">Edit, {project.name}</span>
                     </button>
-                    <button
-                      on:click|stopPropagation={() => handleDelete(project.id)}
-                      title="Delete" class="text-red-600 hover:text-red-900">
+                    <button on:click|stopPropagation={() => handleDelete(project.id)} title="Delete" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                       <span class="sr-only">Hapus, {project.name}</span>
                     </button>
@@ -572,20 +572,21 @@
           </tbody>
         </table>
       </div>
+
       {#if projects.length > 0}
-        <Pagination 
-          currentPage={currentPage} 
-          lastPage={lastPage} 
-          onPageChange={goToPage} 
-          totalItems={totalProjects} 
-          itemsPerPage={10} 
+        <Pagination
+          currentPage={currentPage}
+          lastPage={lastPage}
+          onPageChange={goToPage}
+          totalItems={totalProjects}
+          itemsPerPage={10}
         />
       {/if}
     </div>
   {/if}
 {/if}
 
-
+<!-- Modals -->
 <ProjectFormModal
   bind:show={showCreateModal}
   title="Form Project Baru"
@@ -612,11 +613,7 @@
   />
 {/if}
 
-<!-- Project Detail Drawer -->
-<Drawer 
-  bind:show={showDetailDrawer} 
-  title="Detail Project"
-  on:close={() => showDetailDrawer = false}
->
+<!-- Drawer detail -->
+<Drawer bind:show={showDetailDrawer} title="Detail Project" on:close={() => (showDetailDrawer = false)}>
   <ProjectDetail project={selectedProject} />
 </Drawer>
