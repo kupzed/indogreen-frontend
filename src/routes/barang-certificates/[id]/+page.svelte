@@ -29,9 +29,7 @@
     try {
       const res = await axiosClient.get('/barang-certificate/getFormDependencies');
       mitras = res.data?.data?.mitras ?? res.data?.mitras ?? [];
-    } catch (err) {
-      // ignore
-    }
+    } catch (err) { /* ignore */ }
   }
 
   async function fetchDetail() {
@@ -96,43 +94,47 @@
 </svelte:head>
 
 {#if loading}
-  <p>Memuat detail...</p>
+  <p class="text-gray-900 dark:text-white">Memuat detail...</p>
 {:else if error}
   <p class="text-red-500">{error}</p>
 {:else if !item}
-  <p>Data tidak ditemukan.</p>
+  <p class="text-gray-900 dark:text-white">Data tidak ditemukan.</p>
 {:else}
   <div class="max-w-1xl mx-auto mb-8">
     <div class="flex justify-between items-center mb-4">
       <div class="flex-1 min-w-0">
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-2xl">
+        <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
           {item.name}
         </h2>
-        <div class="my-2 text-sm text-gray-500">
+        <div class="my-2 text-sm text-gray-500 dark:text-gray-300">
           <span>No. Seri: {item.no_seri}</span>
         </div>
       </div>
       <div class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4">
         <button
           on:click={openEditModal}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                 dark:focus:ring-offset-gray-800"
         >
           Edit
         </button>
         <button
           on:click={handleDelete}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+                 dark:focus:ring-offset-gray-800"
         >
           Hapus
         </button>
       </div>
     </div>
 
-    <div class="bg-white shadow overflow-hidden">
+    <div class="bg-white dark:bg-black shadow overflow-hidden">
       <div class="px-4 py-5 sm:px-6">
-        <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Barang Certificate</h3>
+        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Informasi Barang Certificate</h3>
       </div>
-      <div class="border-t border-gray-200">
+      <div class="border-t border-gray-200 dark:border-gray-700">
         <BarangCertificatesDetail barangCertificates={item} />
       </div>
     </div>
