@@ -1,13 +1,35 @@
-/* src/app.css */
+/* =========================================================
+   Tailwind + Fonts
+   =======================================================*/
 @import 'tailwindcss';
-
 @import '@fontsource/fira-mono';
 
-/* Aktifkan dark mode berbasis class .dark di elemen html */
+/* OPSIONAL: Flatpickr CSS (kalau kamu pakai svelte-flatpickr/flatpickr)
+   Hapus komentar ini jika diperlukan.
+   @import "flatpickr/dist/flatpickr.min.css";
+   @import "flatpickr/dist/themes/dark.css";
+*/
+
+/* =========================================================
+   Dark mode berbasis class `.dark` (Tailwind v4)
+   - Mengaktifkan varian `dark:` saat elemen <html> memiliki class `dark`
+   =======================================================*/
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* (opsional) style global ringan */
+/* =========================================================
+   Skema warna global untuk komponen native (form, date picker, scrollbar)
+   - Membantu browser memilih warna default gelap/terang pada kontrol native
+   =======================================================*/
+html {
+	color-scheme: light;
+}
+.dark {
+	color-scheme: dark;
+}
 
+/* =========================================================
+   Scrollbar (konsisten light/dark) via CSS variables
+   =======================================================*/
 :root {
 	--sb-track: theme(colors.white);
 	--sb-thumb: theme(colors.gray.300);
@@ -21,7 +43,7 @@
 /* Firefox */
 html {
 	scrollbar-width: thin; /* auto | thin | none */
-	scrollbar-color: var(--sb-thumb) var(--sb-track); /* thumb track */
+	scrollbar-color: var(--sb-thumb) var(--sb-track); /* thumb | track */
 }
 
 /* WebKit (Chromium, Safari) */
@@ -35,7 +57,7 @@ html {
 *::-webkit-scrollbar-thumb {
 	background-color: var(--sb-thumb);
 	border-radius: 9999px;
-	border: 2px solid transparent; /* biar ada padding */
+	border: 2px solid transparent; /* padding agar thumb tidak terlalu tebal */
 	background-clip: padding-box;
 }
 *::-webkit-scrollbar-thumb:hover {
@@ -45,11 +67,38 @@ html {
 	background-color: theme(colors.gray.500);
 }
 
-/* Saat .dark aktif, gunakan palette lebih gelap */
+/* =========================================================
+   Native <input type="date"> (popup kalender bawaan browser)
+   - Tidak semua browser mengizinkan full styling popup,
+     tapi color-scheme + indikator kalender ini membantu.
+   =======================================================*/
+
+/* Ikon kalender (mode terang): sedikit di-gelapkan agar kontras */
+input[type='date']::-webkit-calendar-picker-indicator {
+	filter: invert(0.2) contrast(1.2) opacity(0.9);
+}
+
+/* Ikon kalender (mode gelap): dibuat terang & kontras */
+.dark input[type='date']::-webkit-calendar-picker-indicator {
+	filter: invert(0.2) brightness(1.2) contrast(1.1) opacity(0.95);
+}
+
+/* Tambahan: pastikan kontrol tanggal/time ikut dark UI */
+.dark input[type='date'],
+.dark input[type='time'],
+.dark input[type='datetime-local'],
+.dark input[type='month'] {
+	color-scheme: dark; /* dorong UI kontrol jadi gelap (Chromium/Edge/Safari baru) */
+}
+
+/* =========================================================
+   Flatpickr (kalau dipakai) — tema gelap konsisten dengan dashboard
+   - Berlaku saat class `.dark` ada di <html>
+   =======================================================*/
 .dark .flatpickr-calendar {
-	background: #0a0a0a;
-	border-color: #374151;
-	color: #e5e7eb;
+	background: #0a0a0a; /* ~ bg-black/neutral-950 */
+	border-color: #374151; /* gray-700 */
+	color: #e5e7eb; /* gray-200 */
 }
 .dark .flatpickr-months,
 .dark .flatpickr-weekdays,
@@ -57,26 +106,35 @@ html {
 	background: transparent;
 	color: #e5e7eb;
 }
+
+/* Hari "today" diberi outline/tepi bernuansa indigo */
 .dark .flatpickr-day.today {
-	border-color: #6366f1;
+	border-color: #6366f1; /* indigo-500 */
 }
+
+/* Hari terpilih / rentang */
 .dark .flatpickr-day.selected,
 .dark .flatpickr-day.startRange,
 .dark .flatpickr-day.endRange {
-	background: #4f46e5;
-	color: white;
+	background: #4f46e5; /* indigo-600 */
+	color: #ffffff;
 }
 
-/* Terang: bikin ikon agak gelap biar kontras */
-input[type='date']::-webkit-calendar-picker-indicator {
-	filter: invert(0.2) contrast(1.2) opacity(0.9);
+/* Hover state hari di dark mode (sedikit gelap) */
+.dark .flatpickr-day:hover {
+	background: #111827; /* gray-900 */
 }
 
-/* Gelap: bikin ikon jadi terang & lebih kontras */
-.dark input[type='date']::-webkit-calendar-picker-indicator {
-	filter: invert(1) brightness(1.2) contrast(1.1) opacity(0.95);
+/* Navigasi bulan (panah & label) agar kontras di dark mode */
+.dark .flatpickr-months .flatpickr-prev-month,
+.dark .flatpickr-months .flatpickr-next-month,
+.dark .flatpickr-current-month {
+	color: #e5e7eb;
 }
 
+/* =========================================================
+   Global base
+   =======================================================*/
 body {
 	min-height: 100%;
 }
