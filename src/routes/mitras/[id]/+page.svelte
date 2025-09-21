@@ -90,10 +90,7 @@
     try {
       const response = await axiosClient.get(`/mitras/${mitraId}`);
       mitra = response.data.data;
-
-      // Pre-fill edit mitra form
       form = { ...mitra };
-
     } catch (err: any) {
       errorMitra = err.response?.data?.message || 'Gagal memuat detail mitra.';
       console.error('Error fetching mitra details:', err.response || err);
@@ -106,9 +103,7 @@
     fetchMitraDetails();
   });
 
-  function openEditModal() {
-    showEditModal = true;
-  }
+  function openEditModal() { showEditModal = true; }
 
   async function handleSubmitUpdate() {
     if (!mitra?.id) return;
@@ -117,7 +112,7 @@
       alert('Mitra berhasil diperbarui!');
       goto(`/mitras/${mitra.id}`);
       showEditModal = false;
-      fetchMitraDetails(); // Refresh details
+      fetchMitraDetails();
     } catch (err: any) {
       const messages = err.response?.data?.errors
         ? Object.values(err.response.data.errors).flat().join('\n')
@@ -133,7 +128,7 @@
       try {
         await axiosClient.delete(`/mitras/${mitra.id}`);
         alert('Mitra berhasil dihapus!');
-        goto('/mitras'); // Redirect to mitra list
+        goto('/mitras');
       } catch (err: any) {
         alert('Gagal menghapus mitra: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
         console.error('Delete mitra failed:', err.response || err);
@@ -141,29 +136,30 @@
     }
   }
 
-  // Helper for badge colors
+  // Helper untuk badge
   function getKategoriBadgeColor(kategori: string) {
+    // badge konsisten: tint di light, deep di dark
+    const base =
+      'inline-flex rounded-full px-2 text-xs font-semibold leading-5';
     switch (kategori) {
-      case 'Pribadi': return 'bg-indigo-600';
-      case 'Perusahaan': return 'bg-indigo-600';
-      case 'Customer': return 'bg-indigo-600';
-      case 'Vendor': return 'bg-indigo-600';
-      default: return 'bg-gray-500';
+      case 'Pribadi':
+      case 'Perusahaan':
+      case 'Customer':
+      case 'Vendor':
+        return `${base} bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200`;
+      default:
+        return `${base} bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200`;
     }
   }
 
-  // ===== Barang Certificates handlers (filtered by this mitra) =====
+  // ===== Barang Certificates handlers =====
   async function fetchBarangCertificates() {
     if (!mitra?.id) return;
     bcLoading = true;
     bcError = '';
     try {
       const res = await axiosClient.get('/barang-certificates', {
-        params: {
-          search: bcSearch,
-          mitra_id: mitra.id,
-          page: bcCurrentPage
-        }
+        params: { search: bcSearch, mitra_id: mitra.id, page: bcCurrentPage }
       });
       bcItems = res.data?.data ?? [];
       bcCurrentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
@@ -177,42 +173,18 @@
     }
   }
 
-  function bcHandleSearchChange() {
-    bcCurrentPage = 1;
-    fetchBarangCertificates();
-  }
-
-  function bcGoToPage(page: number) {
-    if (page > 0 && page <= bcLastPage) {
-      bcCurrentPage = page;
-      fetchBarangCertificates();
-    }
-  }
-
-  function bcOpenCreateModal() {
-    if (!mitra?.id) return;
-    bcForm = { name: '', no_seri: '', mitra_id: mitra.id };
-    bcShowCreateModal = true;
-  }
-
+  function bcHandleSearchChange() { bcCurrentPage = 1; fetchBarangCertificates(); }
+  function bcGoToPage(page: number) { if (page > 0 && page <= bcLastPage) { bcCurrentPage = page; fetchBarangCertificates(); } }
+  function bcOpenCreateModal() { if (!mitra?.id) return; bcForm = { name: '', no_seri: '', mitra_id: mitra.id }; bcShowCreateModal = true; }
   function bcOpenEditModal(item: BarangCertificate) {
     bcEditingItem = { ...item };
-    bcForm = {
-      name: item.name ?? '',
-      no_seri: item.no_seri ?? '',
-      mitra_id: mitra?.id ?? ''
-    };
+    bcForm = { name: item.name ?? '', no_seri: item.no_seri ?? '', mitra_id: mitra?.id ?? '' };
     bcShowEditModal = true;
   }
-
-  function bcOpenDetailDrawer(item: BarangCertificate) {
-    bcSelectedItem = { ...item };
-    bcShowDetailDrawer = true;
-  }
+  function bcOpenDetailDrawer(item: BarangCertificate) { bcSelectedItem = { ...item }; bcShowDetailDrawer = true; }
 
   async function bcHandleSubmitCreate() {
     try {
-      // Force assign current mitra
       if (mitra?.id) bcForm.mitra_id = mitra.id;
       await axiosClient.post('/barang-certificates', bcForm);
       alert('Data berhasil ditambahkan');
@@ -256,7 +228,6 @@
     }
   }
 
-  // First-time load when switching to barang tab
   $: if (activeTab === 'barang' && mitra?.id && !bcInitialized) {
     bcInitialized = true;
     fetchBarangCertificates();
@@ -268,50 +239,54 @@
 </svelte:head>
 
 {#if loadingMitra}
-  <p>Memuat detail mitra...</p>
+  <p class="text-gray-900 dark:text-white">Memuat detail mitra...</p>
 {:else if errorMitra}
   <p class="text-red-500">{errorMitra}</p>
 {:else if mitra}
   <div class="max-w-1xl mx-auto mb-8">
     <div class="flex justify-between items-center mb-4">
       <div class="flex-1 min-w-0">
-        <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-2xl">
+        <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-2xl">
           {mitra.nama}
         </h2>
         <div class="my-2 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
-          <div class="my-2 flex items-center text-sm text-gray-500">
-            {#if mitra.is_pribadi}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Pribadi')} text-white mr-1">Pribadi</span>{/if}
-            {#if mitra.is_perusahaan}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Perusahaan')} text-white mr-1">Perusahaan</span>{/if}
-            {#if mitra.is_customer}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Customer')} text-white mr-1">Customer</span>{/if}
-            {#if mitra.is_vendor}<span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getKategoriBadgeColor('Vendor')} text-white mr-1">Vendor</span>{/if}
+          <div class="my-2 flex items-center text-sm text-gray-500 dark:text-gray-300">
+            {#if mitra.is_pribadi}<span class="{getKategoriBadgeColor('Pribadi')}">Pribadi</span>{/if}
+            {#if mitra.is_perusahaan}<span class="{getKategoriBadgeColor('Perusahaan')}">Perusahaan</span>{/if}
+            {#if mitra.is_customer}<span class="{getKategoriBadgeColor('Customer')}">Customer</span>{/if}
+            {#if mitra.is_vendor}<span class="{getKategoriBadgeColor('Vendor')}">Vendor</span>{/if}
           </div>
         </div>
       </div>
       <div class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4">
         <button
           on:click={openEditModal}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                 dark:focus:ring-offset-gray-800"
         >
           Edit Mitra
         </button>
         <button
           on:click={handleDelete}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+                 dark:focus:ring-offset-gray-800"
         >
           Hapus Mitra
         </button>
       </div>
     </div>
 
-    <!-- Tab Navigation -->
+    <!-- Tabs -->
     <div class="flex items-center justify-between mb-4">
-      <div class="p-1 bg-gray-200 rounded-lg inline-flex" role="tablist">
+      <div class="p-1 bg-gray-200 dark:bg-gray-700 rounded-lg inline-flex" role="tablist">
         <button
           on:click={() => (activeTab = 'detail')}
-          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-gray-700 dark:text-gray-200"
           class:bg-white={activeTab === 'detail'}
+          class:dark:bg-neutral-900={activeTab === 'detail'}
           class:shadow={activeTab === 'detail'}
-          class:text-gray-600={activeTab !== 'detail'}
           role="tab"
           aria-selected={activeTab === 'detail'}
         >
@@ -319,10 +294,10 @@
         </button>
         <button
           on:click={() => (activeTab = 'barang')}
-          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-gray-700 dark:text-gray-200"
           class:bg-white={activeTab === 'barang'}
+          class:dark:bg-neutral-900={activeTab === 'barang'}
           class:shadow={activeTab === 'barang'}
-          class:text-gray-600={activeTab !== 'barang'}
           role="tab"
           aria-selected={activeTab === 'barang'}
         >
@@ -331,18 +306,19 @@
       </div>
     </div>
 
-    <!-- Tab Content -->
+    <!-- DETAIL -->
     {#if activeTab === 'detail'}
-      <div class="bg-white shadow overflow-hidden">
+      <div class="bg-white dark:bg-black shadow overflow-hidden">
         <div class="px-4 py-5 sm:px-6">
-          <h3 class="text-lg leading-6 font-medium text-gray-900">Informasi Mitra</h3>
+          <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Informasi Mitra</h3>
         </div>
-        <div class="border-t border-gray-200">
+        <div class="border-t border-gray-200 dark:border-gray-700">
           <MitraDetail mitra={mitra} />
         </div>
       </div>
     {/if}
 
+    <!-- BARANG CERTIFICATES -->
     {#if activeTab === 'barang'}
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
@@ -358,14 +334,18 @@
                 placeholder="Cari barang certificate..."
                 bind:value={bcSearch}
                 on:input={bcHandleSearchChange}
-                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                class="block w-full pl-10 pr-3 py-2 border rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 border-gray-300
+                       focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm
+                       dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700"
               />
             </div>
           </div>
           <div class="flex space-x-2 w-full sm:w-auto">
             <button
               on:click={bcOpenCreateModal}
-              class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
+                     bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                     dark:focus:ring-offset-gray-800"
             >
               Tambah Barang
             </button>
@@ -373,13 +353,13 @@
         </div>
 
         <div class="flex items-center justify-between mb-4">
-          <div class="p-1 bg-gray-200 rounded-lg inline-flex" role="tablist">
+          <div class="p-1 bg-gray-200 dark:bg-gray-700 rounded-lg inline-flex" role="tablist">
             <button
               on:click={() => (bcActiveView = 'table')}
-              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-gray-700 dark:text-gray-200"
               class:bg-white={bcActiveView === 'table'}
+              class:dark:bg-neutral-900={bcActiveView === 'table'}
               class:shadow={bcActiveView === 'table'}
-              class:text-gray-600={bcActiveView !== 'table'}
               role="tab"
               aria-selected={bcActiveView === 'table'}
             >
@@ -387,10 +367,10 @@
             </button>
             <button
               on:click={() => (bcActiveView = 'list')}
-              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200"
+              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-gray-700 dark:text-gray-200"
               class:bg-white={bcActiveView === 'list'}
+              class:dark:bg-neutral-900={bcActiveView === 'list'}
               class:shadow={bcActiveView === 'list'}
-              class:text-gray-600={bcActiveView !== 'list'}
               role="tab"
               aria-selected={bcActiveView === 'list'}
             >
@@ -400,30 +380,30 @@
         </div>
 
         {#if bcLoading}
-          <p>Memuat data...</p>
+          <p class="text-gray-900 dark:text-white">Memuat data...</p>
         {:else if bcError}
           <p class="text-red-500">{bcError}</p>
         {:else if bcItems.length === 0}
-          <div class="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul class="divide-y divide-gray-200">
+          <div class="bg-white dark:bg-black shadow overflow-hidden sm:rounded-md">
+            <ul class="divide-y divide-gray-200 dark:divide-gray-700">
               <li class="px-4 py-4 sm:px-6">
-                <p class="text-sm text-gray-500">Belum ada data.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-300">Belum ada data.</p>
               </li>
             </ul>
           </div>
         {:else}
           {#if bcActiveView === 'list'}
-            <div class="bg-white shadow overflow-hidden sm:rounded-md">
-              <ul class="divide-y divide-gray-200">
+            <div class="bg-white dark:bg-black shadow overflow-hidden sm:rounded-md">
+              <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                 {#each bcItems as item (item.id)}
                   <li>
-                    <a href={`/barang-certificates/${item.id}`} class="block hover:bg-gray-50 px-4 py-4 sm:px-6">
+                    <a href={`/barang-certificates/${item.id}`} class="block hover:bg-gray-50 dark:hover:bg-neutral-950 px-4 py-4 sm:px-6">
                       <div class="flex items-center justify-between">
-                        <p class="text-sm font-medium text-indigo-600 truncate">{item.name}</p>
+                        <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">{item.name}</p>
                       </div>
                       <div class="mt-2 sm:flex sm:justify-between">
                         <div class="sm:flex">
-                          <p class="flex items-center text-sm text-gray-500">No. Seri: {item.no_seri} | Mitra: {mitra.nama}</p>
+                          <p class="flex items-center text-sm text-gray-500 dark:text-gray-300">No. Seri: {item.no_seri} | Mitra: {mitra.nama}</p>
                         </div>
                       </div>
                     </a>
@@ -442,36 +422,36 @@
           {/if}
 
           {#if bcActiveView === 'table'}
-            <div class="mt-4 bg-white shadow-md rounded-lg">
+            <div class="mt-4 bg-white dark:bg-black shadow-md rounded-lg">
               <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-300">
-                  <thead class="bg-gray-50">
+                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                  <thead class="bg-gray-50 dark:bg-neutral-900">
                     <tr>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Nama Barang</th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">No. Seri</th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Mitra</th>
-                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Aksi</th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Nama Barang</th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">No. Seri</th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Mitra</th>
+                      <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-gray-200 bg-white">
+                  <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-black">
                     {#each bcItems as item (item.id)}
                       <tr>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
-                          <a href={`/barang-certificates/${item.id}`} class="text-indigo-600 hover:text-indigo-900">{item.name}</a>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                          <a href={`/barang-certificates/${item.id}`} class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">{item.name}</a>
                         </td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{item.no_seri}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{mitra.nama}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{item.no_seri}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{mitra.nama}</td>
                         <td class="relative whitespace-nowrap px-3 py-4 text-sm">
                           <div class="flex items-center space-x-2">
-                            <button on:click={() => bcOpenDetailDrawer(item)} title="Detail" class="text-yellow-600 hover:text-yellow-900">
+                            <button on:click={() => bcOpenDetailDrawer(item)} title="Detail" class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                               <span class="sr-only">Detail, {item.name}</span>
                             </button>
-                            <button on:click={() => bcOpenEditModal(item)} title="Edit" class="text-blue-600 hover:text-blue-900">
-                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            <button on:click={() => bcOpenEditModal(item)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                               <span class="sr-only">Edit, {item.name}</span>
                             </button>
-                            <button on:click={() => bcHandleDelete(item.id)} title="Hapus" class="text-red-600 hover:text-red-900">
+                            <button on:click={() => bcHandleDelete(item.id)} title="Hapus" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                               <span class="sr-only">Hapus, {item.name}</span>
                             </button>
