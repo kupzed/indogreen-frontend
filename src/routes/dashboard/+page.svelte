@@ -69,7 +69,7 @@
                         {project.status} 
                       </span>
                       {#if project.is_cert_projects}
-                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-purple-100 text-purple-800">
+                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
                           Certificate
                         </span>
                       {/if}
