@@ -133,6 +133,32 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 /* =========================================================
+   POP UP SweetAlert2 (konsisten light/dark) via CSS variables
+   =======================================================*/
+/* SweetAlert2: dark mode */
+html.dark .swal2-popup {
+	background: #0a0a0a !important; /* mirip bg-neutral-950 */
+	color: #e5e7eb !important; /* text-gray-200 */
+	border-radius: 0.75rem; /* rounded-xl */
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+html.dark .swal2-title,
+html.dark .swal2-html-container {
+	color: #e5e7eb !important;
+}
+html.dark .swal2-icon.swal2-success {
+	border-color: #22c55e !important; /* green-500 */
+	color: #22c55e !important;
+}
+html.dark .swal2-icon.swal2-error {
+	border-color: #ef4444 !important; /* red-500 */
+	color: #ef4444 !important;
+}
+html.dark .swal2-timer-progress-bar {
+	background: rgba(229, 231, 235, 0.3) !important; /* gray-200/30 */
+}
+
+/* =========================================================
    Global base
    =======================================================*/
 body {

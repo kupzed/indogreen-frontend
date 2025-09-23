@@ -48,6 +48,7 @@
 	},
 	"dependencies": {
 		"@tailwindplus/elements": "^1.0.5",
-		"axios": "^1.10.0"
+		"axios": "^1.10.0",
+		"sweetalert2": "^11.23.0"
 	}
 }

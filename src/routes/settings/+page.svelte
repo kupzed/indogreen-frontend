@@ -1,4 +1,12 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import Swal from 'sweetalert2';
+  import axiosClient from '$lib/axiosClient';
+  import { setUser, patchUser } from '$lib/stores/user';
+
+  // Form state
+  let disabled = false;
+
   let formData = {
     name: '',
     email: '',
@@ -9,16 +17,97 @@
     pilihRole: 'admin'
   };
 
-  // State tab aktif
+  // Tabs
   let activeTab: 'profile' | 'keamanan' = 'profile';
 
-  function handleSubmit(event: Event) {
+  // UI state
+  let loading = true;
+  let saving = false;
+  let errorMsg = '';
+
+  // --- SweetAlert helpers ---
+  function showSuccess(message: string) {
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil!',
+      text: message,
+      timer: 3000,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
+  }
+
+  function showError(message: string) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal',
+      text: message,
+      timer: 3000,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
+  }
+  // --------------------------
+
+  // Ambil data user yang sedang login
+  onMount(async () => {
+    loading = true;
+    errorMsg = '';
+    try {
+      // backend kamu: POST /auth/me
+      const { data } = await axiosClient.post('/auth/me');
+      formData.name = data?.name ?? '';
+      formData.email = data?.email ?? '';
+      setUser({ name: formData.name, email: formData.email });
+    } catch (err: any) {
+      errorMsg = err?.response?.data?.message || 'Gagal memuat data pengguna.';
+      showError(errorMsg);
+    } finally {
+      loading = false;
+    }
+  });
+
+  // Submit: update nama saja
+  async function handleSubmit(event: Event) {
     event.preventDefault();
-    console.log('Form submitted:', formData);
+    errorMsg = '';
+    saving = true;
+    try {
+      // endpoint baru: PUT /auth/profile { name }
+      const { data } = await axiosClient.put('/auth/profile', { name: formData.name });
+      formData.name = data?.name ?? formData.name;
+      showSuccess('Profil berhasil diperbarui');
+      patchUser({ name: formData.name });
+    } catch (err: any) {
+      errorMsg =
+        err?.response?.data?.message ||
+        (typeof err?.response?.data === 'string' ? err.response.data : 'Gagal memperbarui nama.');
+      showError(errorMsg);
+    } finally {
+      saving = false;
+    }
   }
 
   function handleCancel() {
-    console.log('Form cancelled');
+    // reset ke nilai server terakhir
+    loading = true;
+    errorMsg = '';
+    axiosClient
+      .post('/auth/me')
+      .then(({ data }) => {
+        formData.name = data?.name ?? '';
+        formData.email = data?.email ?? '';
+        setUser({ name: formData.name, email: formData.email });
+      })
+      .catch(() => {
+        errorMsg = 'Gagal memulihkan data.';
+        showError(errorMsg);
+      })
+      .finally(() => {
+        loading = false;
+      });
   }
 </script>
 
@@ -27,6 +116,16 @@
 </svelte:head>
 
 <div class="max-w-1xl">
+  <!-- Alerts (hapus successMsg, pakai toast) -->
+  {#if loading}
+    <div class="mb-4 text-sm text-gray-900 dark:text-white">Memuat data…</div>
+  {/if}
+  {#if errorMsg}
+    <div class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-200">
+      {errorMsg}
+    </div>
+  {/if}
+
   <!-- Tab switcher -->
   <div class="p-1 bg-gray-200 dark:bg-gray-700 rounded-lg inline-flex mb-4" role="tablist">
     <button
@@ -77,25 +176,28 @@
                     class="block w-full rounded-md bg-white dark:bg-neutral-900 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100
                            outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-700
                            placeholder:text-gray-400 dark:placeholder-gray-400
-                           focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                           focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 disabled:opacity-60"
+                    disabled={disabled || loading || saving}
                   />
                 </div>
               </div>
 
               <div class="sm:col-span-4">
-                <label for="email" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">Email address</label>
+                <label for="email" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-300">Email address</label>
                 <div class="mt-2">
                   <input
                     id="email"
                     type="email"
                     bind:value={formData.email}
                     autocomplete="email"
-                    class="block w-full rounded-md bg-white dark:bg-neutral-900 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100
+                    readonly
+                    class="block w-full rounded-md bg-gray-100 dark:bg-neutral-800 px-3 py-1.5 text-base text-gray-700 dark:text-gray-300
                            outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-700
                            placeholder:text-gray-400 dark:placeholder-gray-400
-                           focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                           sm:text-sm/6 cursor-not-allowed"
                   />
                 </div>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Email hanya ditampilkan dan tidak bisa diubah.</p>
               </div>
             </div>
           </div>
@@ -127,7 +229,7 @@
                   <option>User_3</option>
                   <option>User_4</option>
                 </select>
-                <svg viewBox="0 0 16 16" fill="currentColor" data-slot="icon" aria-hidden="true"
+                <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"
                      class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 dark:text-gray-400 sm:size-4">
                   <path d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
                 </svg>
@@ -290,9 +392,10 @@
       <button
         type="submit"
         class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500
-               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-60"
+        disabled={saving || loading}
       >
-        Save
+        {saving ? 'Saving…' : 'Save'}
       </button>
     </div>
   </form>
