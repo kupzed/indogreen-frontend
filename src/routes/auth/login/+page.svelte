@@ -61,16 +61,16 @@
           title={$theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
         >
           {#if $theme === 'dark'}
-            <!-- Ikon matahari -->
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 3v2m4.95 2.05-1.41 1.41M21 12h-2m-4 6l1.41 1.41M12 19v2M6.46 17.95l1.41-1.41M5 12H3m3.05-4.95L7.46 8.46M12 8a4 4 0 100 8 4 4 0 000-8z"/>
-            </svg>
-          {:else}
             <!-- Ikon bulan -->
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M21 12.79A9 9 0 1111.21 3c-.09.88.27 1.75.92 2.4a5 5 0 006.47 6.47c.65.65 1.52 1.01 2.4.92z"/>
+            </svg>
+          {:else}
+            <!-- Ikon matahari -->
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v2m4.95 2.05-1.41 1.41M21 12h-2m-4 6l1.41 1.41M12 19v2M6.46 17.95l1.41-1.41M5 12H3m3.05-4.95L7.46 8.46M12 8a4 4 0 100 8 4 4 0 000-8z"/>
             </svg>
           {/if}
         </button>
