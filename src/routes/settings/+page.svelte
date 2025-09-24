@@ -159,7 +159,7 @@
   <form on:submit={handleSubmit}>
     {#if activeTab === 'profile'}
       <div id="panel-profile" role="tabpanel" aria-labelledby="tab-profile">
-        <div class="bg-white dark:bg-black space-y-12 py-8 px-4 rounded-lg sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-black space-y-12 py-4 px-4 rounded-lg sm:px-6 lg:px-8">
           <div class="border-b border-gray-900/10 dark:border-gray-700 pb-12">
             <h2 class="text-base/7 font-semibold text-gray-900 dark:text-white">Personal Information</h2>
             <p class="mt-1 text-sm/6 text-gray-600 dark:text-gray-300">Kelola informasi data pribadi kamu.</p>
@@ -207,7 +207,7 @@
 
     {#if activeTab === 'keamanan'}
       <div id="panel-keamanan" role="tabpanel" aria-labelledby="tab-keamanan">
-        <div class="bg-white dark:bg-black space-y-12 py-8 px-4 rounded-lg sm:px-6 lg:px-8">
+        <div class="bg-white dark:bg-black space-y-12 py-4 px-4 rounded-lg sm:px-6 lg:px-8">
           <div class="border-b border-gray-900/10 dark:border-gray-700 pb-12">
             <h2 class="text-base/7 font-semibold text-gray-900 dark:text-white">Role</h2>
             <p class="mt-1 text-sm/6 text-gray-600 dark:text-gray-300">Role kamu adalah Admin.</p>

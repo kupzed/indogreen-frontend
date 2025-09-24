@@ -44,20 +44,13 @@
   // Fungsi untuk mendapatkan title berdasarkan route
   function getPageTitle(pathname: string): string {
     switch (pathname) {
-      case '/dashboard':
-        return 'Dashboard';
-      case '/projects':
-        return 'Daftar Project';
-      case '/activities':
-        return 'Daftar Activity';
-      case '/mitras':
-        return 'Daftar Mitra';
-      case '/settings':
-        return 'Pengaturan';
-      case '/barang-certificates':
-        return 'Daftar Barang Sertifikat';
-      case '/certificates':
-        return 'Daftar Sertifikat';
+      case '/dashboard': return 'Dashboard';
+      case '/projects': return 'Daftar Project';
+      case '/activities': return 'Daftar Activity';
+      case '/mitras': return 'Daftar Mitra';
+      case '/settings': return 'Pengaturan';
+      case '/barang-certificates': return 'Daftar Barang Sertifikat';
+      case '/certificates': return 'Daftar Sertifikat';
       default:
         if (pathname.startsWith('/projects/')) return 'Detail Project';
         if (pathname.startsWith('/activities/')) return 'Detail Activity';
@@ -103,7 +96,7 @@
       </TopNav>
 
       <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-neutral-800 p-6">
-        <div class="mx-auto">
+        <div class="mx-auto mb-16">
           <slot></slot>
         </div>
       </main>
