@@ -1078,7 +1078,6 @@
                       <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Status</th>
                       <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Terbit</th>
                       <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Expired</th>
-                      <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Lampiran</th>
                       <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Aksi</th>
                     </tr>
                   </thead>
@@ -1098,9 +1097,6 @@
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                           {#if item.date_of_expired}{new Date(item.date_of_expired).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}{:else}<span class="text-gray-500 dark:text-gray-400">-</span>{/if}
-                        </td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-indigo-600 dark:text-indigo-400">
-                          {#if item.attachment}<a href={item.attachment} target="_blank" rel="noreferrer" class="hover:text-indigo-900 dark:hover:text-indigo-300">Lihat</a>{:else}-{/if}
                         </td>
                         <td class="relative whitespace-nowrap px-3 py-4 text-sm">
                           <div class="flex items-center space-x-2">
