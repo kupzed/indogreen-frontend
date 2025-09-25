@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { storageUrl } from "$lib/utils/url";
+  
   export let certificates: any = null;
 </script>
 
@@ -78,7 +80,11 @@
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Lampiran</dt>
         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
           {#if certificates.attachment}
-            <a href={`/storage/${certificates.attachment}`} target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Lihat</a>
+            <a
+              href={storageUrl(certificates.attachment)}
+              target="_blank"
+              class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+            >Lihat</a>
           {:else}
             <span class="text-gray-500 dark:text-gray-400">Tidak ada file</span>
           {/if}

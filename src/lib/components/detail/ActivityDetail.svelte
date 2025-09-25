@@ -1,16 +1,7 @@
 <script lang="ts">
-  export let activity: any = null;
+	import { storageUrl } from "$lib/utils/url";
 
-  // (belum dipakai di view, tapi dibiarkan)
-  function getStatusBadgeClasses(status: string) {
-    switch (status) {
-      case 'Completed': return 'text-green-800';
-      case 'In Progress': return 'text-blue-800';
-      case 'Pending': return 'text-yellow-800';
-      case 'Cancelled': return 'text-red-800';
-      default: return 'text-gray-800';
-    }
-  }
+  export let activity: any = null;
 </script>
 
 {#if activity}
@@ -93,7 +84,11 @@
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Lampiran</dt>
         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
           {#if activity.attachment}
-            <a href={`/storage/${activity.attachment}`} target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">Lihat</a>
+            <a
+              href={storageUrl(activity.attachment)}
+              target="_blank"
+              class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+            >Lihat</a>
           {:else}
             <span class="text-gray-500 dark:text-gray-400">Tidak ada file</span>
           {/if}
