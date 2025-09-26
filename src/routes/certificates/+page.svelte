@@ -57,6 +57,7 @@
     date_of_issue: string;
     date_of_expired: string;
     attachment: File | null;
+    attachment_removed?: boolean;
   } = {
     name: '',
     no_certificate: '',
@@ -65,7 +66,8 @@
     status: '',
     date_of_issue: '',
     date_of_expired: '',
-    attachment: null
+    attachment: null,
+    attachment_removed: false
   };
 
   async function fetchDependencies() {
@@ -80,10 +82,7 @@
   }
 
   async function fetchBarangCertificatesByProject(projectId: number) {
-    if (!projectId) {
-      filteredBarangCertificates = [];
-      return;
-    }
+    if (!projectId) { filteredBarangCertificates = []; return; }
     try {
       const res = await axiosClient.get(`/certificate/getBarangCertificatesByProject/${projectId}`);
       filteredBarangCertificates = res.data?.data ?? [];
@@ -129,7 +128,6 @@
   });
 
   function handleFilterOrSearch() { currentPage = 1; fetchList(); }
-  function handleSearchChange()   { currentPage = 1; fetchList(); }
   function goToPage(page: number) { if (page > 0 && page <= lastPage) { currentPage = page; fetchList(); } }
   function toggleDateFilter() { showDateFilter = !showDateFilter; }
 
@@ -139,9 +137,22 @@
   }
 
   function openCreateModal() {
-    form = { name: '', no_certificate: '', project_id: '', barang_certificate_id: '', status: '', date_of_issue: '', date_of_expired: '', attachment: null };
-    formFileName = ''; filteredBarangCertificates = []; showCreateModal = true;
+    form = {
+      name: '',
+      no_certificate: '',
+      project_id: '',
+      barang_certificate_id: '',
+      status: '',
+      date_of_issue: '',
+      date_of_expired: '',
+      attachment: null,
+      attachment_removed: false
+    };
+    formFileName = '';
+    filteredBarangCertificates = [];
+    showCreateModal = true;
   }
+
   function openEditModal(item: Certificate) {
     editingItem = { ...item };
     form = {
@@ -152,13 +163,15 @@
       status: item.status ?? '',
       date_of_issue: item.date_of_issue ? new Date(item.date_of_issue).toISOString().split('T')[0] : '',
       date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
-      attachment: null
+      attachment: null,
+      attachment_removed: false
     };
     formFileName = item.attachment ? String(item.attachment).split('/').pop() ?? '' : '';
     if (item.project_id) fetchBarangCertificatesByProject(Number(item.project_id));
     else filteredBarangCertificates = [];
     showEditModal = true;
   }
+
   function openDetailDrawer(item: Certificate) { selectedItem = { ...item }; showDetailDrawer = true; }
 
   function buildFormData() {
@@ -171,6 +184,7 @@
     fd.append('date_of_issue', form.date_of_issue || '');
     fd.append('date_of_expired', form.date_of_expired || '');
     if (form.attachment) fd.append('attachment', form.attachment);
+    fd.append('attachment_removed', form.attachment_removed ? '1' : '0');
     return fd;
   }
 
@@ -178,23 +192,30 @@
     try {
       const fd = buildFormData();
       await axiosClient.post('/certificates', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      alert('Data berhasil ditambahkan'); showCreateModal = false; fetchList();
+      alert('Data berhasil ditambahkan');
+      showCreateModal = false;
+      fetchList();
     } catch (err: any) {
       const messages = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join('\n') : err.response?.data?.message || 'Gagal menambahkan data.';
       alert('Error:\n' + messages);
     }
   }
+
   async function handleSubmitUpdate() {
     if (!editingItem?.id) return;
     try {
-      const fd = buildFormData(); fd.append('_method', 'PUT');
+      const fd = buildFormData();
+      fd.append('_method', 'PUT');
       await axiosClient.post(`/certificates/${editingItem.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      alert('Data berhasil diperbarui'); showEditModal = false; fetchList();
+      alert('Data berhasil diperbarui');
+      showEditModal = false;
+      fetchList();
     } catch (err: any) {
       const messages = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join('\n') : err.response?.data?.message || 'Gagal memperbarui data.';
       alert('Error:\n' + messages);
     }
   }
+
   async function handleDelete(id: number) {
     if (!confirm('Yakin ingin menghapus data ini?')) return;
     try { await axiosClient.delete(`/certificates/${id}`); alert('Data berhasil dihapus'); fetchList(); }
@@ -204,10 +225,10 @@
   // === Badge konsisten dark ===
   function getStatusBadgeClasses(status: string) {
     switch (status) {
-      case 'Aktif':       return 'bg-green-100  text-green-800  dark:bg-green-900  dark:text-green-200';
-      case 'Tidak Aktif': return 'bg-red-100    text-red-800    dark:bg-red-900    dark:text-red-200';
-      case 'Belum':       return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      default:            return 'bg-gray-100   text-gray-800   dark:bg-gray-900   dark:text-gray-200';
+      case 'Aktif': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'Tidak Aktif': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'Belum': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   }
 </script>
@@ -216,6 +237,7 @@
   <title>Daftar Sertifikat - Indogreen</title>
 </svelte:head>
 
+<!-- Toolbar & filters -->
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
     <select bind:value={statusFilter} on:change={handleFilterOrSearch}
@@ -251,34 +273,29 @@
   </div>
 </div>
 
+<!-- Date filter button + dropdown -->
 <div class="flex items-center justify-between mb-4">
   <div class="p-1 bg-gray-200 dark:bg-gray-700 rounded-lg inline-flex" role="tablist">
-    <button
-      on:click={() => (activeView = 'table')}
+    <button on:click={() => (activeView = 'table')}
       class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-gray-700 dark:text-gray-200"
       class:bg-white={activeView === 'table'}
       class:dark:bg-neutral-900={activeView === 'table'}
-      class:shadow={activeView === 'table'}
-      role="tab" aria-selected={activeView === 'table'}>
+      class:shadow={activeView === 'table'} role="tab" aria-selected={activeView === 'table'}>
       Table
     </button>
-    <button
-      on:click={() => (activeView = 'list')}
+    <button on:click={() => (activeView = 'list')}
       class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-gray-700 dark:text-gray-200"
       class:bg-white={activeView === 'list'}
       class:dark:bg-neutral-900={activeView === 'list'}
-      class:shadow={activeView === 'list'}
-      role="tab" aria-selected={activeView === 'list'}>
+      class:shadow={activeView === 'list'} role="tab" aria-selected={activeView === 'list'}>
       Simple
     </button>
   </div>
 
   <div class="relative">
-    <button
-      on:click={toggleDateFilter}
+    <button on:click={toggleDateFilter}
       class="date-filter-button px-3 py-2 rounded-md text-sm font-semibold border hover:bg-gray-50 flex items-center space-x-1 transition-colors
-             bg-white border-gray-300 text-gray-900
-             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-neutral-800
+             bg-white border-gray-300 text-gray-900 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-neutral-800
              focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-offset-2 dark:focus:ring-offset-gray-800"
       class:bg-indigo-50={dateFromFilter || dateToFilter}
       class:border-indigo-300={dateFromFilter || dateToFilter}
@@ -306,24 +323,19 @@
           <div>
             <label for="filter_from" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal Terbit</label>
             <input id="filter_from" type="date" bind:value={dateFromFilter} on:change={handleFilterOrSearch}
-              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
-                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700" />
+              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700" />
           </div>
           <div>
             <label for="filter_to" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sampai Tanggal Terbit</label>
             <input id="filter_to" type="date" bind:value={dateToFilter} on:change={handleFilterOrSearch}
-              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
-                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700" />
+              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700" />
           </div>
           <div class="flex space-x-2 pt-2">
-            <button
-              on:click={() => { dateFromFilter = ''; dateToFilter = ''; handleFilterOrSearch(); }}
-              class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200
-                     dark:text-gray-200 dark:bg-neutral-800 dark:border-gray-700 dark:hover:bg-neutral-700">
+            <button on:click={() => { dateFromFilter = ''; dateToFilter = ''; handleFilterOrSearch(); }}
+              class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 dark:text-gray-200 dark:bg-neutral-800 dark:border-gray-700 dark:hover:bg-neutral-700">
               Clear All
             </button>
-            <button
-              on:click={() => { showDateFilter = false; }}
+            <button on:click={() => { showDateFilter = false; }}
               class="flex-1 px-3 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700">
               Close
             </button>
@@ -426,15 +438,15 @@
                 <td class="relative whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex items-center space-x-2">
                     <button on:click={() => openDetailDrawer(item)} title="Detail" class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                       <span class="sr-only">Detail, {item.name}</span>
                     </button>
                     <button on:click={() => openEditModal(item)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                       <span class="sr-only">Edit, {item.name}</span>
                     </button>
                     <button on:click={() => handleDelete(item.id)} title="Hapus" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                       <span class="sr-only">Hapus, {item.name}</span>
                     </button>
                   </div>
@@ -451,6 +463,7 @@
   {/if}
 {/if}
 
+<!-- Create -->
 <CertificateFormModal
   bind:show={showCreateModal}
   title="Tambah Sertifikat"
@@ -466,6 +479,7 @@
   onSubmit={handleSubmitCreate}
 />
 
+<!-- Edit -->
 {#if editingItem}
   <CertificateFormModal
     bind:show={showEditModal}
@@ -483,6 +497,7 @@
   />
 {/if}
 
+<!-- Detail drawer -->
 <Drawer bind:show={showDetailDrawer} title="Detail Sertifikat" on:close={() => (showDetailDrawer = false)}>
   <CertificateDetail certificates={selectedItem} />
 </Drawer>

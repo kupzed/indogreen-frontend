@@ -36,7 +36,8 @@
     status: '',
     date_of_issue: '',
     date_of_expired: '',
-    attachment: null
+    attachment: null,
+    attachment_removed: false
   };
 
   const statuses = ['Belum', 'Tidak Aktif', 'Aktif'] as const;
@@ -89,7 +90,8 @@
       status: item.status ?? '',
       date_of_issue: item.date_of_issue ? new Date(item.date_of_issue).toISOString().split('T')[0] : '',
       date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
-      attachment: null
+      attachment: null,
+      attachment_removed: false
     };
     formFileName = item.attachment ? String(item.attachment).split('/').pop() ?? '' : '';
     if (item.project_id && typeof item.project_id === 'number') fetchBarangCertificatesByProject(item.project_id);
@@ -107,6 +109,7 @@
     fd.append('date_of_issue', form.date_of_issue || '');
     fd.append('date_of_expired', form.date_of_expired || '');
     if (form.attachment) fd.append('attachment', form.attachment);
+    fd.append('attachment_removed', form.attachment_removed ? '1' : '0');
     return fd;
   }
 
@@ -186,7 +189,7 @@
     statuses={Array.from(statuses)}
     handleProjectChange={handleProjectChange}
     bind:currentFileName={formFileName}
-    allowRemoveAttachment={false}
+    allowRemoveAttachment={true}
     onSubmit={handleSubmitUpdate}
     onClose={closeEditModal}
   />
