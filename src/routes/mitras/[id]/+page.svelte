@@ -72,6 +72,16 @@
   let bcShowDetailDrawer = false;
   let bcSelectedItem: BarangCertificate | null = null;
   let bcActiveView: 'table' | 'list' = 'table';
+  const views: Array<'table' | 'list'> = ['table', 'list'];
+
+  function handleViewKeydown(e: KeyboardEvent) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      let idx = views.indexOf(bcActiveView);
+      idx = e.key === 'ArrowRight' ? (idx + 1) % views.length : (idx - 1 + views.length) % views.length;
+      bcActiveView = views[idx];
+    }
+  }
 
   // Barang Certificates: form state
   let bcForm: { name: string; no_seri: string; mitra_id: number | '' | null } = {
@@ -355,28 +365,70 @@
         </div>
 
         <div class="flex items-center justify-between mb-4">
-          <div class="p-1 bg-gray-200 dark:bg-gray-700 rounded-lg inline-flex" role="tablist">
+          <!-- Segmented icon toggle (Table / List) -->
+          <div
+            class="bg-white dark:bg-neutral-900 rounded-md inline-flex gap-1"
+            role="tablist"
+            aria-label="Switch view"
+            tabindex="0"
+            on:keydown={handleViewKeydown}
+          >
+            <!-- TABLE -->
             <button
               on:click={() => (bcActiveView = 'table')}
-              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-gray-700 dark:text-gray-200"
+              class="grid h-9 w-9 place-items-center rounded-md
+                    text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-50
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500"
               class:bg-white={bcActiveView === 'table'}
               class:dark:bg-neutral-900={bcActiveView === 'table'}
-              class:shadow={bcActiveView === 'table'}
+              class:text-gray-900={bcActiveView === 'table'}
+              class:dark:text-white={bcActiveView === 'table'}
+              class:border={bcActiveView === 'table'}
+              class:border-gray-300={bcActiveView === 'table'}
+              class:dark:border-gray-700={bcActiveView === 'table'}
               role="tab"
               aria-selected={bcActiveView === 'table'}
+              aria-label="Table view"
+              title="Table"
             >
-              Table
+              <!-- Table icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                <rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect>
+                <line x1="3.5" y1="9"  x2="20.5" y2="9"></line>
+                <line x1="3.5" y1="13" x2="20.5" y2="13"></line>
+                <line x1="3.5" y1="17" x2="20.5" y2="17"></line>
+              </svg>
+              <span class="sr-only">Tampilan Tabel</span>
             </button>
+
+            <!-- LIST -->
             <button
               on:click={() => (bcActiveView = 'list')}
-              class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-gray-700 dark:text-gray-200"
+              class="grid h-9 w-9 place-items-center rounded-md
+                    text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-50
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 dark:focus-visible:ring-gray-500"
               class:bg-white={bcActiveView === 'list'}
               class:dark:bg-neutral-900={bcActiveView === 'list'}
-              class:shadow={bcActiveView === 'list'}
+              class:text-gray-900={bcActiveView === 'list'}
+              class:dark:text-white={bcActiveView === 'list'}
+              class:border={bcActiveView === 'list'}
+              class:border-gray-300={bcActiveView === 'list'}
+              class:dark:border-gray-700={bcActiveView === 'list'}
               role="tab"
               aria-selected={bcActiveView === 'list'}
+              aria-label="List view"
+              title="List"
             >
-              List
+              <!-- List icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+                <circle cx="5" cy="6" r="1.3"></circle>
+                <circle cx="5" cy="12" r="1.3"></circle>
+                <circle cx="5" cy="18" r="1.3"></circle>
+                <line x1="9" y1="6"  x2="20" y2="6"></line>
+                <line x1="9" y1="12" x2="20" y2="12"></line>
+                <line x1="9" y1="18" x2="20" y2="18"></line>
+              </svg>
+              <span class="sr-only">Tampilan List</span>
             </button>
           </div>
         </div>
