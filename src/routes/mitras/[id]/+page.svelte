@@ -61,6 +61,8 @@
   let bcCurrentPage = 1;
   let bcLastPage = 1;
   let bcTotalItems = 0;
+  let perPage: number = 10;
+  const perPageOptions = [10, 25, 50, 100];
   let bcInitialized = false;
 
   // Barang Certificates: modal and drawer state
@@ -159,7 +161,7 @@
     bcError = '';
     try {
       const res = await axiosClient.get('/barang-certificates', {
-        params: { search: bcSearch, mitra_id: mitra.id, page: bcCurrentPage }
+        params: { search: bcSearch, mitra_id: mitra.id, page: bcCurrentPage, per_page: perPage }
       });
       bcItems = res.data?.data ?? [];
       bcCurrentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
@@ -374,7 +376,7 @@
               role="tab"
               aria-selected={bcActiveView === 'list'}
             >
-              Simple
+              List
             </button>
           </div>
         </div>
@@ -416,7 +418,15 @@
                 {/each}
               </ul>
               {#if bcItems.length > 0}
-                <Pagination currentPage={bcCurrentPage} lastPage={bcLastPage} onPageChange={bcGoToPage} totalItems={bcTotalItems} itemsPerPage={10} />
+                <Pagination
+                  currentPage={bcCurrentPage}
+                  lastPage={bcLastPage}
+                  onPageChange={bcGoToPage}
+                  totalItems={bcTotalItems}
+                  itemsPerPage={perPage}
+                  perPageOptions={perPageOptions}
+                  onPerPageChange={(n) => { perPage = n; bcCurrentPage = 1; fetchBarangCertificates(); }}
+                />
               {/if}
             </div>
           {/if}
@@ -468,7 +478,9 @@
                   lastPage={bcLastPage}
                   onPageChange={bcGoToPage}
                   totalItems={bcTotalItems}
-                  itemsPerPage={10}
+                  itemsPerPage={perPage}
+                  perPageOptions={perPageOptions}
+                  onPerPageChange={(n) => { perPage = n; bcCurrentPage = 1; fetchBarangCertificates(); }}
                 />
               {/if}
             </div>

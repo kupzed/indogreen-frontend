@@ -22,6 +22,8 @@
   let currentPage: number = 1;
   let lastPage: number = 1;
   let totalActivities: number = 0;
+  let perPage: number = 10;
+  const perPageOptions = [10, 25, 50, 100];
 
   let activeView: 'table' | 'list' = 'table';
 
@@ -59,7 +61,7 @@
       const response = await axiosClient.get('/activities', {
         params: {
           search, jenis: jenisFilter, kategori: kategoriFilter,
-          date_from: dateFromFilter, date_to: dateToFilter, page: currentPage
+          date_from: dateFromFilter, date_to: dateToFilter, page: currentPage, per_page: perPage
         }
       });
       activities = response.data.data;
@@ -306,7 +308,7 @@
       class:shadow={activeView === 'list'}
       role="tab"
       aria-selected={activeView === 'list'}
-    >Simple</button>
+    >List</button>
   </div>
   
   <div class="relative">
@@ -440,7 +442,7 @@
         {/each}
       </ul>
       {#if activities.length > 0}
-        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalActivities} itemsPerPage={10}/>
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalActivities} itemsPerPage={perPage} perPageOptions={perPageOptions} onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchActivities(); }}/>
       {/if}
     </div>
   {/if}
@@ -509,7 +511,7 @@
         </table>
       </div>
       {#if activities.length > 0}
-        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalActivities} itemsPerPage={10}/>
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalActivities} itemsPerPage={perPage} perPageOptions={perPageOptions} onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchActivities(); }}/>
       {/if}
     </div>
   {/if}

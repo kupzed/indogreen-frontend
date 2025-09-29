@@ -21,6 +21,8 @@
   let currentPage: number = 1;
   let lastPage: number = 1;
   let totalProjects: number = 0;
+  let perPage: number = 10;
+  const perPageOptions = [10, 25, 50, 100];
 
   // toggle tampilan
   let activeView: 'table' | 'list' = 'table';
@@ -71,7 +73,8 @@
           is_cert_projects: certProjectFilter || undefined,
           date_from: dateFromFilter,
           date_to: dateToFilter,
-          page: currentPage
+          page: currentPage,
+          per_page: perPage,
         }
       });
       projects = response.data.data;
@@ -331,7 +334,7 @@
       role="tab"
       aria-selected={activeView === 'list'}
     >
-      Simple
+      List
     </button>
   </div>
 
@@ -490,7 +493,9 @@
           lastPage={lastPage}
           onPageChange={goToPage}
           totalItems={totalProjects}
-          itemsPerPage={10}
+          itemsPerPage={perPage}
+          perPageOptions={perPageOptions}
+          onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchProjects(); }}
         />
       {/if}
     </div>
@@ -579,7 +584,9 @@
           lastPage={lastPage}
           onPageChange={goToPage}
           totalItems={totalProjects}
-          itemsPerPage={10}
+          itemsPerPage={perPage}
+          perPageOptions={perPageOptions}
+          onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchProjects(); }}
         />
       {/if}
     </div>

@@ -37,6 +37,8 @@
   let currentPage = 1;
   let lastPage = 1;
   let totalItems = 0;
+  let perPage: number = 10;
+  const perPageOptions = [10, 25, 50, 100];
 
   // Modal state
   let showCreateModal = false;
@@ -107,7 +109,7 @@
     error = '';
     try {
       const res = await axiosClient.get('/certificates', {
-        params: { search, status: statusFilter, date_from: dateFromFilter, date_to: dateToFilter, page: currentPage }
+        params: { search, status: statusFilter, date_from: dateFromFilter, date_to: dateToFilter, page: currentPage, per_page: perPage }
       });
       items = res.data?.data ?? [];
       currentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
@@ -288,7 +290,7 @@
       class:bg-white={activeView === 'list'}
       class:dark:bg-neutral-900={activeView === 'list'}
       class:shadow={activeView === 'list'} role="tab" aria-selected={activeView === 'list'}>
-      Simple
+      List
     </button>
   </div>
 
@@ -393,7 +395,7 @@
         {/each}
       </ul>
       {#if items.length > 0}
-        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={10} />
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={perPage} perPageOptions={perPageOptions} onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchList(); }} />
       {/if}
     </div>
   {/if}
@@ -457,7 +459,7 @@
         </table>
       </div>
       {#if items.length > 0}
-        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={10} />
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={perPage} perPageOptions={perPageOptions} onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchList(); }} />
       {/if}
     </div>
   {/if}

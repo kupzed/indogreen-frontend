@@ -31,6 +31,9 @@
   let activityCurrentPage = 1;
   let activityLastPage = 1;
   let totalActivities = 0;
+  let activityPerPage = 10;
+  let certificatePerPage = 10;
+  const perPageOptions = [10, 25, 50, 100];
 
   // Date filter state
   let activityDateFromFilter = '';
@@ -164,6 +167,7 @@
           date_from: activityDateFromFilter,
           date_to: activityDateToFilter,
           page: activityCurrentPage,
+          per_page: activityPerPage,
         }
       });
       const data = res.data?.data ?? {};
@@ -425,6 +429,7 @@
           date_from: certificateDateFromFilter,
           date_to: certificateDateToFilter,
           page: certificateCurrentPage,
+          per_page: certificatePerPage,
         },
       });
       certificates = res.data?.data ?? [];
@@ -684,7 +689,7 @@
               role="tab"
               aria-selected={activityView === 'list'}
             >
-              Simple
+              List
             </button>
           </div>
 
@@ -819,7 +824,15 @@
                 {/each}
               </ul>
               {#if activities.length > 0}
-                <Pagination currentPage={activityCurrentPage} lastPage={activityLastPage} onPageChange={goToActivityPage} totalItems={totalActivities} itemsPerPage={10} />
+                <Pagination
+                  currentPage={activityCurrentPage}
+                  lastPage={activityLastPage}
+                  onPageChange={goToActivityPage}
+                  totalItems={totalActivities}
+                  itemsPerPage={activityPerPage}
+                  perPageOptions={perPageOptions}
+                  onPerPageChange={(n) => { activityPerPage = n; activityCurrentPage = 1; fetchActivities(); }}
+                />
               {/if}
             </div>
           {/if}
@@ -879,7 +892,15 @@
                 </table>
               </div>
               {#if activities.length > 0}
-                <Pagination currentPage={activityCurrentPage} lastPage={activityLastPage} onPageChange={goToActivityPage} totalItems={totalActivities} itemsPerPage={10} />
+                <Pagination
+                  currentPage={activityCurrentPage}
+                  lastPage={activityLastPage}
+                  onPageChange={goToActivityPage}
+                  totalItems={totalActivities}
+                  itemsPerPage={activityPerPage}
+                  perPageOptions={perPageOptions}
+                  onPerPageChange={(n) => { activityPerPage = n; activityCurrentPage = 1; fetchActivities(); }}
+                />
               {/if}
             </div>
           {/if}
@@ -944,7 +965,7 @@
               class:shadow={certificateView === 'list'}
               role="tab"
               aria-selected={certificateView === 'list'}
-            >Simple</button>
+            >List</button>
           </div>
 
           <div class="relative certificate-date-filter-dropdown">
@@ -1061,7 +1082,15 @@
                 {/each}
               </ul>
               {#if certificates.length > 0}
-                <Pagination currentPage={certificateCurrentPage} lastPage={certificateLastPage} onPageChange={goToCertificatePage} totalItems={totalCertificates} itemsPerPage={10} />
+                <Pagination
+                  currentPage={certificateCurrentPage}
+                  lastPage={certificateLastPage}
+                  onPageChange={goToCertificatePage}
+                  totalItems={totalCertificates}
+                  itemsPerPage={certificatePerPage}
+                  perPageOptions={perPageOptions}
+                  onPerPageChange={(n) => { certificatePerPage = n; certificateCurrentPage = 1; fetchCertificates(); }}
+                />
               {/if}
             </div>
           {/if}
@@ -1120,7 +1149,15 @@
                 </table>
               </div>
               {#if certificates.length > 0}
-                <Pagination currentPage={certificateCurrentPage} lastPage={certificateLastPage} onPageChange={goToCertificatePage} totalItems={totalCertificates} itemsPerPage={10} />
+                <Pagination
+                  currentPage={certificateCurrentPage}
+                  lastPage={certificateLastPage}
+                  onPageChange={goToCertificatePage}
+                  totalItems={totalCertificates}
+                  itemsPerPage={certificatePerPage}
+                  perPageOptions={perPageOptions}
+                  onPerPageChange={(n) => { certificatePerPage = n; certificateCurrentPage = 1; fetchCertificates(); }}
+                />
               {/if}
             </div>
           {/if}
