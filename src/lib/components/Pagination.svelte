@@ -45,7 +45,7 @@
                 <option value={opt}>{opt}</option>
               {/each}
             </select>
-            Records
+            Records (Showing <span class="font-bold">{startItem}</span> to <span class="font-bold">{endItem}</span> of <span class="font-bold">{totalItems}</span>)
           </p>
         {/if}
 
@@ -126,7 +126,7 @@
                 <option value={opt}>{opt}</option>
               {/each}
             </select>
-            Records
+            Records (Showing <span class="font-bold">{startItem}</span> to <span class="font-bold">{endItem}</span> of <span class="font-bold">{totalItems}</span>)
           </p>
         {/if}
       </div>
