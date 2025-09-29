@@ -136,7 +136,7 @@
           <button 
             on:click={() => goToPage(1)} 
             disabled={currentPage === 1} 
-            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
+            class="px-2 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
                    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                    dark:text-gray-100 dark:bg-neutral-900 dark:border-gray-700 dark:hover:bg-neutral-800
                    {currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
@@ -147,7 +147,7 @@
           <button 
             on:click={() => goToPage(currentPage - 1)} 
             disabled={currentPage === 1} 
-            class="p-2.5 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
+            class="p-1.5 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
                    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                    dark:text-gray-100 dark:bg-neutral-900 dark:border-gray-700 dark:hover:bg-neutral-800
                    {currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
@@ -156,7 +156,7 @@
             </svg>
           </button>
 
-          <span class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md
+          <span class="px-2 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md
                        dark:text-gray-100 dark:bg-neutral-900 dark:border-gray-700">
             Page {currentPage} of {lastPage}
           </span>
@@ -165,7 +165,7 @@
           <button 
             on:click={() => goToPage(currentPage + 1)} 
             disabled={currentPage === lastPage} 
-            class="p-2.5 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
+            class="p-1.5 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
                    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                    dark:text-gray-100 dark:bg-neutral-900 dark:border-gray-700 dark:hover:bg-neutral-800
                    {currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}">
@@ -177,7 +177,7 @@
           <button 
             on:click={() => goToPage(lastPage)} 
             disabled={currentPage === lastPage} 
-            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
+            class="px-2 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
                    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                    dark:text-gray-100 dark:bg-neutral-900 dark:border-gray-700 dark:hover:bg-neutral-800
                    {currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}">
