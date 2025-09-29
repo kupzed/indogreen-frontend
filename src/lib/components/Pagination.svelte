@@ -3,6 +3,11 @@
   export let lastPage: number;
   export let totalItems: number;
   export let itemsPerPage: number = 10;
+
+  // NEW: opsi & handler perubahan per page
+  export let perPageOptions: number[] = [10, 25, 50, 100];
+  export let onPerPageChange: (n: number) => void = () => {};
+
   export let onPageChange: (page: number) => void;
   export let showResultsInfo: boolean = true;
   export let showMobileButtons: boolean = true;
@@ -13,6 +18,13 @@
   function goToPage(page: number) {
     if (page >= 1 && page <= lastPage && page !== currentPage) onPageChange(page);
   }
+
+  function handlePerPageChange(e: Event) {
+    const n = parseInt((e.target as HTMLSelectElement).value, 10);
+    if (!Number.isNaN(n) && n !== itemsPerPage) {
+      onPerPageChange(n);
+    }
+  }
 </script>
 
 {#if totalItems > 0}
@@ -22,11 +34,21 @@
       <div class="sm:hidden w-full flex flex-col items-center justify-center gap-2 text-center">
         {#if showResultsInfo}
           <p class="text-xs text-gray-700 dark:text-gray-300">
-            Showing <span class="font-medium">{startItem}</span>
-            to <span class="font-medium">{endItem}</span>
-            of <span class="font-medium">{totalItems}</span> results
+            Showing
+            <select
+              value={itemsPerPage}
+              on:change={handlePerPageChange}
+              class="px-2 py-1 text-xs rounded-md border border-gray-300 bg-white text-gray-900
+                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+            >
+              {#each perPageOptions as opt}
+                <option value={opt}>{opt}</option>
+              {/each}
+            </select>
+            Records
           </p>
         {/if}
+
         <nav class="flex items-center justify-center space-x-1" aria-label="Pagination">
           <!-- First -->
           <button
@@ -74,6 +96,7 @@
           </button>
 
           <!-- Last -->
+          <!-- svelte-ignore a11y_consider_explicit_label -->
           <button
             on:click={() => goToPage(lastPage)}
             disabled={currentPage === lastPage}
@@ -89,23 +112,27 @@
 
     <!-- Desktop -->
     <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-      {#if showResultsInfo}
-        <div>
-          <p class="text-sm text-gray-700 dark:text-gray-300">
+      <div class="flex items-center gap-3">
+        {#if showResultsInfo}
+          <p class="text-xs text-gray-700 dark:text-gray-300">
             Showing
-            <span class="font-medium">{startItem}</span>
-            to
-            <span class="font-medium">{endItem}</span>
-            of
-            <span class="font-medium">{totalItems}</span>
-            results
+            <select
+              value={itemsPerPage}
+              on:change={handlePerPageChange}
+              class="px-2 py-1 text-xs rounded-md border border-gray-300 bg-white text-gray-900
+                    dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+            >
+              {#each perPageOptions as opt}
+                <option value={opt}>{opt}</option>
+              {/each}
+            </select>
+            Records
           </p>
-        </div>
-      {/if}
+        {/if}
+      </div>
 
       <div>
         <nav class="flex items-center space-x-2" aria-label="Pagination">
-          <!-- First -->
           <button 
             on:click={() => goToPage(1)} 
             disabled={currentPage === 1} 
@@ -116,12 +143,11 @@
             First
           </button>
 
-          <!-- Prev -->
           <!-- svelte-ignore a11y_consider_explicit_label -->
           <button 
             on:click={() => goToPage(currentPage - 1)} 
             disabled={currentPage === 1} 
-            class="p-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
+            class="p-2.5 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
                    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                    dark:text-gray-100 dark:bg-neutral-900 dark:border-gray-700 dark:hover:bg-neutral-800
                    {currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}">
@@ -130,18 +156,16 @@
             </svg>
           </button>
 
-          <!-- Info -->
           <span class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md
                        dark:text-gray-100 dark:bg-neutral-900 dark:border-gray-700">
             Page {currentPage} of {lastPage}
           </span>
 
-          <!-- Next -->
           <!-- svelte-ignore a11y_consider_explicit_label -->
           <button 
             on:click={() => goToPage(currentPage + 1)} 
             disabled={currentPage === lastPage} 
-            class="p-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
+            class="p-2.5 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50
                    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
                    dark:text-gray-100 dark:bg-neutral-900 dark:border-gray-700 dark:hover:bg-neutral-800
                    {currentPage === lastPage ? 'opacity-50 cursor-not-allowed' : ''}">
@@ -150,7 +174,6 @@
             </svg>
           </button>
 
-          <!-- Last -->
           <button 
             on:click={() => goToPage(lastPage)} 
             disabled={currentPage === lastPage} 
