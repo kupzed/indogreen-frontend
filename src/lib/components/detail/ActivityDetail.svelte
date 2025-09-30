@@ -21,7 +21,7 @@
   function formatBytes(bytes: number | undefined) {
     if (!Number.isFinite(bytes as number)) return undefined;
     let num = Number(bytes);
-    const units = ["bytes", "kb", "mb", "gb", "tb"];
+    const units = ["bytes", "KB", "MB", "GB", "TB"];
     let i = 0;
     while (num >= 1024 && i < units.length - 1) {
       num /= 1024;
@@ -70,7 +70,7 @@
   }
 
   // Mendukung activity.attachment (single) atau activity.attachments (array)
-  $: attachments = normalizeAttachments(activity?.attachment ?? activity?.attachments);
+  $: attachments = normalizeAttachments(activity?.attachments ?? activity?.attachment);
 </script>
 
 {#if activity}
@@ -165,7 +165,7 @@
                     <div class="ml-4 flex min-w-0 flex-1 gap-2">
                       <span class="truncate font-medium text-gray-900 dark:text-white">{file.name}</span>
                       {#if file.sizeLabel}
-                        <span class="shrink-0 text-gray-500">{file.sizeLabel}</span>
+                        <span class="shrink-0 text-gray-500 dark:text-gray-400">{file.sizeLabel}</span>
                       {/if}
                     </div>
                   </div>
@@ -175,8 +175,18 @@
                       target="_blank"
                       rel="noopener"
                       download
-                      class="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-                    >Download</a>
+                      class="inline-flex items-center justify-center rounded-md p-1 hover:bg-gray-100 dark:hover:bg-white/10
+                             text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300
+                             focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      aria-label={`Download ${file.name}`}
+                      title={`Download ${file.name}`}
+                    >
+                      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3v12m0 0 4-4m-4 4-4-4"></path>
+                        <path d="M5 21h14"></path>
+                      </svg>
+                      <span class="sr-only">Download</span>
+                    </a>
                   </div>
                 </li>
               {/each}
