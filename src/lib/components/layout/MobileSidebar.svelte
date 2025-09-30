@@ -73,7 +73,7 @@
                 Mitra
               </SidebarLink>
               <SidebarLink href="/barang-certificates" icon="M9 2.25H6.75A2.25 2.25 0 004.5 4.5v15a2.25 2.25 0 002.25 2.25h10.5A2.25 2.25 0 0019.5 19.5V8.25L13.5 2.25H9zM9 12h6m-6 4h3" routePrefix="barang-certificates" on:click={closeSidebar}>
-                Barang Certificates
+                Barang Sertifikat
               </SidebarLink>
               <SidebarLink href="/certificates" icon="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" routePrefix="certificates" on:click={closeSidebar}>
                 Sertifikat
