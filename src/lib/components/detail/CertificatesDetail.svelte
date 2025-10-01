@@ -165,7 +165,7 @@
                       {/if}
                     </div>
                   </div>
-                  <div class="ml-4 shrink-0">
+                  <div class="relative ml-4 shrink-0">
                     <a
                       href={file.url}
                       target="_blank"
