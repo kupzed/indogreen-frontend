@@ -15,20 +15,38 @@
 
   let showEditModal: boolean = false;
 
-  let form = {
+  // === FORM STATE (multi-file) ===
+  let form: {
+    name: string;
+    description: string;
+    project_id: string | number | '';
+    kategori: string | '';
+    activity_date: string | '';
+    jenis: string | '';
+    mitra_id: number | string | '' | null;
+    from?: string | '';
+    to?: string | '';
+    attachments: File[];
+    attachment_names: string[];
+    attachment_descriptions: string[];
+    existing_attachments?: Array<{ id: number; name: string; url: string; size?: number }>;
+    removed_existing_ids?: number[];
+  } = {
     name: '',
     description: '',
     project_id: '',
     kategori: '',
     activity_date: '',
-    attachment: null as File | null,
     jenis: '',
-    mitra_id: null as string | null,
+    mitra_id: null,
     from: '',
     to: '',
-    attachment_removed: false,
+    attachments: [],
+    attachment_names: [],
+    attachment_descriptions: [],
+    existing_attachments: [],
+    removed_existing_ids: []
   };
-  let formFileName = '';
 
   const activityKategoriList = [
     'Expense Report','Invoice','Purchase Order','Payment','Quotation',
@@ -45,23 +63,31 @@
       activity = response.data.data;
 
       form = {
-        name: activity.name,
-        description: activity.description,
+        name: activity.name ?? '',
+        description: activity.description ?? '',
         project_id: activity.project_id || '',
         kategori: activity.kategori || '',
         activity_date: activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '',
-        attachment: null,
         jenis: activity.jenis || '',
         mitra_id: activity.mitra_id || null,
         from: activity.from || '',
         to: activity.to || '',
-        attachment_removed: false,
+        attachments: [],
+        attachment_names: [],
+        attachment_descriptions: [],
+        existing_attachments: Array.isArray(activity.attachments)
+          ? activity.attachments.map((a: any) => ({
+              id: a.id, name: a.name ?? a.file_name ?? 'Lampiran',
+              url: a.url ?? a.path ?? a.file_path, size: a.size
+            }))
+          : [],
+        removed_existing_ids: []
       };
+
       if (form.jenis === 'Customer' && form.project_id) {
         const selectedProject = projects.find(p => p.id == form.project_id);
         if (selectedProject?.mitra_id) form.mitra_id = selectedProject.mitra_id;
       }
-      formFileName = activity.attachment ? activity.attachment.split('/').pop() : '';
     } catch (err: any) {
       errorActivity = err.response?.data?.message || 'Gagal memuat detail aktivitas.';
       console.error('Error fetching activity details:', err.response || err);
@@ -93,25 +119,45 @@
 
   function openEditModal() { showEditModal = true; }
 
+  function appendScalar(fd: FormData, key: string, val: any) {
+    if (val === null || val === undefined || val === '') return;
+    fd.append(key, String(val));
+  }
+
+  function buildFormDataForActivity() {
+    const fd = new FormData();
+    appendScalar(fd, 'name', form.name);
+    appendScalar(fd, 'description', form.description);
+    appendScalar(fd, 'project_id', form.project_id);
+    appendScalar(fd, 'kategori', form.kategori);
+    appendScalar(fd, 'activity_date', form.activity_date);
+    appendScalar(fd, 'jenis', form.jenis);
+    appendScalar(fd, 'from', form.from);
+    appendScalar(fd, 'to', form.to);
+
+    // mitra_id rules:
+    if (form.jenis === 'Internal') {
+      fd.set('mitra_id', '1');
+    } else if (form.jenis === 'Customer') {
+      const selectedProject = projects.find(p => p.id == form.project_id);
+      if (selectedProject?.mitra_id) fd.set('mitra_id', String(selectedProject.mitra_id));
+    } else if (form.jenis === 'Vendor' && form.mitra_id) {
+      fd.set('mitra_id', String(form.mitra_id));
+    }
+
+    // multi-file arrays:
+    (form.attachments || []).forEach((file, i) => fd.append(`attachments[${i}]`, file));
+    (form.attachment_names || []).forEach((n, i) => { if (n != null) fd.append(`attachment_names[${i}]`, n); });
+    (form.attachment_descriptions || []).forEach((d, i) => { if (d != null) fd.append(`attachment_descriptions[${i}]`, d); });
+    (form.removed_existing_ids || []).forEach((id) => fd.append('removed_existing_ids[]', String(id)));
+
+    return fd;
+  }
+
   async function handleSubmitUpdate() {
     if (!activity?.id) return;
     try {
-      const formData = new FormData();
-      for (const key in form) {
-        const typedKey = key as keyof typeof form;
-        if (typedKey === 'attachment' && form.attachment) formData.append(typedKey, form.attachment);
-        else if (typedKey === 'attachment_removed') formData.append(typedKey, form.attachment_removed ? '1' : '0');
-        else if (form[typedKey] !== null && form[typedKey] !== undefined) formData.append(typedKey, form[typedKey] as string | Blob);
-      }
-
-      if (form.jenis === 'Internal') formData.set('mitra_id','1');
-      else if (form.jenis === 'Customer') {
-        const selectedProject = projects.find(p => p.id == form.project_id);
-        if (selectedProject?.mitra_id) formData.set('mitra_id', selectedProject.mitra_id);
-        else formData.delete('mitra_id');
-      } else if (form.jenis === 'Vendor' && form.mitra_id) formData.set('mitra_id', form.mitra_id);
-      else formData.delete('mitra_id');
-
+      const formData = buildFormDataForActivity();
       formData.append('_method', 'PUT');
 
       await axiosClient.post(`/activities/${activity.id}`, formData, { headers: { 'Content-Type':'multipart/form-data' } });
@@ -225,7 +271,6 @@
     {form}
     {projects}
     {vendors}
-    bind:currentFileName={formFileName}
     allowRemoveAttachment={true}
     onSubmit={handleSubmitUpdate}
   />

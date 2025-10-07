@@ -58,39 +58,70 @@
   const projectStatuses = ['Ongoing', 'Prospect', 'Complete', 'Cancel'];
   const projectKategoris = ['PLTS Hybrid', 'PLTS Ongrid', 'PLTS Offgrid', 'PJUTS All In One', 'PJUTS Two In One', 'PJUTS Konvensional'];
 
-  // Activity Create Modal
+  // Activity Create Modal (multi-file)
   let showCreateActivityModal = false;
-  let createActivityForm = {
+  let createActivityForm: {
+    name: string;
+    description: string;
+    project_id: number | string | '';
+    kategori: string | '';
+    activity_date: string | '';
+    jenis: string | '';
+    mitra_id: number | string | '' | null;
+    from?: string | '';
+    to?: string | '';
+    attachments: File[];
+    attachment_names: string[];
+    attachment_descriptions: string[];
+  } = {
     name: '',
     description: '',
     project_id: '',
     kategori: '',
     activity_date: '',
-    attachment: null as File | null,
     jenis: '',
-    mitra_id: null as string | null,
+    mitra_id: null,
     from: '',
     to: '',
+    attachments: [],
+    attachment_names: [],
+    attachment_descriptions: [],
   };
-  let createActivityFileName = '';
 
-  // Activity Edit Modal
+  // Activity Edit Modal (multi-file)
   let showEditActivityModal = false;
   let editingActivity: any = null;
-  let editActivityForm = {
+  let editActivityForm: {
+    name: string;
+    description: string;
+    project_id: number | string | '';
+    kategori: string | '';
+    activity_date: string | '';
+    jenis: string | '';
+    mitra_id: number | string | '' | null;
+    from?: string | '';
+    to?: string | '';
+    attachments: File[];
+    attachment_names: string[];
+    attachment_descriptions: string[];
+    existing_attachments: Array<{ id: number; name: string; url: string; size?: number }>;
+    removed_existing_ids: number[];
+  } = {
     name: '',
     description: '',
     project_id: '',
     kategori: '',
     activity_date: '',
-    attachment: null as File | null,
     jenis: '',
-    mitra_id: null as string | null,
+    mitra_id: null,
     from: '',
     to: '',
-    attachment_removed: false,
+    attachments: [],
+    attachment_names: [],
+    attachment_descriptions: [],
+    existing_attachments: [],
+    removed_existing_ids: []
   };
-  let editActivityFileName = '';
 
   // Drawer activity
   let showActivityDetailDrawer = false;
@@ -266,38 +297,59 @@
       project_id: project.id,
       kategori: '',
       activity_date: '',
-      attachment: null,
       jenis: project.mitra && project.mitra.is_customer ? 'Customer' : '',
       mitra_id: project.mitra && project.mitra.is_customer ? project.mitra.id : null,
       from: '',
       to: '',
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
     };
-    createActivityFileName = '';
     showCreateActivityModal = true;
   }
-  function handleAttachmentChange(e: Event) {
-    const t = e.target as HTMLInputElement;
-    if (t.files && t.files[0]) { createActivityForm.attachment = t.files[0]; createActivityFileName = t.files[0].name; }
-    else { createActivityForm.attachment = null; createActivityFileName = ''; }
+
+  function appendScalar(fd: FormData, key: string, val: any) {
+    if (val === null || val === undefined || val === '') return;
+    fd.append(key, String(val));
   }
-  function handleEditAttachmentChange(e: Event) {
-    const t = e.target as HTMLInputElement;
-    if (t.files && t.files[0]) { editActivityForm.attachment = t.files[0]; editActivityFileName = t.files[0].name; }
-    else { editActivityForm.attachment = null; editActivityFileName = ''; }
+
+  function buildActivityFormData(data: {
+    name: string; description: string; project_id: number | string | '';
+    kategori: string | ''; activity_date: string | ''; jenis: string | '';
+    mitra_id: number | string | '' | null; from?: string | ''; to?: string | '';
+    attachments: File[]; attachment_names: string[]; attachment_descriptions: string[];
+    removed_existing_ids?: number[];
+  }) {
+    const fd = new FormData();
+    appendScalar(fd, 'name', data.name);
+    appendScalar(fd, 'description', data.description);
+    appendScalar(fd, 'project_id', data.project_id);
+    appendScalar(fd, 'kategori', data.kategori);
+    appendScalar(fd, 'activity_date', data.activity_date);
+    appendScalar(fd, 'jenis', data.jenis);
+    appendScalar(fd, 'from', data.from);
+    appendScalar(fd, 'to', data.to);
+
+    // mitra_id rules
+    if (data.jenis === 'Internal') {
+      fd.set('mitra_id', '1');
+    } else if (data.jenis === 'Customer') {
+      if (project?.mitra_id) fd.set('mitra_id', String(project.mitra_id));
+    } else if (data.jenis === 'Vendor' && data.mitra_id) {
+      fd.set('mitra_id', String(data.mitra_id));
+    }
+
+    (data.attachments || []).forEach((file, i) => fd.append(`attachments[${i}]`, file));
+    (data.attachment_names || []).forEach((n, i) => { if (n != null) fd.append(`attachment_names[${i}]`, n); });
+    (data.attachment_descriptions || []).forEach((d, i) => { if (d != null) fd.append(`attachment_descriptions[${i}]`, d); });
+    (data.removed_existing_ids || []).forEach((id) => fd.append('removed_existing_ids[]', String(id)));
+
+    return fd;
   }
+
   async function handleSubmitCreateActivity() {
     try {
-      const fd = new FormData();
-      for (const key in createActivityForm) {
-        const k = key as keyof typeof createActivityForm;
-        if (k === 'attachment' && createActivityForm.attachment) fd.append(k, createActivityForm.attachment);
-        else if (createActivityForm[k] !== null && createActivityForm[k] !== undefined) fd.append(k, createActivityForm[k] as string | Blob);
-      }
-      if (createActivityForm.jenis === 'Internal')       fd.set('mitra_id', '1');
-      else if (createActivityForm.jenis === 'Customer')  fd.set('mitra_id', project.mitra_id);
-      else if (createActivityForm.jenis === 'Vendor' && createActivityForm.mitra_id) fd.set('mitra_id', createActivityForm.mitra_id);
-      else fd.delete('mitra_id');
-
+      const fd = buildActivityFormData(createActivityForm);
       await axiosClient.post('/activities', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       alert('Aktivitas berhasil ditambahkan!');
       goto(`/projects/${project.id}`);
@@ -308,38 +360,39 @@
       alert('Error:\n' + messages);
     }
   }
+
   function openEditActivityModal(activity: any) {
     editingActivity = { ...activity, activity_date: activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '' };
     editActivityForm = {
-      ...editingActivity,
+      name: editingActivity.name ?? '',
+      description: editingActivity.description ?? '',
       project_id: editingActivity.project_id || '',
       kategori: editingActivity.kategori || '',
+      activity_date: editingActivity.activity_date || '',
       jenis: editingActivity.jenis || '',
       mitra_id: editingActivity.mitra_id || '',
-      attachment: null,
       from: editingActivity.from || '',
       to: editingActivity.to || '',
-      attachment_removed: false,
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: Array.isArray(editingActivity.attachments)
+        ? editingActivity.attachments.map((a: any) => ({
+            id: a.id, name: a.name ?? a.file_name ?? 'Lampiran',
+            url: a.url ?? a.path ?? a.file_path, size: a.size
+          }))
+        : [],
+      removed_existing_ids: []
     };
-    editActivityFileName = activity.attachment ? activity.attachment.split('/').pop() : '';
     showEditActivityModal = true;
   }
+
   function openActivityDetailDrawer(activity: any) { selectedActivity = { ...activity }; showActivityDetailDrawer = true; }
+
   async function handleSubmitUpdateActivity() {
     if (!editingActivity?.id) return;
     try {
-      const fd = new FormData();
-      for (const key in editActivityForm) {
-        const k = key as keyof typeof editActivityForm;
-        if (k === 'attachment' && editActivityForm.attachment) fd.append(k, editActivityForm.attachment);
-        else if (k === 'attachment_removed') fd.append(k, editActivityForm.attachment_removed ? '1' : '0');
-        else if (editActivityForm[k] !== null && editActivityForm[k] !== undefined) fd.append(k, editActivityForm[k] as string | Blob);
-      }
-      if (editActivityForm.jenis === 'Internal')       fd.set('mitra_id', '1');
-      else if (editActivityForm.jenis === 'Customer')  fd.set('mitra_id', project.mitra_id);
-      else if (editActivityForm.jenis === 'Vendor' && editActivityForm.mitra_id) fd.set('mitra_id', editActivityForm.mitra_id);
-      else fd.delete('mitra_id');
-
+      const fd = buildActivityFormData(editActivityForm);
       fd.append('_method', 'PUT');
       await axiosClient.post(`/activities/${editingActivity.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       alert('Aktivitas berhasil diperbarui!');
@@ -351,6 +404,7 @@
       alert('Error:\n' + messages);
     }
   }
+
   async function handleDeleteActivity(activityId: number) {
     if (!confirm('Apakah Anda yakin ingin menghapus aktivitas ini?')) return;
     try {
@@ -393,7 +447,8 @@
     id: number; name: string; no_certificate: string;
     status: 'Belum' | 'Tidak Aktif' | 'Aktif';
     date_of_issue: string; date_of_expired: string;
-    attachment?: string | null; barang_certificate?: { id: number; name: string } | null;
+    attachments?: Array<{ id: number; name: string; url: string; size?: number }>;
+    barang_certificate?: { id: number; name: string } | null;
   };
   let certificates: ProjectCertificate[] = [];
   let loadingCertificates = false;
@@ -476,13 +531,50 @@
     certificatesInitialized = true; fetchCertificates();
     if (!certificateDependenciesInitialized) { certificateDependenciesInitialized = true; fetchCertificateDependencies(); }
   }
+
+  // Certificate create/edit forms (multi-file)
+  let certificateForm: {
+    name: string;
+    no_certificate: string;
+    project_id: number | string | '';
+    barang_certificate_id: number | string | '' | null;
+    status: 'Belum' | 'Tidak Aktif' | 'Aktif' | '';
+    date_of_issue: string;
+    date_of_expired: string;
+    attachments: File[];
+    attachment_names: string[];
+    attachment_descriptions: string[];
+    existing_attachments?: Array<{ id: number; name: string; url: string; size?: number }>;
+    removed_existing_ids?: number[];
+  } = {
+    name: '',
+    no_certificate: '',
+    project_id: '',
+    barang_certificate_id: '',
+    status: '',
+    date_of_issue: '',
+    date_of_expired: '',
+    attachments: [],
+    attachment_names: [],
+    attachment_descriptions: [],
+    existing_attachments: [],
+    removed_existing_ids: []
+  };
+  let showCreateCertificateModal = false;
+  let showEditCertificateModal = false;
+  let showCertificateDetailDrawer = false;
+  let editingCertificate: ProjectCertificate | null = null;
+  let selectedCertificate: ProjectCertificate | null = null;
+
   function openCreateCertificateModal() {
     certificateForm = {
       name: '', no_certificate: '', project_id: project?.id ?? '',
       barang_certificate_id: '', status: '',
-      date_of_issue: '', date_of_expired: '', attachment: null, attachment_removed: false,
+      date_of_issue: '', date_of_expired: '',
+      attachments: [], attachment_names: [], attachment_descriptions: [],
+      existing_attachments: [], removed_existing_ids: []
     };
-    certificateFormFileName = ''; showCreateCertificateModal = true;
+    showCreateCertificateModal = true;
   }
   function openEditCertificateModal(item: ProjectCertificate) {
     editingCertificate = { ...item };
@@ -492,12 +584,31 @@
       status: item.status ?? '',
       date_of_issue: item.date_of_issue ? new Date(item.date_of_issue).toISOString().split('T')[0] : '',
       date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
-      attachment: null, attachment_removed: false,
+      attachments: [], attachment_names: [], attachment_descriptions: [],
+      existing_attachments: Array.isArray(item.attachments) ? item.attachments.map(a => ({ id: a.id, name: a.name, url: a.url, size: a.size })) : [],
+      removed_existing_ids: []
     };
-    certificateFormFileName = item.attachment ? String(item.attachment).split('/').pop() ?? '' : '';
     showEditCertificateModal = true;
   }
   function openCertificateDetailDrawer(item: ProjectCertificate) { selectedCertificate = { ...item }; showCertificateDetailDrawer = true; }
+
+  function buildCertificateFormData() {
+    const fd = new FormData();
+    if (project?.id) fd.append('project_id', String(project.id));
+    fd.append('name', certificateForm.name);
+    fd.append('no_certificate', certificateForm.no_certificate);
+    if (certificateForm.barang_certificate_id !== '' && certificateForm.barang_certificate_id !== null) fd.append('barang_certificate_id', String(certificateForm.barang_certificate_id));
+    if (certificateForm.status) fd.append('status', certificateForm.status);
+    fd.append('date_of_issue', certificateForm.date_of_issue || '');
+    fd.append('date_of_expired', certificateForm.date_of_expired || '');
+
+    (certificateForm.attachments || []).forEach((file, i) => fd.append(`attachments[${i}]`, file));
+    (certificateForm.attachment_names || []).forEach((n, i) => { if (n != null) fd.append(`attachment_names[${i}]`, n); });
+    (certificateForm.attachment_descriptions || []).forEach((d, i) => { if (d != null) fd.append(`attachment_descriptions[${i}]`, d); });
+    (certificateForm.removed_existing_ids || []).forEach((id) => fd.append('removed_existing_ids[]', String(id)));
+
+    return fd;
+  }
 
   async function handleSubmitCreateCertificate() {
     try {
@@ -525,27 +636,8 @@
     try { await axiosClient.delete(`/certificates/${id}`); alert('Certificate berhasil dihapus'); fetchCertificates(); }
     catch (err: any) { alert('Gagal menghapus data: ' + (err.response?.data?.message || 'Terjadi kesalahan')); }
   }
-  function buildCertificateFormData() {
-    const fd = new FormData();
-    fd.append('name', certificateForm.name);
-    fd.append('no_certificate', certificateForm.no_certificate);
-    if (project?.id) fd.append('project_id', String(project.id));
-    if (certificateForm.barang_certificate_id !== '' && certificateForm.barang_certificate_id !== null) fd.append('barang_certificate_id', String(certificateForm.barang_certificate_id));
-    if (certificateForm.status) fd.append('status', certificateForm.status);
-    fd.append('date_of_issue', certificateForm.date_of_issue || '');
-    fd.append('date_of_expired', certificateForm.date_of_expired || '');
-    if (certificateForm.attachment) fd.append('attachment', certificateForm.attachment);
-    if (certificateForm.attachment_removed) fd.append('attachment_removed', '1');
-    return fd;
-  }
 
   // Tabs state
-  let certificateForm: any;
-  let showCreateCertificateModal = false;
-  let showEditCertificateModal = false;
-  let showCertificateDetailDrawer = false;
-  let editingCertificate: ProjectCertificate | null = null;
-  let selectedCertificate: ProjectCertificate | null = null;
   let certificateFormFileName = '';
 </script>
 
@@ -1274,36 +1366,74 @@
     {/if}
   </div>
 
-  {#if showEditProjectModal}
-    <ProjectFormModal bind:show={showEditProjectModal} title="Edit Project" submitLabel="Update Project" idPrefix="edit_project"
-      form={editProjectForm} {customers} {projectStatuses} {projectKategoris} onSubmit={handleSubmitUpdateProject} />
-  {/if}
+    {#if showEditProjectModal}
+      <ProjectFormModal bind:show={showEditProjectModal} title="Edit Project" submitLabel="Update Project" idPrefix="edit_project"
+        form={editProjectForm} {customers} {projectStatuses} {projectKategoris} onSubmit={handleSubmitUpdateProject} />
+    {/if}
 
-  <ActivityFormModal bind:show={showCreateActivityModal} title="Form Tambah Aktivitas" submitLabel="Tambah Aktivitas"
-    idPrefix="create_activity" form={createActivityForm} projects={project ? [project] : []} showProjectSelect={false}
-    {vendors} bind:currentFileName={createActivityFileName} allowRemoveAttachment={false} onSubmit={handleSubmitCreateActivity} />
+    <ActivityFormModal
+      bind:show={showCreateActivityModal}
+      title="Form Tambah Aktivitas"
+      submitLabel="Tambah Aktivitas"
+      idPrefix="create_activity"
+      form={createActivityForm}
+      projects={project ? [project] : []}
+      showProjectSelect={false}
+      {vendors}
+      allowRemoveAttachment={false}
+      onSubmit={handleSubmitCreateActivity}
+    />
 
-  {#if editingActivity}
-    <ActivityFormModal bind:show={showEditActivityModal} title="Edit Aktivitas" submitLabel="Update Aktivitas"
-      idPrefix="edit_activity" form={editActivityForm} projects={project ? [project] : []} showProjectSelect={false}
-      {vendors} bind:currentFileName={editActivityFileName} allowRemoveAttachment={true} onSubmit={handleSubmitUpdateActivity} />
-  {/if}
+    {#if editingActivity}
+      <ActivityFormModal
+        bind:show={showEditActivityModal}
+        title="Edit Aktivitas"
+        submitLabel="Update Aktivitas"
+        idPrefix="edit_activity"
+        form={editActivityForm}
+        projects={project ? [project] : []}
+        showProjectSelect={false}
+        {vendors}
+        allowRemoveAttachment={true}
+        onSubmit={handleSubmitUpdateActivity}
+      />
+    {/if}
 
-  <Drawer bind:show={showActivityDetailDrawer} title="Detail Activity" on:close={() => (showActivityDetailDrawer = false)}>
-    <ActivityDetail activity={selectedActivity} />
-  </Drawer>
+    <Drawer bind:show={showActivityDetailDrawer} title="Detail Activity" on:close={() => (showActivityDetailDrawer = false)}>
+      <ActivityDetail activity={selectedActivity} />
+    </Drawer>
 
-  <CertificateFormModal bind:show={showCreateCertificateModal} title="Tambah Sertifikat" submitLabel="Simpan" idPrefix="create_cert"
-    form={certificateForm} projects={[]} barangOptions={certificateBarangOptions} statuses={Array.from(certificateStatuses)}
-    bind:currentFileName={certificateFormFileName} allowRemoveAttachment={true} showProjectSelect={false} onSubmit={handleSubmitCreateCertificate} />
+    <CertificateFormModal
+      bind:show={showCreateCertificateModal}
+      title="Tambah Sertifikat"
+      submitLabel="Simpan"
+      idPrefix="create_cert"
+      form={certificateForm}
+      projects={[]}
+      barangOptions={certificateBarangOptions}
+      statuses={Array.from(certificateStatuses)}
+      allowRemoveAttachment={true}
+      showProjectSelect={false}
+      onSubmit={handleSubmitCreateCertificate}
+    />
 
-  {#if editingCertificate}
-    <CertificateFormModal bind:show={showEditCertificateModal} title="Edit Sertifikat" submitLabel="Update" idPrefix="edit_cert"
-      form={certificateForm} projects={[]} barangOptions={certificateBarangOptions} statuses={Array.from(certificateStatuses)}
-      bind:currentFileName={certificateFormFileName} allowRemoveAttachment={true} showProjectSelect={false} onSubmit={handleSubmitUpdateCertificate} />
-  {/if}
+    {#if editingCertificate}
+      <CertificateFormModal
+        bind:show={showEditCertificateModal}
+        title="Edit Sertifikat"
+        submitLabel="Update"
+        idPrefix="edit_cert"
+        form={certificateForm}
+        projects={[]}
+        barangOptions={certificateBarangOptions}
+        statuses={Array.from(certificateStatuses)}
+        allowRemoveAttachment={true}
+        showProjectSelect={false}
+        onSubmit={handleSubmitUpdateCertificate}
+      />
+    {/if}
 
-  <Drawer bind:show={showCertificateDetailDrawer} title="Detail Sertifikat" on:close={() => (showCertificateDetailDrawer = false)}>
-    <CertificatesDetail certificates={selectedCertificate} />
-  </Drawer>
+    <Drawer bind:show={showCertificateDetailDrawer} title="Detail Sertifikat" on:close={() => (showCertificateDetailDrawer = false)}>
+      <CertificatesDetail certificates={selectedCertificate} />
+    </Drawer>
 {/if}

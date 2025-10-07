@@ -7,6 +7,7 @@
   import CertificateDetail from '$lib/components/detail/CertificatesDetail.svelte';
 
   type Option = { id: number; name?: string; title?: string; no_seri?: string };
+  type AttachmentItem = { id: number; name: string; url: string; size?: number };
 
   let item: any = null;
   let loading = true;
@@ -17,7 +18,8 @@
   let filteredBarangCertificates: Option[] = [];
 
   let showEditModal = false;
-  let formFileName = '';
+
+  // === FORM STATE (multi-file) ===
   let form: {
     name: string;
     no_certificate: string;
@@ -26,8 +28,11 @@
     status: 'Belum' | 'Tidak Aktif' | 'Aktif' | '';
     date_of_issue: string;
     date_of_expired: string;
-    attachment: File | null;
-    attachment_removed?: boolean;
+    attachments: File[];
+    attachment_names: string[];
+    attachment_descriptions: string[];
+    existing_attachments: AttachmentItem[];
+    removed_existing_ids: number[];
   } = {
     name: '',
     no_certificate: '',
@@ -36,8 +41,11 @@
     status: '',
     date_of_issue: '',
     date_of_expired: '',
-    attachment: null,
-    attachment_removed: false
+    attachments: [],
+    attachment_names: [],
+    attachment_descriptions: [],
+    existing_attachments: [],
+    removed_existing_ids: []
   };
 
   const statuses = ['Belum', 'Tidak Aktif', 'Aktif'] as const;
@@ -90,26 +98,39 @@
       status: item.status ?? '',
       date_of_issue: item.date_of_issue ? new Date(item.date_of_issue).toISOString().split('T')[0] : '',
       date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
-      attachment: null,
-      attachment_removed: false
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: Array.isArray(item.attachments)
+        ? item.attachments.map((a: any) => ({ id: a.id, name: a.name, url: a.url, size: a.size }))
+        : [],
+      removed_existing_ids: []
     };
-    formFileName = item.attachment ? String(item.attachment).split('/').pop() ?? '' : '';
     if (item.project_id && typeof item.project_id === 'number') fetchBarangCertificatesByProject(item.project_id);
     else filteredBarangCertificates = [];
     showEditModal = true;
   }
 
+  function appendScalar(fd: FormData, key: string, val: any) {
+    if (val === null || val === undefined || val === '') return;
+    fd.append(key, String(val));
+  }
+
   function buildFormData() {
     const fd = new FormData();
-    fd.append('name', form.name);
-    fd.append('no_certificate', form.no_certificate);
-    if (form.project_id !== '' && form.project_id !== null) fd.append('project_id', String(form.project_id));
-    if (form.barang_certificate_id !== '' && form.barang_certificate_id !== null) fd.append('barang_certificate_id', String(form.barang_certificate_id));
-    if (form.status) fd.append('status', form.status);
-    fd.append('date_of_issue', form.date_of_issue || '');
-    fd.append('date_of_expired', form.date_of_expired || '');
-    if (form.attachment) fd.append('attachment', form.attachment);
-    fd.append('attachment_removed', form.attachment_removed ? '1' : '0');
+    appendScalar(fd, 'name', form.name);
+    appendScalar(fd, 'no_certificate', form.no_certificate);
+    appendScalar(fd, 'project_id', form.project_id);
+    appendScalar(fd, 'barang_certificate_id', form.barang_certificate_id);
+    appendScalar(fd, 'status', form.status);
+    appendScalar(fd, 'date_of_issue', form.date_of_issue);
+    appendScalar(fd, 'date_of_expired', form.date_of_expired);
+
+    (form.attachments || []).forEach((file, i) => fd.append(`attachments[${i}]`, file));
+    (form.attachment_names || []).forEach((n, i) => { if (n != null) fd.append(`attachment_names[${i}]`, n); });
+    (form.attachment_descriptions || []).forEach((d, i) => { if (d != null) fd.append(`attachment_descriptions[${i}]`, d); });
+    (form.removed_existing_ids || []).forEach((id) => fd.append('removed_existing_ids[]', String(id)));
+
     return fd;
   }
 
@@ -188,7 +209,6 @@
     barangOptions={filteredBarangCertificates}
     statuses={Array.from(statuses)}
     handleProjectChange={handleProjectChange}
-    bind:currentFileName={formFileName}
     allowRemoveAttachment={true}
     onSubmit={handleSubmitUpdate}
     onClose={closeEditModal}

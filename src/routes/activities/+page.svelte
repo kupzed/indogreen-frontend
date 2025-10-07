@@ -40,24 +40,41 @@
   let showCreateModal: boolean = false;
   let showEditModal: boolean = false;
   let editingActivity: any = null;
-  
   let showDetailDrawer: boolean = false;
   let selectedActivity: any = null;
 
-  let form = {
+  // === FORM STATE (multi-file) ===
+  let form: {
+    name: string;
+    description: string;
+    project_id: string | number | '';
+    kategori: string | '';
+    activity_date: string | '';
+    jenis: string | '';
+    mitra_id: number | string | '' | null;
+    from?: string | '';
+    to?: string | '';
+    attachments: File[];
+    attachment_names: string[];
+    attachment_descriptions: string[];
+    existing_attachments?: Array<{ id: number; name: string; url: string; size?: number }>;
+    removed_existing_ids?: number[];
+  } = {
     name: '',
     description: '',
     project_id: '',
     kategori: '',
     activity_date: '',
-    attachment: null as File | null,
     jenis: '',
-    mitra_id: null as string | null,
+    mitra_id: null,
     from: '',
     to: '',
-    attachment_removed: false,
+    attachments: [],
+    attachment_names: [],
+    attachment_descriptions: [],
+    existing_attachments: [],
+    removed_existing_ids: []
   };
-  let formFileName = '';
 
   const activityKategoriList = [
     'Expense Report','Invoice','Purchase Order','Payment','Quotation',
@@ -133,50 +150,108 @@
   function goToPage(page: number) { if (page > 0 && page <= lastPage) { currentPage = page; fetchActivities(); } }
 
   function openCreateModal() {
-    form = { name:'',description:'',project_id:'',kategori:'',activity_date:'',attachment:null,jenis:'',mitra_id:null,from:'',to:'',attachment_removed:false };
-    formFileName = '';
+    form = {
+      name: '',
+      description: '',
+      project_id: '',
+      kategori: '',
+      activity_date: '',
+      jenis: '',
+      mitra_id: null,
+      from: '',
+      to: '',
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: [],
+      removed_existing_ids: []
+    };
     showCreateModal = true;
   }
+
   function openEditModal(activity: any) {
     editingActivity = { ...activity };
     editingActivity.activity_date = activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '';
     form = {
-      ...editingActivity,
-      project_id: editingActivity.project_id || '',
-      kategori: editingActivity.kategori || '',
-      jenis: editingActivity.jenis || '',
-      mitra_id: editingActivity.mitra_id || '',
-      attachment: null,
-      from: editingActivity.from || '',
-      to: editingActivity.to || '',
-      attachment_removed: false,
+      name: editingActivity.name ?? '',
+      description: editingActivity.description ?? '',
+      project_id: editingActivity.project_id ?? '',
+      kategori: editingActivity.kategori ?? '',
+      activity_date: editingActivity.activity_date ?? '',
+      jenis: editingActivity.jenis ?? '',
+      mitra_id: editingActivity.mitra_id ?? '',
+      from: editingActivity.from ?? '',
+      to: editingActivity.to ?? '',
+      attachments: [],
+      attachment_names: [],
+      attachment_descriptions: [],
+      existing_attachments: Array.isArray(editingActivity.attachments)
+        ? editingActivity.attachments.map((a: any) => ({
+            id: a.id, name: a.name ?? a.file_name ?? 'Lampiran',
+            url: a.url ?? a.path ?? a.file_path, size: a.size
+          }))
+        : [],
+      removed_existing_ids: []
     };
+
     if (form.jenis === 'Customer' && form.project_id) {
       const selectedProject = projects.find(p => p.id == form.project_id);
       if (selectedProject?.mitra_id) form.mitra_id = selectedProject.mitra_id;
     }
-    formFileName = activity.attachment ? activity.attachment.split('/').pop() : '';
+
     showEditModal = true;
   }
+
   function openDetailDrawer(activity: any) { selectedActivity = { ...activity }; showDetailDrawer = true; }
+
+  function appendScalar(fd: FormData, key: string, val: any) {
+    if (val === null || val === undefined || val === '') return;
+    fd.append(key, String(val));
+  }
+
+  function buildFormDataForActivity() {
+    const fd = new FormData();
+    appendScalar(fd, 'name', form.name);
+    appendScalar(fd, 'description', form.description);
+    appendScalar(fd, 'project_id', form.project_id);
+    appendScalar(fd, 'kategori', form.kategori);
+    appendScalar(fd, 'activity_date', form.activity_date);
+    appendScalar(fd, 'jenis', form.jenis);
+    appendScalar(fd, 'from', form.from);
+    appendScalar(fd, 'to', form.to);
+
+    // mitra_id rules:
+    if (form.jenis === 'Internal') {
+      fd.set('mitra_id', '1');
+    } else if (form.jenis === 'Customer') {
+      const selectedProject = projects.find(p => p.id == form.project_id);
+      if (selectedProject?.mitra_id) fd.set('mitra_id', String(selectedProject.mitra_id));
+    } else if (form.jenis === 'Vendor' && form.mitra_id) {
+      fd.set('mitra_id', String(form.mitra_id));
+    }
+
+    // multi-file payload
+    (form.attachments || []).forEach((file, i) => {
+      fd.append(`attachments[${i}]`, file);
+    });
+    (form.attachment_names || []).forEach((n, i) => {
+      if (n != null) fd.append(`attachment_names[${i}]`, n);
+    });
+    (form.attachment_descriptions || []).forEach((d, i) => {
+      if (d != null) fd.append(`attachment_descriptions[${i}]`, d);
+    });
+
+    // removed_existing_ids (untuk UPDATE)
+    (form.removed_existing_ids || []).forEach((id) => {
+      fd.append('removed_existing_ids[]', String(id));
+    });
+
+    return fd;
+  }
 
   async function handleSubmitCreate() {
     try {
-      const formData = new FormData();
-      for (const key in form) {
-        const typedKey = key as keyof typeof form;
-        if (typedKey === 'attachment' && form.attachment) formData.append(typedKey, form.attachment);
-        else if (typedKey !== 'attachment_removed' && form[typedKey] !== null && form[typedKey] !== undefined)
-          formData.append(typedKey, form[typedKey] as string | Blob);
-      }
-      if (form.jenis === 'Internal') formData.set('mitra_id','1');
-      else if (form.jenis === 'Customer') {
-        const selectedProject = projects.find(p => p.id == form.project_id);
-        if (selectedProject?.mitra_id) formData.set('mitra_id', selectedProject.mitra_id);
-        else formData.delete('mitra_id');
-      } else if (form.jenis === 'Vendor' && form.mitra_id) formData.set('mitra_id', form.mitra_id);
-      else formData.delete('mitra_id');
-
+      const formData = buildFormDataForActivity();
       await axiosClient.post('/activities', formData, { headers: { 'Content-Type':'multipart/form-data' } });
       alert('Aktivitas berhasil ditambahkan!');
       goto(`/activities`);
@@ -192,22 +267,7 @@
   async function handleSubmitUpdate() {
     if (!editingActivity?.id) return;
     try {
-      const formData = new FormData();
-      for (const key in form) {
-        const typedKey = key as keyof typeof form;
-        if (typedKey === 'attachment' && form.attachment) formData.append(typedKey, form.attachment);
-        else if (typedKey === 'attachment_removed') formData.append(typedKey, form.attachment_removed ? '1' : '0');
-        else if (form[typedKey] !== null && form[typedKey] !== undefined) formData.append(typedKey, form[typedKey] as string | Blob);
-      }
-
-      if (form.jenis === 'Internal') formData.set('mitra_id','1');
-      else if (form.jenis === 'Customer') {
-        const selectedProject = projects.find(p => p.id == form.project_id);
-        if (selectedProject?.mitra_id) formData.set('mitra_id', selectedProject.mitra_id);
-        else formData.delete('mitra_id');
-      } else if (form.jenis === 'Vendor' && form.mitra_id) formData.set('mitra_id', form.mitra_id);
-      else formData.delete('mitra_id');
-
+      const formData = buildFormDataForActivity();
       formData.append('_method', 'PUT');
       await axiosClient.post(`/activities/${editingActivity.id}`, formData, { headers: { 'Content-Type':'multipart/form-data' } });
       alert('Aktivitas berhasil diperbarui!');
@@ -581,7 +641,6 @@
   {form}
   {projects}
   {vendors}
-  bind:currentFileName={formFileName}
   allowRemoveAttachment={false}
   onSubmit={handleSubmitCreate}
 />
@@ -595,7 +654,6 @@
     {form}
     {projects}
     {vendors}
-    bind:currentFileName={formFileName}
     allowRemoveAttachment={true}
     onSubmit={handleSubmitUpdate}
   />
