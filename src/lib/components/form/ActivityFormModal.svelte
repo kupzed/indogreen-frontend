@@ -6,7 +6,7 @@
   export let title: string = 'Form Aktivitas';
   export let submitLabel: string = 'Simpan';
   export let idPrefix: string = 'activity';
-  export let allowRemoveAttachment: boolean = false;
+  export let allowRemoveAttachment: boolean = true;
   export let showProjectSelect: boolean = true;
 
   export let form: {
@@ -15,12 +15,17 @@
     project_id: string | number | '';
     kategori: string | '';
     activity_date: string | '';
-    attachment: File | null;
     jenis: string | '';
     mitra_id: number | string | '' | null;
     from?: string | '';
     to?: string | '';
-    attachment_removed?: boolean;
+    // multi-file
+    attachments?: File[];
+    attachment_names?: string[];
+    attachment_descriptions?: string[];
+    // edit support
+    existing_attachments?: Array<{ id: number; name: string; url: string; size?: number }>;
+    removed_existing_ids?: number[];
   };
 
   export let projects: Array<{
@@ -37,7 +42,6 @@
   ];
   const activityJenisList = ['Internal', 'Customer', 'Vendor'];
 
-  export let currentFileName: string = '';
   export let onSubmit: () => Promise<void> | void;
 
   $: selectedProject = projects.find((p) => p.id === Number(form.project_id));
@@ -63,7 +67,6 @@
 
   <form on:submit|preventDefault={handleSubmit} autocomplete="off">
     <fieldset disabled={isSubmitting} class="space-y-4">
-      <!-- Name -->
       <div>
         <label for="{idPrefix}_name" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Nama Aktivitas</label>
         <div class="mt-2">
@@ -81,7 +84,6 @@
         </div>
       </div>
 
-      <!-- Project -->
       {#if showProjectSelect}
         <div>
           <label for="{idPrefix}_project_id" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Project</label>
@@ -103,7 +105,6 @@
         </div>
       {/if}
 
-      <!-- Jenis -->
       <div>
         <label for="{idPrefix}_jenis" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Jenis</label>
         <div class="mt-2">
@@ -123,7 +124,6 @@
         </div>
       </div>
 
-      <!-- Mitra logic -->
       {#if form.jenis === 'Customer'}
         <p class="text-sm text-gray-500 dark:text-gray-400">Customer akan otomatis dipilih berdasarkan Project.</p>
       {:else if form.jenis === 'Vendor'}
@@ -147,7 +147,6 @@
         </div>
       {/if}
 
-      <!-- Kategori -->
       <div>
         <label for="{idPrefix}_kategori" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Kategori</label>
         <div class="mt-2">
@@ -167,7 +166,6 @@
         </div>
       </div>
 
-      <!-- From / To -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label for="{idPrefix}_from" class="block text-sm/6 font-medium text-gray-900 dark:text-white">From (Optional)</label>
@@ -199,7 +197,6 @@
         </div>
       </div>
 
-      <!-- Description -->
       <div>
         <label for="{idPrefix}_description" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Deskripsi</label>
         <div class="mt-2">
@@ -217,7 +214,6 @@
         </div>
       </div>
 
-      <!-- Activity Date -->
       <div>
         <label for="{idPrefix}_activity_date" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Tanggal Aktivitas</label>
         <div class="mt-2">
@@ -233,26 +229,43 @@
         </div>
       </div>
 
-      <!-- Attachment -->
+      <!-- Attachment (multi-file) -->
       <FileAttachment
-        id="{idPrefix}_attachment"
+        id="{idPrefix}_attachments"
         label="Lampiran"
-        bind:file={form.attachment}
-        bind:fileName={currentFileName}
+        bind:files={form.attachments}
+        bind:fileNames={form.attachment_names}
+        bind:fileDescriptions={form.attachment_descriptions}
+        maxFiles={10}
         showRemoveButton={allowRemoveAttachment}
-        on:change={(e) => {
-          form.attachment = e.detail.file;
-          currentFileName = e.detail.fileName;
-          if (form.attachment_removed !== undefined) form.attachment_removed = false;
-        }}
-        on:remove={() => {
-          if (allowRemoveAttachment) {
-            form.attachment_removed = true;
-            form.attachment = null;
-            currentFileName = '';
-          }
-        }}
       />
+
+      <!-- Lampiran lama (opsional saat edit) -->
+      {#if form.existing_attachments && form.existing_attachments.length > 0}
+        <div class="mt-3 space-y-2">
+          <p class="text-sm font-medium text-gray-900 dark:text-white">Lampiran Lama</p>
+          {#each form.existing_attachments as att (att.id)}
+            <div class="flex items-center justify-between rounded border px-3 py-2 text-sm dark:border-gray-700">
+              <a class="truncate text-indigo-600 dark:text-indigo-400 hover:underline" href={att.url} target="_blank" rel="noreferrer">
+                {att.name}
+              </a>
+              <div class="flex items-center gap-3">
+                {#if att.size}<span class="text-gray-500 dark:text-gray-400">{att.size} B</span>{/if}
+                <button
+                  type="button"
+                  class="text-red-600 hover:text-red-700"
+                  on:click={() => {
+                    form.removed_existing_ids = [...(form.removed_existing_ids ?? []), att.id];
+                    form.existing_attachments = form.existing_attachments!.filter(x => x.id !== att.id);
+                  }}
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+          {/each}
+        </div>
+      {/if}
     </fieldset>
 
     <div class="mt-6">

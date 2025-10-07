@@ -6,8 +6,8 @@
   export let title: string = 'Form Sertifikat';
   export let submitLabel: string = 'Simpan';
   export let idPrefix: string = 'certificate';
+  export let allowRemoveAttachment: boolean = true;
   export let showProjectSelect: boolean = true;
-  export let allowRemoveAttachment: boolean = false;
   export let onClose: (() => void) | undefined = undefined;
 
   export let form: {
@@ -18,15 +18,19 @@
     status: string | '';
     date_of_issue: string | '';
     date_of_expired: string | '';
-    attachment: File | null;
-    attachment_removed?: boolean;
+    // multi-file
+    attachments?: File[];
+    attachment_names?: string[];
+    attachment_descriptions?: string[];
+    existing_attachments?: Array<{ id: number; name: string; url: string; size?: number }>;
+    removed_existing_ids?: number[];
   };
 
   export let projects: Array<{ id: number; name?: string; title?: string; mitra?: { id: number; nama: string; is_customer?: boolean }; }> = [];
   export let barangOptions: Array<{ id: number; name?: string; title?: string; no_seri?: string }> = [];
   export let statuses: string[] = ['Belum', 'Tidak Aktif', 'Aktif'];
   export let handleProjectChange: ((projectId: number | '' | null) => void) | undefined = undefined;
-  export let currentFileName: string = '';
+
   export let onSubmit: () => void | Promise<void>;
 
   let isSubmitting = false;
@@ -148,25 +152,43 @@
         </div>
       </div>
 
+      <!-- Attachment (multi-file) -->
       <FileAttachment
-        id="{idPrefix}_attachment"
+        id="{idPrefix}_attachments"
         label="Lampiran"
-        bind:file={form.attachment}
-        bind:fileName={currentFileName}
+        bind:files={form.attachments}
+        bind:fileNames={form.attachment_names}
+        bind:fileDescriptions={form.attachment_descriptions}
+        maxFiles={10}
         showRemoveButton={allowRemoveAttachment}
-        on:change={(e) => {
-          form.attachment = e.detail.file;
-          currentFileName = e.detail.fileName;
-          if (form.attachment_removed !== undefined) form.attachment_removed = false;
-        }}
-        on:remove={() => {
-          if (allowRemoveAttachment) {
-            form.attachment_removed = true;
-            form.attachment = null;
-            currentFileName = '';
-          }
-        }}
       />
+
+      <!-- Lampiran lama (opsional saat edit) -->
+      {#if form.existing_attachments && form.existing_attachments.length > 0}
+        <div class="mt-3 space-y-2">
+          <p class="text-sm font-medium text-gray-900 dark:text-white">Lampiran Lama</p>
+          {#each form.existing_attachments as att (att.id)}
+            <div class="flex items-center justify-between rounded border px-3 py-2 text-sm dark:border-gray-700">
+              <a class="truncate text-indigo-600 dark:text-indigo-400 hover:underline" href={att.url} target="_blank" rel="noreferrer">
+                {att.name}
+              </a>
+              <div class="flex items-center gap-3">
+                {#if att.size}<span class="text-gray-500 dark:text-gray-400">{att.size} B</span>{/if}
+                <button
+                  type="button"
+                  class="text-red-600 hover:text-red-700"
+                  on:click={() => {
+                    form.removed_existing_ids = [...(form.removed_existing_ids ?? []), att.id];
+                    form.existing_attachments = form.existing_attachments!.filter(x => x.id !== att.id);
+                  }}
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+          {/each}
+        </div>
+      {/if}
     </fieldset>
 
     <div>
