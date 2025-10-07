@@ -222,12 +222,15 @@
 
     // mitra_id rules:
     if (form.jenis === 'Internal') {
-      fd.set('mitra_id', '1');
+      fd.delete('mitra_id');
     } else if (form.jenis === 'Customer') {
       const selectedProject = projects.find(p => p.id == form.project_id);
       if (selectedProject?.mitra_id) fd.set('mitra_id', String(selectedProject.mitra_id));
+      else fd.delete('mitra_id');
     } else if (form.jenis === 'Vendor' && form.mitra_id) {
       fd.set('mitra_id', String(form.mitra_id));
+    } else {
+      fd.delete('mitra_id');
     }
 
     // multi-file payload
@@ -302,7 +305,7 @@
       const selectedProject = projects.find(p => p.id == form.project_id);
       form.mitra_id = selectedProject?.mitra_id || null;
     } else if (form.jenis === 'Internal') {
-      form.mitra_id = '1';
+      form.mitra_id = null;
     } else if (form.jenis === 'Vendor') {
       if (!Array.isArray(vendors) || !vendors.some(v => v.id == form.mitra_id)) form.mitra_id = '';
     } else {
