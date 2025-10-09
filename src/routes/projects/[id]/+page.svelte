@@ -332,14 +332,11 @@
 
     // mitra_id rules
     if (data.jenis === 'Internal') {
-      fd.delete('mitra_id');
+      fd.set('mitra_id', '1');
     } else if (data.jenis === 'Customer') {
       if (project?.mitra_id) fd.set('mitra_id', String(project.mitra_id));
-      else fd.delete('mitra_id');
     } else if (data.jenis === 'Vendor' && data.mitra_id) {
       fd.set('mitra_id', String(data.mitra_id));
-    } else {
-      fd.delete('mitra_id');
     }
 
     (data.attachments || []).forEach((file, i) => fd.append(`attachments[${i}]`, file));
@@ -424,7 +421,7 @@
   $: if (showCreateActivityModal && createActivityForm.jenis && createActivityForm.jenis !== previousCreateActivityJenis) {
     previousCreateActivityJenis = createActivityForm.jenis;
     if (createActivityForm.jenis === 'Customer')      createActivityForm.mitra_id = project?.mitra_id || null;
-    else if (createActivityForm.jenis === 'Internal') createActivityForm.mitra_id = null;
+    else if (createActivityForm.jenis === 'Internal') createActivityForm.mitra_id = '1';
     else if (createActivityForm.jenis === 'Vendor')   { if (!Array.isArray(vendors) || !vendors.some(v => v.id == createActivityForm.mitra_id)) createActivityForm.mitra_id = ''; }
     else                                              createActivityForm.mitra_id = '';
   }

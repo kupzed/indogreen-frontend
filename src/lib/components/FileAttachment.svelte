@@ -151,15 +151,6 @@
     dispatch('descriptionChange', { index, description: newVal });
   }
 
-  function handleContainerClick(e: MouseEvent) {
-    const target = e.target as HTMLElement;
-    // Abaikan klik pada elemen interaktif supaya tidak membuka file picker
-    if (target.closest('input, textarea, button, [role="button"], a, svg')) {
-      return;
-    }
-    triggerPicker();
-  }
-
   $: totalSize = files.reduce((total, file) => total + file.size, 0);
   $: canAddMore = files.length < maxFiles;
 </script>
@@ -213,12 +204,12 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="mt-2 block w-full rounded-lg border-2 border-dashed p-5 sm:p-6 text-center transition
-          bg-white dark:bg-neutral-900 border-gray-300
-          dark:border-gray-700 cursor-pointer
-          hover:border-indigo-400 hover:bg-gray-50 dark:hover:bg-neutral-800
-          {isDragOver ? 'border-indigo-400 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/20' : ''}"
+           bg-white dark:bg-neutral-900 border-gray-300
+           dark:border-gray-700 cursor-pointer
+           hover:border-indigo-400 hover:bg-gray-50 dark:hover:bg-neutral-800
+           {isDragOver ? 'border-indigo-400 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-900/20' : ''}"
     aria-label="Upload files"
-    on:click={handleContainerClick}
+    on:click={triggerPicker}
     on:dragenter={handleDragEnter}
     on:dragover|preventDefault={handleDragOver}
     on:dragleave={handleDragLeave}
@@ -233,26 +224,20 @@
               <input
                 type="text"
                 bind:value={fileNames[index]}
-                required
-                on:click|stopPropagation
-                on:mousedown|stopPropagation
                 on:input={(e) => updateFileName(index, (e.target as HTMLInputElement).value)}
-                placeholder="Nama file"
+                placeholder="Nama file (opsional)"
                 class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded
-                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                      focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                       focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
               <input
                 type="text"
                 bind:value={fileDescriptions[index]}
-                required
-                on:click|stopPropagation
-                on:mousedown|stopPropagation
                 on:input={(e) => updateFileDesc(index, (e.target as HTMLInputElement).value)}
-                placeholder="Deskripsi file"
+                placeholder="Deskripsi file (opsional)"
                 class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded
-                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                      focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                       focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
               <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                 <span title={file.name} class="truncate">{shortenMiddle(file.name)}</span>
@@ -268,9 +253,9 @@
             {#if showRemoveButton}
               <button
                 type="button"
-                on:click|stopPropagation={() => handleRemoveFile(index)}
+                on:click={() => handleRemoveFile(index)}
                 class="shrink-0 p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300
-                      hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                       hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
                 aria-label={`Hapus ${file.name}`}
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
