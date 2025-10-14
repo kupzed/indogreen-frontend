@@ -1,5 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { onMount } from 'svelte';
   import axiosClient from '$lib/axiosClient';
   import { theme, toggleTheme } from '$lib/stores/theme';
 
@@ -8,6 +10,20 @@
   let showPassword = false;
   let loading = false;
   let error: string | null = null;
+
+  // helper next yang aman
+  function getSafeNext(u: URL) {
+    const n = u.searchParams.get('next') || '';
+    return n.startsWith('/') && !n.startsWith('/auth/') ? n : '/dashboard';
+  }
+
+  // ⬇️ Jika sudah login dan buka /auth/login, langsung redirect
+  onMount(() => {
+    const token = localStorage.getItem('jwt_token');
+    if (token) {
+      goto(getSafeNext($page.url));
+    }
+  });
 
   async function handleSubmit() {
     if (loading) return;
@@ -18,7 +34,8 @@
       const token = res?.data?.access_token ?? res?.data?.token;
       if (!token) throw new Error('Token tidak ditemukan');
       localStorage.setItem('jwt_token', token);
-      goto('/dashboard');
+
+      goto(getSafeNext($page.url));   // ⬅️ gunakan next bila ada
     } catch (err: any) {
       error =
         err?.response?.data?.error ||
@@ -31,6 +48,7 @@
     }
   }
 </script>
+
 
 <svelte:head>
   <title>Login - Indogreen</title>
@@ -185,7 +203,10 @@
 
       <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
         Belum punya akun?
-        <a href="/auth/register" class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">Daftar disini</a>
+        <a
+          href="/auth/register"
+          class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+        >Daftar disini</a>
       </p>
     </div>
   </div>

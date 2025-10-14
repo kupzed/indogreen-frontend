@@ -1,5 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { page } from '$app/stores';
+  import { onMount } from 'svelte';
   import axiosClient from '$lib/axiosClient';
   import { theme, toggleTheme } from '$lib/stores/theme';
 
@@ -12,6 +14,19 @@
   let loading = false;
   let error: string | null = null;
 
+  function getSafeNext(u: URL) {
+    const n = u.searchParams.get('next') || '';
+    return n.startsWith('/') && !n.startsWith('/auth/') ? n : '/dashboard';
+  }
+
+  // ⬇️ Jika sudah login, jangan boleh buka register
+  onMount(() => {
+    const token = localStorage.getItem('jwt_token');
+    if (token) {
+      goto(getSafeNext($page.url));
+    }
+  });
+
   async function handleSubmit() {
     if (loading) return;
     error = null;
@@ -21,15 +36,17 @@
     }
     loading = true;
     try {
-      const response = await axiosClient.post('/auth/register', {
+      await axiosClient.post('/auth/register', {
         name, email, password, password_confirmation
       });
       alert('Registrasi berhasil! Silakan login.');
-      goto('/auth/login');
+
+      const next = $page.url.searchParams.get('next');
+      goto(`/auth/login${next ? `?next=${encodeURIComponent(next)}` : ''}`);
     } catch (err: any) {
       const apiErrors = err?.response?.data?.errors;
       if (apiErrors) {
-        error = Object.values(apiErrors).flat().join('\n');
+        error = (Object.values(apiErrors) as string[][]).flat().join('\n');
       } else {
         error = err?.response?.data?.message || err?.message || 'Registrasi gagal. Coba lagi.';
       }
@@ -250,7 +267,10 @@
 
       <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-300">
         Sudah punya akun?
-        <a href="/auth/login" class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">Login disini</a>
+        <a
+          href="/auth/login"
+          class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+        >Login disini</a>
       </p>
     </div>
   </div>

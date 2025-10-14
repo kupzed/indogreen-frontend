@@ -1,6 +1,7 @@
 // src/lib/axiosClient.ts
-import axios from 'axios';
+import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL } from './config';
+import { browser } from '$app/environment';
 
 const axiosClient = axios.create({
 	baseURL: API_BASE_URL,
@@ -10,18 +11,20 @@ const axiosClient = axios.create({
 	}
 });
 
-// Interceptor untuk menambahkan token JWT
 axiosClient.interceptors.request.use(
-	(config) => {
-		const token = localStorage.getItem('jwt_token'); // Atau dari cookie
-		if (token) {
-			config.headers.Authorization = `Bearer ${token}`;
+	(config: InternalAxiosRequestConfig) => {
+		if (browser) {
+			const token = localStorage.getItem('jwt_token');
+			if (token) {
+				// Axios v1: gunakan setter
+				config.headers.set?.('Authorization', `Bearer ${token}`);
+			} else {
+				config.headers.delete?.('Authorization');
+			}
 		}
 		return config;
 	},
-	(error) => {
-		return Promise.reject(error);
-	}
+	(error) => Promise.reject(error)
 );
 
 export default axiosClient;
