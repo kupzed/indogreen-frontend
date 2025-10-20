@@ -3,6 +3,8 @@
 
   export let activity: any = null;
 
+  let attachments: NormalizedAttachment[] = [];
+
   // ====== Helpers Lampiran (nama/label + deskripsi) ======
   type NormalizedAttachment = {
     url: string;
@@ -43,12 +45,11 @@
       }
 
       // Object
-      const url =
-        a?.url ??
-        (a?.path ? storageUrl(a.path) : a?.file ? storageUrl(a.file) : "");
+      const rawPath = a?.path ?? a?.file ?? a?.file_path ?? "";
+      const url = a?.url ?? (rawPath ? storageUrl(rawPath) : "");
       if (!url) return null;
 
-      const filename = filenameFromPath(a?.path ?? a?.file ?? a?.url ?? "");
+      const filename = filenameFromPath(rawPath || a?.url || "");
       const displayName = a?.label ?? a?.nama ?? a?.title ?? a?.name ?? filename;
       const desc = a?.description ?? a?.deskripsi ?? a?.keterangan ?? a?.caption ?? undefined;
       const sizeLabel = a?.sizeLabel ?? formatBytes(a?.size);
