@@ -6,8 +6,12 @@
   import CertificateDetail from '$lib/components/detail/CertificatesDetail.svelte';
   import CertificateFormModal from '$lib/components/form/CertificateFormModal.svelte';
 
+  /**
+   * Certificate type definition. Each certificate has optional attachments array.
+   * Attachments may include description and original_name when editing.
+   */
   type Option = { id: number; name?: string; nama?: string; title?: string; no_seri?: string };
-  type AttachmentItem = { id: number; name: string; url: string; size?: number };
+  type AttachmentItem = { id: number; name: string; description?: string; original_name?: string; url: string; size?: number };
 
   type Certificate = {
     id: number;
@@ -25,6 +29,7 @@
 
   const statuses = ['Belum', 'Tidak Aktif', 'Aktif'] as const;
 
+  // list state
   let items: Certificate[] = [];
   let projects: Option[] = [];
   let barangCertificates: Option[] = [];
@@ -42,7 +47,7 @@
   let perPage: number = 10;
   const perPageOptions = [10, 25, 50, 100];
 
-  // Modal state
+  // modal state
   let showCreateModal = false;
   let showEditModal = false;
   let showDetailDrawer = false;
@@ -60,7 +65,8 @@
     }
   }
 
-  // Form state (multi-file)
+  // === FORM STATE (multi-file) ===
+  // The form supports editing existing attachments (names/descriptions) via existing_attachments array.
   let form: {
     name: string;
     no_certificate: string;
@@ -89,6 +95,7 @@
     removed_existing_ids: []
   };
 
+  // fetch dependencies for select options (projects and barang certificates)
   async function fetchDependencies() {
     try {
       const res = await axiosClient.get('/certificate/getFormDependencies');
@@ -100,8 +107,12 @@
     }
   }
 
+  // fetch barang certificates by project for dependent select
   async function fetchBarangCertificatesByProject(projectId: number) {
-    if (!projectId) { filteredBarangCertificates = []; return; }
+    if (!projectId) {
+      filteredBarangCertificates = [];
+      return;
+    }
     try {
       const res = await axiosClient.get(`/certificate/getBarangCertificatesByProject/${projectId}`);
       filteredBarangCertificates = res.data?.data ?? [];
@@ -111,6 +122,7 @@
     }
   }
 
+  // callback when project changes in form
   function handleProjectChange(projectId: number | '' | null) {
     if (projectId) {
       fetchBarangCertificatesByProject(Number(projectId));
@@ -121,12 +133,20 @@
     }
   }
 
+  // fetch list of certificates with filters and pagination
   async function fetchList() {
     loading = true;
     error = '';
     try {
       const res = await axiosClient.get('/certificates', {
-        params: { search, status: statusFilter, date_from: dateFromFilter, date_to: dateToFilter, page: currentPage, per_page: perPage }
+        params: {
+          search,
+          status: statusFilter,
+          date_from: dateFromFilter,
+          date_to: dateToFilter,
+          page: currentPage,
+          per_page: perPage
+        }
       });
       items = res.data?.data ?? [];
       currentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
@@ -139,6 +159,7 @@
     }
   }
 
+  // mount lifecycle: fetch dependencies and list
   onMount(() => {
     fetchDependencies();
     fetchList();
@@ -146,15 +167,26 @@
     return () => document.removeEventListener('click', handleClickOutside);
   });
 
-  function handleFilterOrSearch() { currentPage = 1; fetchList(); }
-  function goToPage(page: number) { if (page > 0 && page <= lastPage) { currentPage = page; fetchList(); } }
-  function toggleDateFilter() { showDateFilter = !showDateFilter; }
-
+  // filter & search handlers
+  function handleFilterOrSearch() {
+    currentPage = 1;
+    fetchList();
+  }
+  function goToPage(page: number) {
+    if (page > 0 && page <= lastPage) {
+      currentPage = page;
+      fetchList();
+    }
+  }
+  function toggleDateFilter() {
+    showDateFilter = !showDateFilter;
+  }
   function handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
     if (!target.closest('.date-filter-dropdown') && !target.closest('.date-filter-button')) showDateFilter = false;
   }
 
+  // open create modal: reset form and filtered barang options
   function openCreateModal() {
     form = {
       name: '',
@@ -174,6 +206,7 @@
     showCreateModal = true;
   }
 
+  // open edit modal: map existing attachments including description and original_name
   function openEditModal(item: Certificate) {
     editingItem = { ...item };
     form = {
@@ -188,7 +221,14 @@
       attachment_names: [],
       attachment_descriptions: [],
       existing_attachments: Array.isArray(item.attachments)
-        ? item.attachments.map((a) => ({ id: a.id, name: a.name, url: a.url, size: a.size }))
+        ? item.attachments.map((a) => ({
+            id: a.id,
+            name: a.name ?? 'Lampiran',
+            description: (a as any).description ?? '',
+            original_name: (a as any).original_name ?? a.name ?? '',
+            url: a.url,
+            size: a.size
+          }))
         : [],
       removed_existing_ids: []
     };
@@ -197,13 +237,19 @@
     showEditModal = true;
   }
 
-  function openDetailDrawer(item: Certificate) { selectedItem = { ...item }; showDetailDrawer = true; }
+  // open detail drawer
+  function openDetailDrawer(item: Certificate) {
+    selectedItem = { ...item };
+    showDetailDrawer = true;
+  }
 
+  // helper to append scalar to FormData
   function appendScalar(fd: FormData, key: string, val: any) {
     if (val === null || val === undefined || val === '') return;
     fd.append(key, String(val));
   }
 
+  // build FormData for create/update
   function buildFormData() {
     const fd = new FormData();
     appendScalar(fd, 'name', form.name);
@@ -213,18 +259,22 @@
     appendScalar(fd, 'status', form.status);
     appendScalar(fd, 'date_of_issue', form.date_of_issue);
     appendScalar(fd, 'date_of_expired', form.date_of_expired);
-
-    // multi-file arrays
+    // new attachments
     (form.attachments || []).forEach((file, i) => fd.append(`attachments[${i}]`, file));
     (form.attachment_names || []).forEach((n, i) => { if (n != null) fd.append(`attachment_names[${i}]`, n); });
     (form.attachment_descriptions || []).forEach((d, i) => { if (d != null) fd.append(`attachment_descriptions[${i}]`, d); });
-
-    // removed_existing_ids (untuk UPDATE)
+    // existing attachments edits
+    (form.existing_attachments || []).forEach((att, i) => {
+      fd.append(`existing_attachment_ids[${i}]`, String(att.id));
+      fd.append(`existing_attachment_names[${i}]`, att.name);
+      fd.append(`existing_attachment_descriptions[${i}]`, att.description ?? '');
+    });
+    // removed ids
     (form.removed_existing_ids || []).forEach((id) => fd.append('removed_existing_ids[]', String(id)));
-
     return fd;
   }
 
+  // handle create submit
   async function handleSubmitCreate() {
     try {
       const fd = buildFormData();
@@ -233,11 +283,14 @@
       showCreateModal = false;
       fetchList();
     } catch (err: any) {
-      const messages = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join('\n') : err.response?.data?.message || 'Gagal menambahkan data.';
+      const messages = err.response?.data?.errors
+        ? Object.values(err.response.data.errors).flat().join('\n')
+        : err.response?.data?.message || 'Gagal menambahkan data.';
       alert('Error:\n' + messages);
     }
   }
 
+  // handle update submit
   async function handleSubmitUpdate() {
     if (!editingItem?.id) return;
     try {
@@ -248,24 +301,36 @@
       showEditModal = false;
       fetchList();
     } catch (err: any) {
-      const messages = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join('\n') : err.response?.data?.message || 'Gagal memperbarui data.';
+      const messages = err.response?.data?.errors
+        ? Object.values(err.response.data.errors).flat().join('\n')
+        : err.response?.data?.message || 'Gagal memperbarui data.';
       alert('Error:\n' + messages);
     }
   }
 
+  // handle delete
   async function handleDelete(id: number) {
     if (!confirm('Yakin ingin menghapus data ini?')) return;
-    try { await axiosClient.delete(`/certificates/${id}`); alert('Data berhasil dihapus'); fetchList(); }
-    catch (err: any) { alert('Gagal menghapus data: ' + (err.response?.data?.message || 'Terjadi kesalahan')); }
+    try {
+      await axiosClient.delete(`/certificates/${id}`);
+      alert('Data berhasil dihapus');
+      fetchList();
+    } catch (err: any) {
+      alert('Gagal menghapus data: ' + (err.response?.data?.message || 'Terjadi kesalahan'));
+    }
   }
 
-  // === Badge konsisten dark ===
+  // badge classes helper
   function getStatusBadgeClasses(status: string) {
     switch (status) {
-      case 'Aktif': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'Tidak Aktif': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'Belum': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+      case 'Aktif':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'Tidak Aktif':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'Belum':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   }
 </script>
@@ -284,7 +349,6 @@
       {#each statuses as s}<option value={s}>{s}</option>{/each}
     </select>
   </div>
-
   <div class="w-full sm:w-auto flex-grow">
     <div class="relative w-full sm:w-auto">
       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -294,11 +358,9 @@
         type="text" placeholder="Cari certificate..." bind:value={search} on:input={handleFilterOrSearch}
         class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500
                focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm
-               dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700"
-      />
+               dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700" />
     </div>
   </div>
-
   <div class="flex space-x-2 w-full sm:w-auto">
     <button
       on:click={openCreateModal}
@@ -310,9 +372,9 @@
   </div>
 </div>
 
-<!-- Date filter button + dropdown -->
+<!-- Date filter button & dropdown -->
 <div class="flex items-center justify-between mb-4">
-  <!-- Segmented icon toggle (Table / List) -->
+  <!-- View toggle -->
   <div
     class="bg-white dark:bg-neutral-900 rounded-md inline-flex gap-1"
     role="tablist"
@@ -320,7 +382,7 @@
     tabindex="0"
     on:keydown={handleViewKeydown}
   >
-    <!-- TABLE -->
+    <!-- TABLE view -->
     <button
       on:click={() => (activeView = 'table')}
       class="grid h-9 w-9 place-items-center rounded-md
@@ -338,7 +400,6 @@
       aria-label="Table view"
       title="Table"
     >
-      <!-- Table icon -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
         <rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect>
         <line x1="3.5" y1="9"  x2="20.5" y2="9"></line>
@@ -347,8 +408,7 @@
       </svg>
       <span class="sr-only">Tampilan Tabel</span>
     </button>
-
-    <!-- LIST -->
+    <!-- LIST view -->
     <button
       on:click={() => (activeView = 'list')}
       class="grid h-9 w-9 place-items-center rounded-md
@@ -366,7 +426,6 @@
       aria-label="List view"
       title="List"
     >
-      <!-- List icon -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
         <circle cx="5" cy="6" r="1.3"></circle>
         <circle cx="5" cy="12" r="1.3"></circle>
@@ -378,7 +437,7 @@
       <span class="sr-only">Tampilan List</span>
     </button>
   </div>
-
+  <!-- Date filter -->
   <div class="relative">
     <button on:click={toggleDateFilter}
       class="date-filter-button px-3 py-2 rounded-md text-sm font-semibold border hover:bg-gray-50 flex items-center space-x-1 transition-colors
@@ -392,7 +451,6 @@
       {#if dateFromFilter || dateToFilter}<div class="w-2 h-2 bg-indigo-500 rounded-full"></div>{/if}
       <svg class="w-4 h-4 transition-transform" class:rotate-180={showDateFilter} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
     </button>
-
     {#if showDateFilter}
       <div class="date-filter-dropdown absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-10 p-4">
         <div class="space-y-3">
@@ -447,6 +505,7 @@
   </div>
 {:else}
   {#if activeView === 'list'}
+    <!-- List view for certificates -->
     <div class="bg-white dark:bg-black shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200 dark:divide-gray-700">
         {#each items as item (item.id)}
@@ -484,8 +543,8 @@
       {/if}
     </div>
   {/if}
-
   {#if activeView === 'table'}
+    <!-- Table view for certificates -->
     <div class="mt-4 bg-white dark:bg-black shadow-md rounded-lg">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
@@ -515,12 +574,16 @@
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   {#if item.date_of_issue}
                     {new Date(item.date_of_issue).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  {:else}<span class="text-gray-500 dark:text-gray-400">-</span>{/if}
+                  {:else}
+                    <span class="text-gray-500 dark:text-gray-400">-</span>
+                  {/if}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   {#if item.date_of_expired}
                     {new Date(item.date_of_expired).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                  {:else}<span class="text-gray-500 dark:text-gray-400">-</span>{/if}
+                  {:else}
+                    <span class="text-gray-500 dark:text-gray-400">-</span>
+                  {/if}
                 </td>
                 <td class="relative whitespace-nowrap px-3 py-4 text-sm">
                   <div class="flex items-center space-x-2">
@@ -550,6 +613,7 @@
   {/if}
 {/if}
 
+<!-- Create modal -->
 <CertificateFormModal
   bind:show={showCreateModal}
   title="Tambah Sertifikat"
@@ -563,7 +627,7 @@
   onSubmit={handleSubmitCreate}
 />
 
-<!-- Edit -->
+<!-- Edit modal -->
 {#if editingItem}
   <CertificateFormModal
     bind:show={showEditModal}

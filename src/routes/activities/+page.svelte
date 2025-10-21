@@ -7,12 +7,15 @@
   import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
   import ActivityFormModal from '$lib/components/form/ActivityFormModal.svelte';
 
+  // List of activities and form dependencies
   let activities: any[] = [];
   let projects: any[] = [];
   let vendors: any[] = [];
   let customers: any[] = [];
   let loading = true;
   let error = '';
+
+  // Filters and search state
   let search: string = '';
   let jenisFilter: string = '';
   let kategoriFilter: string = '';
@@ -25,9 +28,9 @@
   let perPage: number = 10;
   const perPageOptions = [10, 25, 50, 100];
 
+  // view toggle (table/list)
   let activeView: 'table' | 'list' = 'table';
   const views: Array<'table' | 'list'> = ['table', 'list'];
-
   function handleViewKeydown(e: KeyboardEvent) {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
       e.preventDefault();
@@ -37,6 +40,7 @@
     }
   }
 
+  // Modal state
   let showCreateModal: boolean = false;
   let showEditModal: boolean = false;
   let editingActivity: any = null;
@@ -44,6 +48,7 @@
   let selectedActivity: any = null;
 
   // === FORM STATE (multi-file) ===
+  // form includes existing_attachments with optional description and original_name
   let form: {
     name: string;
     description: string;
@@ -57,7 +62,14 @@
     attachments: File[];
     attachment_names: string[];
     attachment_descriptions: string[];
-    existing_attachments?: Array<{ id: number; name: string; url: string; size?: number }>;
+    existing_attachments?: Array<{
+      id: number;
+      name: string;
+      description?: string;
+      original_name?: string;
+      url: string;
+      size?: number;
+    }>;
     removed_existing_ids?: number[];
   } = {
     name: '',
@@ -76,19 +88,26 @@
     removed_existing_ids: []
   };
 
+  // constant lists for kategori and jenis
   const activityKategoriList = [
     'Expense Report','Invoice','Purchase Order','Payment','Quotation',
     'Faktur Pajak','Kasbon','Laporan Teknis','Surat Masuk','Surat Keluar','Kontrak'
   ];
   const activityJenisList = ['Internal','Customer','Vendor'];
 
+  // fetch list of activities with filters
   async function fetchActivities() {
     loading = true; error = '';
     try {
       const response = await axiosClient.get('/activities', {
         params: {
-          search, jenis: jenisFilter, kategori: kategoriFilter,
-          date_from: dateFromFilter, date_to: dateToFilter, page: currentPage, per_page: perPage
+          search,
+          jenis: jenisFilter,
+          kategori: kategoriFilter,
+          date_from: dateFromFilter,
+          date_to: dateToFilter,
+          page: currentPage,
+          per_page: perPage
         }
       });
       activities = response.data.data;
@@ -98,15 +117,19 @@
     } catch (err: any) {
       error = err.response?.data?.message || 'Gagal memuat aktivitas.';
       console.error('Error fetching activities:', err);
-    } finally { loading = false; }
+    } finally {
+      loading = false;
+    }
   }
 
+  // fetch dependencies for form (projects, vendors, customers)
   async function fetchFormDependencies() {
     try {
       const response = await axiosClient.get('/activity/getFormDependencies');
       projects = response.data.projects;
       vendors = response.data.vendors;
 
+      // fetch customers optionally
       try {
         const custResp = await axiosClient.get('/mitra/customers');
         customers = Array.isArray(custResp.data?.data) ? custResp.data.data : [];
@@ -115,6 +138,7 @@
         console.warn('Fetch customers failed (optional):', e);
       }
 
+      // assign mitra to projects based on vendors/customers
       if (Array.isArray(projects)) {
         const mitraMap = new Map<any, any>();
         if (Array.isArray(vendors)) vendors.forEach((v: any) => mitraMap.set(v.id, v));
@@ -129,6 +153,7 @@
     }
   }
 
+  // lifecycle: fetch activities and dependencies on mount
   onMount(() => {
     fetchActivities();
     fetchFormDependencies();
@@ -136,19 +161,42 @@
     return () => document.removeEventListener('click', handleClickOutside);
   });
 
-  function handleFilterOrSearch() { currentPage = 1; fetchActivities(); }
-  function clearFilters() {
-    search = ''; jenisFilter = ''; kategoriFilter = '';
-    dateFromFilter = ''; dateToFilter = ''; showDateFilter = false;
-    currentPage = 1; fetchActivities();
+  // handle filter or search change
+  function handleFilterOrSearch() {
+    currentPage = 1;
+    fetchActivities();
   }
-  function toggleDateFilter() { showDateFilter = !showDateFilter; }
+  // clear filters
+  function clearFilters() {
+    search = '';
+    jenisFilter = '';
+    kategoriFilter = '';
+    dateFromFilter = '';
+    dateToFilter = '';
+    showDateFilter = false;
+    currentPage = 1;
+    fetchActivities();
+  }
+  // toggle date filter dropdown
+  function toggleDateFilter() {
+    showDateFilter = !showDateFilter;
+  }
+  // close date filter dropdown when clicking outside
   function handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.date-filter-dropdown') && !target.closest('.date-filter-button')) showDateFilter = false;
+    if (!target.closest('.date-filter-dropdown') && !target.closest('.date-filter-button')) {
+      showDateFilter = false;
+    }
   }
-  function goToPage(page: number) { if (page > 0 && page <= lastPage) { currentPage = page; fetchActivities(); } }
+  // pagination helper
+  function goToPage(page: number) {
+    if (page > 0 && page <= lastPage) {
+      currentPage = page;
+      fetchActivities();
+    }
+  }
 
+  // open create modal: reset form
   function openCreateModal() {
     form = {
       name: '',
@@ -169,8 +217,10 @@
     showCreateModal = true;
   }
 
+  // open edit modal: populate form with existing activity
   function openEditModal(activity: any) {
     editingActivity = { ...activity };
+    // convert date to YYYY-MM-DD for input
     editingActivity.activity_date = activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '';
     form = {
       name: editingActivity.name ?? '',
@@ -185,30 +235,42 @@
       attachments: [],
       attachment_names: [],
       attachment_descriptions: [],
+      // map existing attachments to include id, name, description, original_name, url and size
       existing_attachments: Array.isArray(editingActivity.attachments)
         ? editingActivity.attachments.map((a: any) => ({
-            id: a.id, name: a.name ?? a.file_name ?? 'Lampiran',
-            url: a.url ?? a.path ?? a.file_path, size: a.size
+            id: a.id,
+            name: a.name ?? a.file_name ?? 'Lampiran',
+            description: a.description ?? '',
+            original_name: a.original_name ?? a.file_name ?? a.name ?? '',
+            url: a.url ?? a.path ?? a.file_path,
+            size: a.size
           }))
         : [],
       removed_existing_ids: []
     };
 
+    // ensure mitra_id is set correctly for Customer jenis
     if (form.jenis === 'Customer' && form.project_id) {
-      const selectedProject = projects.find(p => p.id == form.project_id);
+      const selectedProject = projects.find((p) => p.id == form.project_id);
       if (selectedProject?.mitra_id) form.mitra_id = selectedProject.mitra_id;
     }
 
     showEditModal = true;
   }
 
-  function openDetailDrawer(activity: any) { selectedActivity = { ...activity }; showDetailDrawer = true; }
+  // open detail drawer
+  function openDetailDrawer(activity: any) {
+    selectedActivity = { ...activity };
+    showDetailDrawer = true;
+  }
 
+  // helper to append scalar values to FormData
   function appendScalar(fd: FormData, key: string, val: any) {
     if (val === null || val === undefined || val === '') return;
     fd.append(key, String(val));
   }
 
+  // build FormData for creating/updating activity
   function buildFormDataForActivity() {
     const fd = new FormData();
     appendScalar(fd, 'name', form.name);
@@ -220,17 +282,17 @@
     appendScalar(fd, 'from', form.from);
     appendScalar(fd, 'to', form.to);
 
-    // mitra_id rules:
+    // determine mitra_id based on jenis
     if (form.jenis === 'Internal') {
       fd.set('mitra_id', '1');
     } else if (form.jenis === 'Customer') {
-      const selectedProject = projects.find(p => p.id == form.project_id);
+      const selectedProject = projects.find((p) => p.id == form.project_id);
       if (selectedProject?.mitra_id) fd.set('mitra_id', String(selectedProject.mitra_id));
     } else if (form.jenis === 'Vendor' && form.mitra_id) {
       fd.set('mitra_id', String(form.mitra_id));
     }
 
-    // multi-file payload
+    // new attachments
     (form.attachments || []).forEach((file, i) => {
       fd.append(`attachments[${i}]`, file);
     });
@@ -241,7 +303,14 @@
       if (d != null) fd.append(`attachment_descriptions[${i}]`, d);
     });
 
-    // removed_existing_ids (untuk UPDATE)
+    // existing attachments edits: send ids, names, descriptions
+    (form.existing_attachments || []).forEach((att, i) => {
+      fd.append(`existing_attachment_ids[${i}]`, String(att.id));
+      fd.append(`existing_attachment_names[${i}]`, att.name);
+      fd.append(`existing_attachment_descriptions[${i}]`, att.description ?? '');
+    });
+
+    // removed existing attachments
     (form.removed_existing_ids || []).forEach((id) => {
       fd.append('removed_existing_ids[]', String(id));
     });
@@ -249,6 +318,7 @@
     return fd;
   }
 
+  // submit handlers
   async function handleSubmitCreate() {
     try {
       const formData = buildFormDataForActivity();
@@ -258,7 +328,9 @@
       showCreateModal = false;
       fetchActivities();
     } catch (err: any) {
-      const messages = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join('\n') : err.response?.data?.message || 'Gagal menambahkan aktivitas.';
+      const messages = err.response?.data?.errors
+        ? Object.values(err.response.data.errors).flat().join('\n')
+        : err.response?.data?.message || 'Gagal menambahkan aktivitas.';
       alert('Error:\n' + messages);
       console.error('Create activity failed:', err.response || err);
     }
@@ -275,7 +347,9 @@
       showEditModal = false;
       fetchActivities();
     } catch (err: any) {
-      const messages = err.response?.data?.errors ? Object.values(err.response.data.errors).flat().join('\n') : err.response?.data?.message || 'Gagal memperbarui aktivitas.';
+      const messages = err.response?.data?.errors
+        ? Object.values(err.response.data.errors).flat().join('\n')
+        : err.response?.data?.message || 'Gagal memperbarui aktivitas.';
       alert('Error:\n' + messages);
       console.error('Update activity failed:', err.response || err);
     }
@@ -294,43 +368,46 @@
     }
   }
 
-  // Reactive mitra options
+  // reactive: adjust mitra_id based on jenis
   let previousJenis = '';
   $: if ((showCreateModal || showEditModal) && form.jenis && form.jenis !== previousJenis) {
     previousJenis = form.jenis;
     if (form.jenis === 'Customer') {
-      const selectedProject = projects.find(p => p.id == form.project_id);
+      const selectedProject = projects.find((p) => p.id == form.project_id);
       form.mitra_id = selectedProject?.mitra_id || null;
     } else if (form.jenis === 'Internal') {
       form.mitra_id = '1';
     } else if (form.jenis === 'Vendor') {
-      if (!Array.isArray(vendors) || !vendors.some(v => v.id == form.mitra_id)) form.mitra_id = '';
+      if (!Array.isArray(vendors) || !vendors.some((v) => v.id == form.mitra_id)) form.mitra_id = '';
     } else {
       form.mitra_id = '';
     }
   }
   $: if (form.jenis === 'Customer' && form.project_id) {
-    const selectedProject = projects.find(p => p.id == form.project_id);
+    const selectedProject = projects.find((p) => p.id == form.project_id);
     if (selectedProject?.mitra_id && form.mitra_id !== selectedProject.mitra_id) form.mitra_id = selectedProject.mitra_id;
   }
-  $: if (!showCreateModal && !showEditModal) { form.mitra_id = ''; form.jenis = ''; previousJenis = ''; }
+  $: if (!showCreateModal && !showEditModal) {
+    form.mitra_id = '';
+    form.jenis = '';
+    previousJenis = '';
+  }
 </script>
 
 <svelte:head>
   <title>Daftar Activity - Indogreen</title>
 </svelte:head>
 
+<!-- Toolbar: filters and search -->
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
     <select bind:value={jenisFilter} on:change={handleFilterOrSearch}
-      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
-             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
       <option value="">Filter Jenis: Semua</option>
       {#each activityJenisList as jenis}<option value={jenis}>{jenis}</option>{/each}
     </select>
     <select bind:value={kategoriFilter} on:change={handleFilterOrSearch}
-      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
-             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
       <option value="">Filter Kategori: Semua</option>
       {#each activityKategoriList as kategori}<option value={kategori}>{kategori}</option>{/each}
     </select>
@@ -359,8 +436,9 @@
   </button>
 </div>
 
+<!-- Date filter button and dropdown -->
 <div class="flex items-center justify-between mb-4">
-  <!-- Segmented icon toggle (Table / List) -->
+  <!-- View toggle -->
   <div
     class="bg-white dark:bg-neutral-900 rounded-md inline-flex gap-1"
     role="tablist"
@@ -368,7 +446,7 @@
     tabindex="0"
     on:keydown={handleViewKeydown}
   >
-    <!-- TABLE -->
+    <!-- TABLE view -->
     <button
       on:click={() => (activeView = 'table')}
       class="grid h-9 w-9 place-items-center rounded-md
@@ -386,7 +464,6 @@
       aria-label="Table view"
       title="Table"
     >
-      <!-- Table icon -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
         <rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect>
         <line x1="3.5" y1="9"  x2="20.5" y2="9"></line>
@@ -395,8 +472,7 @@
       </svg>
       <span class="sr-only">Tampilan Tabel</span>
     </button>
-
-    <!-- LIST -->
+    <!-- LIST view -->
     <button
       on:click={() => (activeView = 'list')}
       class="grid h-9 w-9 place-items-center rounded-md
@@ -414,7 +490,6 @@
       aria-label="List view"
       title="List"
     >
-      <!-- List icon -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
         <circle cx="5" cy="6" r="1.3"></circle>
         <circle cx="5" cy="12" r="1.3"></circle>
@@ -426,7 +501,7 @@
       <span class="sr-only">Tampilan List</span>
     </button>
   </div>
-  
+  <!-- Date filter toggle button and dropdown -->
   <div class="relative">
     <button
       on:click={toggleDateFilter}
@@ -447,7 +522,6 @@
       {#if dateFromFilter || dateToFilter}<div class="w-2 h-2 bg-indigo-500 rounded-full"></div>{/if}
       <svg class="w-4 h-4 transition-transform" class:rotate-180={showDateFilter} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
     </button>
-    
     {#if showDateFilter}
       <div class="date-filter-dropdown absolute right-0 mt-2 w-80 bg-white border border-gray-300 rounded-md shadow-lg z-10 p-4
                   dark:bg-neutral-900 dark:border-gray-700">
@@ -467,15 +541,13 @@
             <!-- svelte-ignore a11y_label_has_associated_control -->
             <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Dari Tanggal</label>
             <input type="date" bind:value={dateFromFilter} on:change={handleFilterOrSearch}
-              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
-                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"/>
+              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"/>
           </div>
           <div>
             <!-- svelte-ignore a11y_label_has_associated_control -->
             <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">Sampai Tanggal</label>
             <input type="date" bind:value={dateToFilter} on:change={handleFilterOrSearch}
-              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
-                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"/>
+              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"/>
           </div>
           <div class="flex space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
             <button on:click={clearFilters}
@@ -494,6 +566,7 @@
   </div>
 </div>
 
+<!-- List or table view -->
 {#if loading}
   <p class="text-gray-900 dark:text-white">Memuat aktivitas...</p>
 {:else if error}
@@ -508,6 +581,7 @@
   </div>
 {:else}
   {#if activeView === 'list'}
+    <!-- LIST view: each item as row with actions -->
     <div class="bg-white dark:bg-black shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200 dark:divide-gray-700">
         {#each activities as activity (activity.id)}
@@ -558,12 +632,14 @@
         {/each}
       </ul>
       {#if activities.length > 0}
-        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalActivities} itemsPerPage={perPage} perPageOptions={perPageOptions} onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchActivities(); }}/>
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalActivities} itemsPerPage={perPage} perPageOptions={perPageOptions}
+          onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchActivities(); }}/>
       {/if}
     </div>
   {/if}
 
   {#if activeView === 'table'}
+    <!-- TABLE view: activities in table with actions -->
     <div class="mt-4 bg-white dark:bg-black shadow-md rounded-lg">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
@@ -627,12 +703,14 @@
         </table>
       </div>
       {#if activities.length > 0}
-        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalActivities} itemsPerPage={perPage} perPageOptions={perPageOptions} onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchActivities(); }}/>
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalActivities} itemsPerPage={perPage} perPageOptions={perPageOptions}
+          onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchActivities(); }}/>
       {/if}
     </div>
   {/if}
 {/if}
 
+<!-- Modals -->
 <ActivityFormModal
   bind:show={showCreateModal}
   title="Form Aktivitas Baru"
@@ -659,6 +737,7 @@
   />
 {/if}
 
+<!-- Detail Drawer -->
 <Drawer bind:show={showDetailDrawer} title="Detail Activity" on:close={() => (showDetailDrawer = false)}>
   <ActivityDetail activity={selectedActivity} />
 </Drawer>

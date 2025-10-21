@@ -104,7 +104,7 @@
     attachments: File[];
     attachment_names: string[];
     attachment_descriptions: string[];
-    existing_attachments: Array<{ id: number; name: string; url: string; size?: number }>;
+    existing_attachments: Array<{ id: number; name: string; url: string; size?: number; description?: string }>;
     removed_existing_ids: number[];
   } = {
     name: '',
@@ -319,6 +319,7 @@
     mitra_id: number | string | '' | null; from?: string | ''; to?: string | '';
     attachments: File[]; attachment_names: string[]; attachment_descriptions: string[];
     removed_existing_ids?: number[];
+    existing_attachments?: Array<{ id: number; name: string; url: string; size?: number; description?: string }>;
   }) {
     const fd = new FormData();
     appendScalar(fd, 'name', data.name);
@@ -343,6 +344,15 @@
     (data.attachment_names || []).forEach((n, i) => { if (n != null) fd.append(`attachment_names[${i}]`, n); });
     (data.attachment_descriptions || []).forEach((d, i) => { if (d != null) fd.append(`attachment_descriptions[${i}]`, d); });
     (data.removed_existing_ids || []).forEach((id) => fd.append('removed_existing_ids[]', String(id)));
+
+    const existing = (data.existing_attachments ?? []) as Array<{ id: number; name: string; description?: string }>;
+    if (existing.length) {
+      existing.forEach((att, i) => {
+        fd.append(`existing_attachment_ids[${i}]`, String(att.id));
+        fd.append(`existing_attachment_names[${i}]`, att.name ?? '');
+        fd.append(`existing_attachment_descriptions[${i}]`, att.description ?? '');
+      });
+    }
 
     return fd;
   }
@@ -378,8 +388,11 @@
       attachment_descriptions: [],
       existing_attachments: Array.isArray(editingActivity.attachments)
         ? editingActivity.attachments.map((a: any) => ({
-            id: a.id, name: a.name ?? a.file_name ?? 'Lampiran',
-            url: a.url ?? a.path ?? a.file_path, size: a.size
+            id: a.id,
+            name: a.name ?? a.file_name ?? 'Lampiran',
+            url: a.url ?? a.path ?? a.file_path,
+            size: a.size,
+            description: a.description ?? ''
           }))
         : [],
       removed_existing_ids: []
@@ -544,7 +557,7 @@
     attachments: File[];
     attachment_names: string[];
     attachment_descriptions: string[];
-    existing_attachments?: Array<{ id: number; name: string; url: string; size?: number }>;
+    existing_attachments?: Array<{ id: number; name: string; url: string; size?: number; description?: string }>;
     removed_existing_ids?: number[];
   } = {
     name: '',
@@ -585,7 +598,15 @@
       date_of_issue: item.date_of_issue ? new Date(item.date_of_issue).toISOString().split('T')[0] : '',
       date_of_expired: item.date_of_expired ? new Date(item.date_of_expired).toISOString().split('T')[0] : '',
       attachments: [], attachment_names: [], attachment_descriptions: [],
-      existing_attachments: Array.isArray(item.attachments) ? item.attachments.map(a => ({ id: a.id, name: a.name, url: a.url, size: a.size })) : [],
+      existing_attachments: Array.isArray(item.attachments)
+        ? item.attachments.map((a: any) => ({
+            id: a.id,
+            name: a.name,
+            url: a.url ?? a.path ?? a.file_path,
+            size: a.size,
+            description: a.description ?? ''
+          }))
+        : [],
       removed_existing_ids: []
     };
     showEditCertificateModal = true;
@@ -606,6 +627,15 @@
     (certificateForm.attachment_names || []).forEach((n, i) => { if (n != null) fd.append(`attachment_names[${i}]`, n); });
     (certificateForm.attachment_descriptions || []).forEach((d, i) => { if (d != null) fd.append(`attachment_descriptions[${i}]`, d); });
     (certificateForm.removed_existing_ids || []).forEach((id) => fd.append('removed_existing_ids[]', String(id)));
+
+    const existing = (certificateForm.existing_attachments ?? []) as Array<{ id: number; name: string; description?: string }>;
+    if (existing.length) {
+      existing.forEach((att, i) => {
+        fd.append(`existing_attachment_ids[${i}]`, String(att.id));
+        fd.append(`existing_attachment_names[${i}]`, att.name ?? '');
+        fd.append(`existing_attachment_descriptions[${i}]`, att.description ?? '');
+      });
+    }
 
     return fd;
   }
