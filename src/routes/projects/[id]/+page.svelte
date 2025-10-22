@@ -392,7 +392,8 @@
             name: a.name ?? a.file_name ?? 'Lampiran',
             url: a.url ?? a.path ?? a.file_path,
             size: a.size,
-            description: a.description ?? ''
+            description: a.description ?? '',
+            original_name: a.original_name ?? a.file_name ?? a.name ?? ''
           }))
         : [],
       removed_existing_ids: []
@@ -604,7 +605,8 @@
             name: a.name,
             url: a.url ?? a.path ?? a.file_path,
             size: a.size,
-            description: a.description ?? ''
+            description: a.description ?? '',
+            original_name: a.original_name ?? a.file_name ?? a.name ?? ''
           }))
         : [],
       removed_existing_ids: []
