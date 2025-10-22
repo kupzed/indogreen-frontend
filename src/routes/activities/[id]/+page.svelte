@@ -72,7 +72,10 @@
     'Laporan Teknis',
     'Surat Masuk',
     'Surat Keluar',
-    'Kontrak'
+    'Kontrak',
+    'Berita Acara',
+    'Receive Item',
+    'Other',
   ];
   const activityJenisList = ['Internal', 'Customer', 'Vendor'];
 

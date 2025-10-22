@@ -91,7 +91,8 @@
   // constant lists for kategori and jenis
   const activityKategoriList = [
     'Expense Report','Invoice','Purchase Order','Payment','Quotation',
-    'Faktur Pajak','Kasbon','Laporan Teknis','Surat Masuk','Surat Keluar','Kontrak'
+    'Faktur Pajak','Kasbon','Laporan Teknis','Surat Masuk','Surat Keluar',
+    'Kontrak', 'Berita Acara', 'Receive Item', 'Other',
   ];
   const activityJenisList = ['Internal','Customer','Vendor'];
 
