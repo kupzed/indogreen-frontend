@@ -141,7 +141,7 @@
     >
       Profile
     </button>
-    <button
+    <!-- <button
       on:click={() => (activeTab = 'keamanan')}
       class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-gray-700 dark:text-gray-200"
       class:bg-white={activeTab === 'keamanan'}
@@ -153,7 +153,7 @@
       id="tab-keamanan"
     >
       Keamanan
-    </button>
+    </button> -->
   </div>
 
   <form on:submit={handleSubmit}>
