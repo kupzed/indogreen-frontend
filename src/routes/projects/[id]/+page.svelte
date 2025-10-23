@@ -974,7 +974,19 @@
               <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                 {#each activities as activity (activity.id)}
                   <li>
-                    <a href={`/activities/${activity.id}`} class="block hover:bg-gray-50 dark:hover:bg-neutral-950 px-4 py-4 sm:px-6">
+                    <a
+                      href={`/activities/${activity.id}`}
+                      class="block hover:bg-gray-50 dark:hover:bg-neutral-950 px-4 py-4 sm:px-6 cursor-pointer"
+                      on:click|preventDefault={() => openActivityDetailDrawer(activity)}
+                      on:keydown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          openActivityDetailDrawer(activity);
+                        }
+                      }}
+                      role="button"
+                      aria-label={`Lihat detail aktivitas ${activity.name}`}
+                    >
                       <div class="flex items-center justify-between">
                         <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">{activity.name}</p>
                         <div class="ml-2 flex-shrink-0 flex">
@@ -1041,7 +1053,21 @@
                     {#each activities as activity (activity.id)}
                       <tr>
                         <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-                          <a href={`/activities/${activity.id}`} class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">{activity.name}</a><br>
+                          <a 
+                            href={`/activities/${activity.id}`}
+                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                            on:click|preventDefault={() => openActivityDetailDrawer(activity)}
+                            on:keydown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                openActivityDetailDrawer(activity);
+                              }
+                            }}
+                            role="button"
+                            aria-label={`Lihat detail aktivitas ${activity.name}`}
+                          >
+                            {activity.name}
+                          </a><br>
                           <span class="text-xs text-gray-500 dark:text-gray-400">{activity.description.substring(0, 40)}{activity.description.length > 40 ? '...' : ''}</span>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm">
@@ -1286,7 +1312,19 @@
               <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                 {#each certificates as item (item.id)}
                   <li>
-                    <a href={`/certificates/${item.id}`} class="block hover:bg-gray-50 dark:hover:bg-neutral-950 px-4 py-4 sm:px-6">
+                    <a
+                      href={`/certificates/${item.id}`}
+                      class="block hover:bg-gray-50 dark:hover:bg-neutral-950 px-4 py-4 sm:px-6 cursor-pointer"
+                      on:click|preventDefault={() => openCertificateDetailDrawer(item)}
+                      on:keydown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          openCertificateDetailDrawer(item);
+                        }
+                      }}
+                      role="button"
+                      aria-label={`Lihat detail sertifikat ${item.name}`}
+                    >
                       <div class="flex items-center justify-between">
                         <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">{item.name}</p>
                         <div class="ml-2 flex-shrink-0 flex">
@@ -1346,7 +1384,21 @@
                     {#each certificates as item (item.id)}
                       <tr>
                         <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-                          <a href={`/certificates/${item.id}`} class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">{item.name}</a>
+                          <a 
+                            href={`/certificates/${item.id}`}
+                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                            on:click|preventDefault={() => openCertificateDetailDrawer(item)}
+                            on:keydown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                openCertificateDetailDrawer(item);
+                              }
+                            }}
+                            role="button"
+                            aria-label={`Lihat detail sertifikat ${item.name}`}
+                          >
+                            {item.name}
+                          </a>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{item.no_certificate}</td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{item.barang_certificate?.name || "-"}</td>

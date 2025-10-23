@@ -451,7 +451,19 @@
               <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                 {#each bcItems as item (item.id)}
                   <li>
-                    <a href={`/barang-certificates/${item.id}`} class="block hover:bg-gray-50 dark:hover:bg-neutral-950 px-4 py-4 sm:px-6">
+                    <a 
+                      href={`/barang-certificates/${item.id}`}
+                      class="block hover:bg-gray-50 dark:hover:bg-neutral-950 px-4 py-4 sm:px-6"
+                      on:click|preventDefault={() => bcOpenDetailDrawer(item)}
+                      on:keydown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          bcOpenDetailDrawer(item);
+                        }
+                      }}
+                      role="button"
+                      aria-label={`Lihat detail barang certificate ${item.name}`}
+                    >
                       <div class="flex items-center justify-between">
                         <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">{item.name}</p>
                       </div>
@@ -499,7 +511,21 @@
                     {#each bcItems as item (item.id)}
                       <tr>
                         <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-                          <a href={`/barang-certificates/${item.id}`} class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">{item.name}</a>
+                          <a 
+                            href={`/barang-certificates/${item.id}`}
+                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                            on:click|preventDefault={() => bcOpenDetailDrawer(item)}
+                            on:keydown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                bcOpenDetailDrawer(item);
+                              }
+                            }}
+                            role="button"
+                            aria-label={`Lihat detail barang certificate ${item.name}`}
+                          >
+                            {item.name}
+                          </a>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{item.no_seri}</td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{mitra.nama}</td>
