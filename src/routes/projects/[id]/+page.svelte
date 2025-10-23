@@ -40,6 +40,10 @@
   let activityDateToFilter = '';
   let showActivityDateFilter = false;
 
+  // Vendor filter state
+  let activityVendorFilter: number | string = '';
+  let projectVendorOptions: Array<{ id: number; nama: string }> = [];
+
   // Project Edit Modal
   let showEditProjectModal = false;
   let editProjectForm = {
@@ -190,10 +194,13 @@
     try {
       const pid = project?.id ?? $page.params.id;
       if (!pid) { errorActivities = 'Project ID tidak ditemukan.'; return; }
+
       const res = await axiosClient.get(`/projects/${pid}`, {
         params: {
           jenis: activityJenisFilter,
           kategori: activityKategoriFilter,
+          // kirim mitra_id hanya kalau Jenis = Vendor dan user pilih sesuatu
+          mitra_id: activityJenisFilter === 'Vendor' && activityVendorFilter ? activityVendorFilter : undefined,
           search: activitySearch,
           date_from: activityDateFromFilter,
           date_to: activityDateToFilter,
@@ -201,11 +208,15 @@
           per_page: activityPerPage,
         }
       });
+
       const data = res.data?.data ?? {};
       activities = data.activities ?? [];
       activityCurrentPage = data.activity_pagination?.current_page ?? 1;
       activityLastPage = data.activity_pagination?.last_page ?? 1;
       totalActivities = data.activity_pagination?.total ?? (Array.isArray(activities) ? activities.length : 0);
+
+      // <<— ambil opsi vendor khusus project (unik dari seluruh aktivitas project)
+      projectVendorOptions = Array.isArray(data.vendor_options) ? data.vendor_options : [];
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         errorActivities = (err.response?.data as any)?.message || err.message || 'Gagal memuat aktivitas.';
@@ -239,6 +250,7 @@
   function clearActivityFilters() {
     activityJenisFilter = '';
     activityKategoriFilter = '';
+    activityVendorFilter = '';
     activitySearch = '';
     activityDateFromFilter = '';
     activityDateToFilter = '';
@@ -440,6 +452,11 @@
     else                                              createActivityForm.mitra_id = '';
   }
   $: if (!showCreateActivityModal) { createActivityForm.mitra_id = ''; createActivityForm.jenis = ''; previousCreateActivityJenis = ''; }
+
+  // Vendor filter
+  $: if (activityJenisFilter !== 'Vendor') {
+    activityVendorFilter = '';
+  }
 
   // Tabs
   let activeTab: 'detail' | 'activity' | 'certificates' = 'detail';
@@ -780,6 +797,19 @@
               <option value="">Filter Jenis: Semua</option>
               {#each activityJenisList as jenis}<option value={jenis}>{jenis}</option>{/each}
             </select>
+            {#if activityJenisFilter === 'Vendor'}
+              <select
+                bind:value={activityVendorFilter}
+                on:change={handleActivityFilterOrSearch}
+                class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
+                      dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+              >
+                <option value="">Filter Vendor: Semua</option>
+                {#each projectVendorOptions as v}
+                  <option value={v.id}>{v.nama}</option>
+                {/each}
+              </select>
+            {/if}
             <select bind:value={activityKategoriFilter} on:change={handleActivityFilterOrSearch}
               class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
                      dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
