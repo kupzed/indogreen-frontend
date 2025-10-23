@@ -25,7 +25,7 @@
   let currentPage: number = 1;
   let lastPage: number = 1;
   let totalActivities: number = 0;
-  let perPage: number = 10;
+  let perPage: number = 50;
   const perPageOptions = [10, 25, 50, 100];
 
   // view toggle (table/list)

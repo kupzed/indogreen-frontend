@@ -31,8 +31,8 @@
   let activityCurrentPage = 1;
   let activityLastPage = 1;
   let totalActivities = 0;
-  let activityPerPage = 10;
-  let certificatePerPage = 10;
+  let activityPerPage = 50;
+  let certificatePerPage = 50;
   const perPageOptions = [10, 25, 50, 100];
 
   // Date filter state

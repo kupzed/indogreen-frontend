@@ -26,6 +26,8 @@
   let currentPage = 1;
   let lastPage = 1;
   let totalItems = 0;
+  let perPage: number = 50;
+  const perPageOptions = [10, 25, 50, 100];
 
   // Modal state
   let showCreateModal = false;
@@ -77,7 +79,8 @@
         params: {
           search,
           mitra_id: mitraFilter || undefined,
-          page: currentPage
+          page: currentPage,
+          per_page: perPage
         }
       });
       items = res.data?.data ?? [];
@@ -327,7 +330,7 @@
         {/each}
       </ul>
       {#if items.length > 0}
-        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={10} />
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={perPage} perPageOptions={perPageOptions} onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchList(); }} />
       {/if}
     </div>
   {/if}
@@ -388,7 +391,7 @@
         </table>
       </div>
       {#if items.length > 0}
-        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={10} />
+        <Pagination currentPage={currentPage} lastPage={lastPage} onPageChange={goToPage} totalItems={totalItems} itemsPerPage={perPage} perPageOptions={perPageOptions} onPerPageChange={(n) => { perPage = n; currentPage = 1; fetchList(); }} />
       {/if}
     </div>
   {/if}

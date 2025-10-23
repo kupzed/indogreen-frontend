@@ -44,7 +44,7 @@
   let currentPage = 1;
   let lastPage = 1;
   let totalItems = 0;
-  let perPage: number = 10;
+  let perPage: number = 50;
   const perPageOptions = [10, 25, 50, 100];
 
   // modal state

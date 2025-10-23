@@ -61,7 +61,7 @@
   let bcCurrentPage = 1;
   let bcLastPage = 1;
   let bcTotalItems = 0;
-  let perPage: number = 10;
+  let perPage: number = 50;
   const perPageOptions = [10, 25, 50, 100];
   let bcInitialized = false;
 
