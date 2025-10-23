@@ -152,9 +152,6 @@
                           <span class="shrink-0 text-xs text-gray-500 dark:text-gray-400">{file.sizeLabel}</span>
                         {/if}
                       </div>
-                      {#if file.displayName !== file.filename}
-                        <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{file.filename}</div>
-                      {/if}
                       {#if file.desc}
                         <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">{file.desc}</p>
                       {/if}
