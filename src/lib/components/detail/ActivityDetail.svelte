@@ -141,8 +141,8 @@
       </div>
 
       <!-- ====== Lampiran (nama tampil + deskripsi) ====== -->
-      <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-        <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Lampiran</dt>
+      <div class="bg-white dark:bg-black px-4 py-2 grid grid-cols-1 sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm mb-2 font-medium text-gray-500 dark:text-gray-300">Lampiran</dt>
         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
           {#if attachments.length}
             <ul role="list" class="divide-y divide-gray-100 dark:divide-white/5 rounded-md border border-gray-200/80 dark:border-white/20">
@@ -157,7 +157,7 @@
 
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center gap-2">
-                        <span class="truncate font-medium text-gray-900 dark:text-white">{file.displayName}</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{file.displayName}</span>
                         {#if file.sizeLabel}
                           <span class="shrink-0 text-xs text-gray-500 dark:text-gray-400">{file.sizeLabel}</span>
                         {/if}
