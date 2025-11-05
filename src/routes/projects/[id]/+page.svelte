@@ -459,7 +459,7 @@
   }
 
   // Tabs
-  let activeTab: 'detail' | 'activity' | 'certificates' = 'detail';
+  let activeTab: 'detail' | 'activity' | 'certificates' = 'activity';
   let activityView: 'table' | 'list' = 'table';
   const activityViews: Array<'table' | 'list'> = ['table', 'list'];
 
