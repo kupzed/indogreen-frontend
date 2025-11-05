@@ -61,24 +61,6 @@
     removed_existing_ids: []
   };
 
-  const activityKategoriList = [
-    'Expense Report',
-    'Invoice',
-    'Purchase Order',
-    'Payment',
-    'Quotation',
-    'Faktur Pajak',
-    'Kasbon',
-    'Laporan Teknis',
-    'Surat Masuk',
-    'Surat Keluar',
-    'Kontrak',
-    'Berita Acara',
-    'Receive Item',
-    'Other',
-  ];
-  const activityJenisList = ['Internal', 'Customer', 'Vendor'];
-
   // fetch the activity details from the server and populate the form
   async function fetchActivityDetails() {
     loadingActivity = true;

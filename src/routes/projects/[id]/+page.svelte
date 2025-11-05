@@ -132,7 +132,7 @@
   let selectedActivity: any = null;
 
   // Lists
-  const activityKategoriList = ['Expense Report','Invoice','Purchase Order','Payment','Quotation','Faktur Pajak','Kasbon','Laporan Teknis','Surat Masuk','Surat Keluar','Kontrak', 'Berita Acara', 'Receive Item', 'Other'];
+  const activityKategoriList = ['Expense Report','Invoice','Invoice & FP','Purchase Order','Payment','Quotation','Faktur Pajak','Kasbon','Laporan Teknis','Surat Masuk','Surat Keluar','Kontrak', 'Berita Acara', 'Receive Item', 'Other'];
   const activityJenisList = ['Internal','Customer','Vendor'];
 
   // === BADGE STATUS: konsisten dengan Dashboard (punya varian dark) ===
