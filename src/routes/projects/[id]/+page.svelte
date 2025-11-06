@@ -35,6 +35,10 @@
   let certificatePerPage = 50;
   const perPageOptions = [10, 25, 50, 100];
 
+  // Sorting (Activity)
+  let activitySortBy: 'created' | 'activity_date' = 'created';
+  let activitySortDir: 'asc' | 'desc' = 'desc';
+
   // Date filter state
   let activityDateFromFilter = '';
   let activityDateToFilter = '';
@@ -206,6 +210,9 @@
           date_to: activityDateToFilter,
           page: activityCurrentPage,
           per_page: activityPerPage,
+          // sorting
+          sort_by: activitySortBy,
+          sort_dir: activitySortDir,
         }
       });
 
@@ -254,6 +261,8 @@
     activitySearch = '';
     activityDateFromFilter = '';
     activityDateToFilter = '';
+    activitySortBy = 'created';
+    activitySortDir = 'desc';
     activityCurrentPage = 1;
     fetchActivities();
   }
@@ -486,6 +495,10 @@
   let errorCertificates = '';
   let certificateSearch = '';
   let certificateStatusFilter: '' | ProjectCertificate['status'] = '';
+  // === Sorting (Certificates) ===
+  let certificateSortBy: 'created' | 'date_of_issue' | 'date_of_expired' = 'created'; // default create
+  let certificateSortDir: 'asc' | 'desc' = 'desc';                                     // default terbaru
+  let certificateDateSortField: 'date_of_issue' | 'date_of_expired' = 'date_of_issue'; // dropdown tanggal pilih field
   let certificateCurrentPage = 1;
   let certificateLastPage = 1;
   let totalCertificates = 0;
@@ -526,6 +539,9 @@
           date_to: certificateDateToFilter,
           page: certificateCurrentPage,
           per_page: certificatePerPage,
+          sort_by: certificateSortBy,
+          sort_dir: certificateSortDir,
+          date_sort_field: certificateDateSortField,
         },
       });
       certificates = res.data?.data ?? [];
@@ -713,7 +729,7 @@
             Mulai: {new Date(project.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
           </div>
           <div class="my-2 flex items-center text-sm">
-            <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadgeClasses(project.status)}">
+            <span class={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusBadgeClasses(project.status)}`}>
               {project.status}
             </span>
           </div>
@@ -791,10 +807,21 @@
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
           <div class="flex w-full sm:w-auto space-x-2">
+            <select
+              bind:value={activitySortDir}
+              on:change={() => { activitySortBy = 'created'; handleActivityFilterOrSearch(); }}
+              class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
+                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+              title="Urutkan berdasarkan waktu dibuat"
+            >
+              <option value="desc">Create: Terbaru</option>
+              <option value="asc">Create: Terlama</option>
+            </select>
+
             <select bind:value={activityJenisFilter} on:change={handleActivityFilterOrSearch}
               class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
                      dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
-              <option value="">Filter Jenis: Semua</option>
+              <option value="">Jenis: Semua</option>
               {#each activityJenisList as jenis}<option value={jenis}>{jenis}</option>{/each}
             </select>
             {#if activityJenisFilter === 'Vendor'}
@@ -804,7 +831,7 @@
                 class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
                       dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
               >
-                <option value="">Filter Vendor: Semua</option>
+                <option value="">Vendor: Semua</option>
                 {#each projectVendorOptions as v}
                   <option value={v.id}>{v.nama}</option>
                 {/each}
@@ -813,7 +840,7 @@
             <select bind:value={activityKategoriFilter} on:change={handleActivityFilterOrSearch}
               class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
                      dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
-              <option value="">Filter Kategori: Semua</option>
+              <option value="">Kategori: Semua</option>
               {#each activityKategoriList as kategori}<option value={kategori}>{kategori}</option>{/each}
             </select>
           </div>
@@ -938,8 +965,43 @@
                       <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                   </div>
+                  <span class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+                    Urutkan Tanggal Aktivitas
+                  </span>
+                  <div class="inline-flex w-full rounded-md overflow-hidden border border-gray-300 dark:border-gray-700" role="tablist" aria-label="Urutan tanggal aktivitas">
+                    <button
+                      type="button"
+                      on:click={() => { activitySortBy='activity_date'; activitySortDir='desc'; activityCurrentPage=1; fetchActivities(); }}
+                      class="w-full px-3 py-1.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                      class:bg-indigo-600={activitySortBy==='activity_date' && activitySortDir==='desc'}
+                      class:text-white={activitySortBy==='activity_date' && activitySortDir==='desc'}
+                      class:bg-white={!(activitySortBy==='activity_date' && activitySortDir==='desc')}
+                      class:text-gray-900={!(activitySortBy==='activity_date' && activitySortDir==='desc')}
+                      class:dark:bg-neutral-900={!(activitySortBy==='activity_date' && activitySortDir==='desc')}
+                      class:dark:text-gray-100={!(activitySortBy==='activity_date' && activitySortDir==='desc')}
+                      aria-selected={activitySortBy==='activity_date' && activitySortDir==='desc'}
+                      role="tab"
+                    >
+                      Terbaru dulu
+                    </button>
+                    <button
+                      type="button"
+                      on:click={() => { activitySortBy='activity_date'; activitySortDir='asc'; activityCurrentPage=1; fetchActivities(); }}
+                      class="w-full px-3 py-1.5 text-sm font-semibold transition-colors border-l border-gray-300 dark:border-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                      class:bg-indigo-600={activitySortBy==='activity_date' && activitySortDir==='asc'}
+                      class:text-white={activitySortBy==='activity_date' && activitySortDir==='asc'}
+                      class:bg-white={!(activitySortBy==='activity_date' && activitySortDir==='asc')}
+                      class:text-gray-900={!(activitySortBy==='activity_date' && activitySortDir==='asc')}
+                      class:dark:bg-neutral-900={!(activitySortBy==='activity_date' && activitySortDir==='asc')}
+                      class:dark:text-gray-100={!(activitySortBy==='activity_date' && activitySortDir==='asc')}
+                      aria-selected={activitySortBy==='activity_date' && activitySortDir==='asc'}
+                      role="tab"
+                    >
+                      Terlama dulu
+                    </button>
+                  </div>
 
-                  <div class="space-y-3">
+                  <div class="space-y-3 mt-3">
                     <div>
                       <!-- svelte-ignore a11y_label_has_associated_control -->
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal</label>
@@ -1155,10 +1217,20 @@
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
           <div class="flex w-full sm:w-auto space-x-2">
+            <select
+              bind:value={certificateSortDir}
+              on:change={() => { certificateSortBy = 'created'; certificateCurrentPage = 1; fetchCertificates(); }}
+              class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
+                    dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+              title="Urutkan berdasarkan waktu dibuat"
+            >
+              <option value="desc">Create: Terbaru</option>
+              <option value="asc">Create: Terlama</option>
+            </select>
             <select bind:value={certificateStatusFilter} on:change={handleCertificateFilterOrSearch}
               class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
                      dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
-              <option value="">Filter Status: Semua</option>
+              <option value="">Status: Semua</option>
               {#each certificateStatuses as s}<option value={s}>{s}</option>{/each}
             </select>
           </div>
@@ -1282,8 +1354,62 @@
                       <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                   </div>
-
                   <div class="space-y-3">
+                    <div class="mb-3">
+                      <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Urutkan Tanggal
+                      </span>
+
+                      <!-- Pilih field tanggal yang diurutkan -->
+                      <select
+                        bind:value={certificateDateSortField}
+                        class="w-full mb-2 px-3 py-2 rounded-md text-sm border border-gray-300 dark:border-gray-700
+                              bg-white text-gray-900 dark:bg-neutral-900 dark:text-gray-100"
+                        title="Pilih tanggal yang diurutkan"
+                      >
+                        <option value="date_of_issue">Tanggal Terbit</option>
+                        <option value="date_of_expired">Tanggal Expired</option>
+                      </select>
+
+                      <!-- Segmented: Terbaru/Terlama -->
+                      <div class="inline-flex w-full rounded-md overflow-hidden border border-gray-300 dark:border-gray-700" role="tablist" aria-label="Urutan tanggal sertifikat">
+                        <button
+                          type="button"
+                          on:click={() => { certificateSortBy = certificateDateSortField; certificateSortDir = 'desc'; certificateCurrentPage = 1; fetchCertificates(); }}
+                          class="w-full px-3 py-1.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                          class:bg-indigo-600={certificateSortBy===certificateDateSortField && certificateSortDir==='desc'}
+                          class:text-white={certificateSortBy===certificateDateSortField && certificateSortDir==='desc'}
+                          class:bg-white={!(certificateSortBy===certificateDateSortField && certificateSortDir==='desc')}
+                          class:text-gray-900={!(certificateSortBy===certificateDateSortField && certificateSortDir==='desc')}
+                          class:dark:bg-neutral-900={!(certificateSortBy===certificateDateSortField && certificateSortDir==='desc')}
+                          class:dark:text-gray-100={!(certificateSortBy===certificateDateSortField && certificateSortDir==='desc')}
+                          aria-selected={certificateSortBy===certificateDateSortField && certificateSortDir==='desc'}
+                          role="tab"
+                        >
+                          Terbaru dulu
+                        </button>
+                        <button
+                          type="button"
+                          on:click={() => { certificateSortBy = certificateDateSortField; certificateSortDir = 'asc'; certificateCurrentPage = 1; fetchCertificates(); }}
+                          class="w-full px-3 py-1.5 text-sm font-semibold transition-colors border-l border-gray-300 dark:border-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                          class:bg-indigo-600={certificateSortBy===certificateDateSortField && certificateSortDir==='asc'}
+                          class:text-white={certificateSortBy===certificateDateSortField && certificateSortDir==='asc'}
+                          class:bg-white={!(certificateSortBy===certificateDateSortField && certificateSortDir==='asc')}
+                          class:text-gray-900={!(certificateSortBy===certificateDateSortField && certificateSortDir==='asc')}
+                          class:dark:bg-neutral-900={!(certificateSortBy===certificateDateSortField && certificateSortDir==='asc')}
+                          class:dark:text-gray-100={!(certificateSortBy===certificateDateSortField && certificateSortDir==='asc')}
+                          aria-selected={certificateSortBy===certificateDateSortField && certificateSortDir==='asc'}
+                          role="tab"
+                        >
+                          Terlama dulu
+                        </button>
+                      </div>
+
+                      <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        Gunakan menu <b>Sortir</b> di toolbar untuk kembali ke urutan <b>Create</b>.
+                      </p>
+                    </div>
+
                     <div>
                       <label for="cert_filter_from" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal Terbit</label>
                       <input id="cert_filter_from" type="date" bind:value={certificateDateFromFilter} on:change={handleCertificateDateFilter}
@@ -1312,11 +1438,28 @@
                   </div>
 
                   <div class="flex justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <button type="button" on:click={() => { certificateDateFromFilter = ''; certificateDateToFilter = ''; handleCertificateFilterOrSearch(); }}
+                    <button
+                      type="button"
+                      on:click={() => {
+                        certificateDateFromFilter = '';
+                        certificateDateToFilter = '';
+                        certificateSortBy = 'created';
+                        certificateSortDir = 'desc';
+                        certificateCurrentPage = 1;
+                        fetchCertificates();
+                      }}
                       class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200
-                             dark:text-gray-200 dark:bg-neutral-800 dark:border-gray-700 dark:hover:bg-neutral-700">Clear All</button>
-                    <button type="button" on:click={toggleCertificateDateFilter}
-                      class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700">Close</button>
+                            dark:text-gray-200 dark:bg-neutral-800 dark:border-gray-700 dark:hover:bg-neutral-700"
+                    >
+                      Clear All
+                    </button>
+                    <button 
+                      type="button" 
+                      on:click={toggleCertificateDateFilter}
+                      class="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
+                    >
+                      Close
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1452,7 +1595,7 @@
                               <span class="sr-only">Edit, {item.name}</span>
                             </button>
                             <button title="Hapus" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" on:click={() => handleDeleteCertificate(item.id)}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                               <span class="sr-only">Hapus, {item.name}</span>
                             </button>
                           </div>
