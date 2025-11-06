@@ -18,6 +18,8 @@
   let dateFromFilter: string = '';
   let dateToFilter: string = '';
   let showDateFilter: boolean = false;
+  let sortBy: 'created' | 'start_date' = 'created';
+  let sortDir: 'desc' | 'asc' = 'desc';
   let currentPage: number = 1;
   let lastPage: number = 1;
   let totalProjects: number = 0;
@@ -85,6 +87,8 @@
           date_to: dateToFilter,
           page: currentPage,
           per_page: perPage,
+          sort_by: sortBy,
+          sort_dir: sortDir,
         }
       });
       projects = response.data.data;
@@ -126,6 +130,8 @@
     kategoriFilter = '';
     dateFromFilter = '';
     dateToFilter = '';
+    sortBy = 'created';
+    sortDir = 'desc';
     showDateFilter = false;
     currentPage = 1;
     fetchProjects();
@@ -248,13 +254,24 @@
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
     <select
+      bind:value={sortDir}
+      on:change={() => { sortBy = 'created'; handleFilterOrSearch(); }}
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold
+            bg-white text-gray-900 border border-gray-300
+            dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+      title="Urutkan berdasarkan waktu dibuat"
+    >
+      <option value="desc">Create: Terbaru</option>
+      <option value="asc">Create: Terlama</option>
+    </select>
+    <select
       bind:value={statusFilter}
       on:change={handleFilterOrSearch}
       class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold
              bg-white text-gray-900 border border-gray-300
              dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
     >
-      <option value="">Filter Status: Semua</option>
+      <option value="">Status: Semua</option>
       {#each projectStatuses as status}
         <option value={status}>{status}</option>
       {/each}
@@ -267,7 +284,7 @@
              bg-white text-gray-900 border border-gray-300
              dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
     >
-      <option value="">Filter Kategori: Semua</option>
+      <option value="">Kategori: Semua</option>
       {#each projectKategoris as kategori}
         <option value={kategori}>{kategori}</option>
       {/each}
@@ -417,6 +434,50 @@
                dark:bg-neutral-900 dark:border-gray-700"
       >
         <div class="space-y-3">
+          <div>
+            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Urutkan Tanggal Dilaksanakan
+            </span>
+            <div
+              class="inline-flex w-full rounded-md overflow-hidden border border-gray-300 dark:border-gray-700"
+              role="tablist"
+              aria-label="Urutan tanggal dilaksanakan"
+            >
+              <button
+                type="button"
+                on:click={() => { sortBy = 'start_date'; sortDir = 'desc'; currentPage = 1; fetchProjects(); }}
+                class="w-full px-3 py-1.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                class:bg-indigo-600={sortBy==='start_date' && sortDir==='desc'}
+                class:text-white={sortBy==='start_date' && sortDir==='desc'}
+                class:bg-white={!(sortBy==='start_date' && sortDir==='desc')}
+                class:text-gray-900={!(sortBy==='start_date' && sortDir==='desc')}
+                class:dark:bg-neutral-900={!(sortBy==='start_date' && sortDir==='desc')}
+                class:dark:text-gray-100={!(sortBy==='start_date' && sortDir==='desc')}
+                aria-selected={sortBy==='start_date' && sortDir==='desc'}
+                role="tab"
+              >
+                Terbaru dulu
+              </button>
+              <button
+                type="button"
+                on:click={() => { sortBy = 'start_date'; sortDir = 'asc'; currentPage = 1; fetchProjects(); }}
+                class="w-full px-3 py-1.5 text-sm font-semibold transition-colors border-l border-gray-300 dark:border-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                class:bg-indigo-600={sortBy==='start_date' && sortDir==='asc'}
+                class:text-white={sortBy==='start_date' && sortDir==='asc'}
+                class:bg-white={!(sortBy==='start_date' && sortDir==='asc')}
+                class:text-gray-900={!(sortBy==='start_date' && sortDir==='asc')}
+                class:dark:bg-neutral-900={!(sortBy==='start_date' && sortDir==='asc')}
+                class:dark:text-gray-100={!(sortBy==='start_date' && sortDir==='asc')}
+                aria-selected={sortBy==='start_date' && sortDir==='asc'}
+                role="tab"
+              >
+                Terlama dulu
+              </button>
+            </div>
+            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+              Gunakan menu <b>Sortir</b> di bar atas untuk kembali ke urutan <b>Create</b>.
+            </p>
+          </div>
           {#if dateFromFilter || dateToFilter}
             <div class="text-xs text-gray-500 bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 p-2 rounded">
               {#if dateFromFilter && dateToFilter}
@@ -429,8 +490,7 @@
             </div>
           {/if}
           <div>
-            <!-- svelte-ignore a11y_label_has_associated_control -->
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal</label>
+            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal</span>
             <input
               type="date"
               bind:value={dateFromFilter}
@@ -440,8 +500,7 @@
             />
           </div>
           <div>
-            <!-- svelte-ignore a11y_label_has_associated_control -->
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sampai Tanggal</label>
+            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sampai Tanggal</span>
             <input
               type="date"
               bind:value={dateToFilter}
