@@ -47,6 +47,12 @@
   let perPage: number = 50;
   const perPageOptions = [10, 25, 50, 100];
 
+  let sortBy: 'created' | 'date_of_issue' | 'date_of_expired' = 'created';
+  let sortDir: 'desc' | 'asc' = 'desc';
+
+  let dateSortField: 'date_of_issue' | 'date_of_expired' = 'date_of_issue';
+
+
   // modal state
   let showCreateModal = false;
   let showEditModal = false;
@@ -145,7 +151,9 @@
           date_from: dateFromFilter,
           date_to: dateToFilter,
           page: currentPage,
-          per_page: perPage
+          per_page: perPage,
+          sort_by: sortBy,
+          sort_dir: sortDir
         }
       });
       items = res.data?.data ?? [];
@@ -342,10 +350,16 @@
 <!-- Toolbar & filters -->
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
+    <select bind:value={sortDir} on:change={handleFilterOrSearch}
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
+             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
+      <option value="desc">Create: Terbaru</option>
+      <option value="asc">Create: Terlama</option>
+    </select>
     <select bind:value={statusFilter} on:change={handleFilterOrSearch}
       class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
              dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
-      <option value="">Filter Status: Semua</option>
+      <option value="">Status: Semua</option>
       {#each statuses as s}<option value={s}>{s}</option>{/each}
     </select>
   </div>
@@ -454,6 +468,56 @@
     {#if showDateFilter}
       <div class="date-filter-dropdown absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-10 p-4">
         <div class="space-y-3">
+          <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Urutkan Tanggal
+          </span>
+          <select
+            bind:value={dateSortField}
+            class="w-full mb-2 px-3 py-2 rounded-md text-sm border border-gray-300 dark:border-gray-700
+                  bg-white text-gray-900 dark:bg-neutral-900 dark:text-gray-100"
+            title="Pilih tanggal yang diurutkan"
+          >
+            <option value="date_of_issue">Tanggal Terbit</option>
+            <option value="date_of_expired">Tanggal Expired</option>
+          </select>
+
+          <!-- Arah urutan -->
+          <div class="inline-flex w-full rounded-md overflow-hidden border border-gray-300 dark:border-gray-700" role="tablist" aria-label="Urutan tanggal">
+            <button
+              type="button"
+              on:click={() => { sortBy = dateSortField; sortDir = 'desc'; currentPage = 1; fetchList(); }}
+              class="w-full px-3 py-1.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              class:bg-indigo-600={sortBy===dateSortField && sortDir==='desc'}
+              class:text-white={sortBy===dateSortField && sortDir==='desc'}
+              class:bg-white={!(sortBy===dateSortField && sortDir==='desc')}
+              class:text-gray-900={!(sortBy===dateSortField && sortDir==='desc')}
+              class:dark:bg-neutral-900={!(sortBy===dateSortField && sortDir==='desc')}
+              class:dark:text-gray-100={!(sortBy===dateSortField && sortDir==='desc')}
+              aria-selected={sortBy===dateSortField && sortDir==='desc'}
+              role="tab"
+            >
+              Terbaru dulu
+            </button>
+            <button
+              type="button"
+              on:click={() => { sortBy = dateSortField; sortDir = 'asc'; currentPage = 1; fetchList(); }}
+              class="w-full px-3 py-1.5 text-sm font-semibold transition-colors border-l border-gray-300 dark:border-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              class:bg-indigo-600={sortBy===dateSortField && sortDir==='asc'}
+              class:text-white={sortBy===dateSortField && sortDir==='asc'}
+              class:bg-white={!(sortBy===dateSortField && sortDir==='asc')}
+              class:text-gray-900={!(sortBy===dateSortField && sortDir==='asc')}
+              class:dark:bg-neutral-900={!(sortBy===dateSortField && sortDir==='asc')}
+              class:dark:text-gray-100={!(sortBy===dateSortField && sortDir==='asc')}
+              aria-selected={sortBy===dateSortField && sortDir==='asc'}
+              role="tab"
+            >
+              Terlama dulu
+            </button>
+          </div>
+
+          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Gunakan menu <b>Sortir</b> di toolbar untuk kembali ke urutan <b>Create</b>.
+          </p>
           {#if dateFromFilter || dateToFilter}
             <div class="text-xs text-gray-500 dark:text-gray-300 bg-gray-50 dark:bg-neutral-800 p-2 rounded">
               {#if dateFromFilter && dateToFilter}
@@ -476,8 +540,17 @@
               class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700" />
           </div>
           <div class="flex space-x-2 pt-2">
-            <button on:click={() => { dateFromFilter = ''; dateToFilter = ''; handleFilterOrSearch(); }}
-              class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 dark:text-gray-200 dark:bg-neutral-800 dark:border-gray-700 dark:hover:bg-neutral-700">
+            <button
+              on:click={() => {
+                dateFromFilter = '';
+                dateToFilter = '';
+                sortBy = 'created';
+                sortDir = 'desc';
+                currentPage = 1;
+                fetchList();
+              }}
+              class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200
+                    dark:text-gray-200 dark:bg-neutral-800 dark:border-gray-700 dark:hover:bg-neutral-700">
               Clear All
             </button>
             <button on:click={() => { showDateFilter = false; }}
