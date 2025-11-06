@@ -97,6 +97,9 @@
   const activityJenisList = ['Internal','Customer','Vendor'];
 
   // fetch list of activities with filters
+  let sortBy: 'created' | 'activity_date' = 'created';
+  let sortDir: 'desc' | 'asc' = 'desc';
+
   async function fetchActivities() {
     loading = true; error = '';
     try {
@@ -108,7 +111,9 @@
           date_from: dateFromFilter,
           date_to: dateToFilter,
           page: currentPage,
-          per_page: perPage
+          per_page: perPage,
+          sort_by: sortBy,
+          sort_dir: sortDir
         }
       });
       activities = response.data.data;
@@ -174,6 +179,8 @@
     kategoriFilter = '';
     dateFromFilter = '';
     dateToFilter = '';
+    sortBy = 'created';
+    sortDir = 'desc';
     showDateFilter = false;
     currentPage = 1;
     fetchActivities();
@@ -402,14 +409,24 @@
 <!-- Toolbar: filters and search -->
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
+    <select
+      bind:value={sortDir}
+      on:change={() => { sortBy = 'created'; handleFilterOrSearch(); }}
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
+            dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+      title="Urutkan berdasarkan waktu dibuat"
+    >
+      <option value="desc">Create: Terbaru</option>
+      <option value="asc">Create: Terlama</option>
+    </select>
     <select bind:value={jenisFilter} on:change={handleFilterOrSearch}
       class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
-      <option value="">Filter Jenis: Semua</option>
+      <option value="">Jenis: Semua</option>
       {#each activityJenisList as jenis}<option value={jenis}>{jenis}</option>{/each}
     </select>
     <select bind:value={kategoriFilter} on:change={handleFilterOrSearch}
       class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
-      <option value="">Filter Kategori: Semua</option>
+      <option value="">Kategori: Semua</option>
       {#each activityKategoriList as kategori}<option value={kategori}>{kategori}</option>{/each}
     </select>
   </div>
@@ -527,6 +544,41 @@
       <div class="date-filter-dropdown absolute right-0 mt-2 w-80 bg-white border border-gray-300 rounded-md shadow-lg z-10 p-4
                   dark:bg-neutral-900 dark:border-gray-700">
         <div class="space-y-3">
+          <span class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+            Urutkan Tanggal Aktivitas
+          </span>
+          <div class="inline-flex w-full rounded-md overflow-hidden border border-gray-300 dark:border-gray-700" role="tablist" aria-label="Urutan tanggal aktivitas">
+            <button
+              type="button"
+              on:click={() => { sortBy='activity_date'; sortDir='desc'; currentPage=1; fetchActivities(); }}
+              class="w-full px-3 py-1.5 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              class:bg-indigo-600={sortBy==='activity_date' && sortDir==='desc'}
+              class:text-white={sortBy==='activity_date' && sortDir==='desc'}
+              class:bg-white={!(sortBy==='activity_date' && sortDir==='desc')}
+              class:text-gray-900={!(sortBy==='activity_date' && sortDir==='desc')}
+              class:dark:bg-neutral-900={!(sortBy==='activity_date' && sortDir==='desc')}
+              class:dark:text-gray-100={!(sortBy==='activity_date' && sortDir==='desc')}
+              aria-selected={sortBy==='activity_date' && sortDir==='desc'}
+              role="tab"
+            >
+              Terbaru dulu
+            </button>
+            <button
+              type="button"
+              on:click={() => { sortBy='activity_date'; sortDir='asc'; currentPage=1; fetchActivities(); }}
+              class="w-full px-3 py-1.5 text-sm font-semibold transition-colors border-l border-gray-300 dark:border-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              class:bg-indigo-600={sortBy==='activity_date' && sortDir==='asc'}
+              class:text-white={sortBy==='activity_date' && sortDir==='asc'}
+              class:bg-white={!(sortBy==='activity_date' && sortDir==='asc')}
+              class:text-gray-900={!(sortBy==='activity_date' && sortDir==='asc')}
+              class:dark:bg-neutral-900={!(sortBy==='activity_date' && sortDir==='asc')}
+              class:dark:text-gray-100={!(sortBy==='activity_date' && sortDir==='asc')}
+              aria-selected={sortBy==='activity_date' && sortDir==='asc'}
+              role="tab"
+            >
+              Terlama dulu
+            </button>
+          </div>
           {#if dateFromFilter || dateToFilter}
             <div class="text-xs text-gray-500 bg-gray-50 p-2 rounded dark:text-gray-300 dark:bg-neutral-800">
               {#if dateFromFilter && dateToFilter}
