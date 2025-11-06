@@ -15,13 +15,16 @@
   let dateFromFilter: string = '';
   let dateToFilter: string = '';
   let showDateFilter: boolean = false;
+
+  let sortBy: 'created' = 'created';
+  let sortDir: 'asc' | 'desc' = 'desc';
+
   let currentPage: number = 1;
   let lastPage: number = 1;
   let totalMitras: number = 0;
   let perPage: number = 50;
   const perPageOptions = [10, 25, 50, 100];
 
-  // State untuk toggle tampilan
   let activeView: 'table' | 'list' = 'table';
   const views: Array<'table' | 'list'> = ['table', 'list'];
 
@@ -34,16 +37,12 @@
     }
   }
 
-  // Modal state for Create/Update
   let showCreateModal: boolean = false;
   let showEditModal: boolean = false;
   let editingMitra: any = null; 
-  
-  // Drawer state for mitra detail
   let showDetailDrawer: boolean = false;
   let selectedMitra: any = null;
 
-  // Form data for Create/Update
   let form = {
     nama: '',
     is_pribadi: false,
@@ -73,6 +72,8 @@
           kategori: kategoriFilter,
           date_from: dateFromFilter,
           date_to: dateToFilter,
+          sort_by: sortBy,
+          sort_dir: sortDir,
           page: currentPage,
           per_page: perPage,
         }
@@ -106,6 +107,8 @@
     dateFromFilter = '';
     dateToFilter = '';
     showDateFilter = false;
+    sortBy = 'created';
+    sortDir = 'desc';
     currentPage = 1;
     fetchMitras();
   }
@@ -206,11 +209,8 @@
     }
   }
 
-  // Helper for badge colors (cukup aman di dark karena text-white)
   function getKategoriBadgeColor(kategori: string) {
-    // badge konsisten: tint di light, deep di dark
-    const base =
-      'inline-flex rounded-full px-2 text-xs font-semibold leading-5';
+    const base = 'inline-flex rounded-full px-2 text-xs font-semibold leading-5';
     switch (kategori) {
       case 'Pribadi':
       case 'Perusahaan':
@@ -230,12 +230,22 @@
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
     <select
+      bind:value={sortDir}
+      on:change={handleFilterOrSearch}
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
+             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+    >
+      <option value="desc">Create: Terbaru</option>
+      <option value="asc">Create: Terlama</option>
+    </select>
+
+    <select
       bind:value={kategoriFilter}
       on:change={handleFilterOrSearch}
       class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
              dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
     >
-      <option value="">Filter Kategori: Semua</option>
+      <option value="">Kategori: Semua</option>
       {#each mitraKategoriOptions as kategori}
         <option value={kategori}>{kategori.charAt(0).toUpperCase() + kategori.slice(1)}</option>
       {/each}
@@ -337,87 +347,6 @@
       </svg>
       <span class="sr-only">Tampilan List</span>
     </button>
-  </div>
-  
-  <div class="relative">
-    <button
-      on:click={toggleDateFilter}
-      class="date-filter-button px-3 py-2 rounded-md text-sm font-semibold border flex items-center space-x-1 transition-colors
-             hover:bg-gray-50 bg-white border-gray-300 text-gray-900
-             dark:hover:bg-neutral-800 dark:bg-neutral-900 dark:border-gray-700 dark:text-gray-100"
-      class:bg-indigo-50={dateFromFilter || dateToFilter}
-      class:border-indigo-300={dateFromFilter || dateToFilter}
-      class:text-indigo-700={dateFromFilter || dateToFilter}
-    >
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-      </svg>
-      <span>Filter Tanggal</span>
-      {#if dateFromFilter || dateToFilter}
-        <div class="w-2 h-2 bg-indigo-500 rounded-full"></div>
-      {/if}
-      <svg class="w-4 h-4 transition-transform" class:rotate-180={showDateFilter} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-      </svg>
-    </button>
-    
-    {#if showDateFilter}
-      <div 
-        class="date-filter-dropdown absolute right-0 mt-2 w-80 bg-white border border-gray-300 rounded-md shadow-lg z-10 p-4
-               dark:bg-neutral-900 dark:border-gray-700"
-      >
-        <div class="space-y-3">
-          {#if dateFromFilter || dateToFilter}
-            <div class="text-xs text-gray-500 bg-gray-50 dark:bg-neutral-800 dark:text-gray-300 p-2 rounded">
-              {#if dateFromFilter && dateToFilter}
-                Filter: {new Date(dateFromFilter).toLocaleDateString('id-ID')} - {new Date(dateToFilter).toLocaleDateString('id-ID')}
-              {:else if dateFromFilter}
-                Dari: {new Date(dateFromFilter).toLocaleDateString('id-ID')}
-              {:else if dateToFilter}
-                Sampai: {new Date(dateToFilter).toLocaleDateString('id-ID')}
-              {/if}
-            </div>
-          {/if}
-          <div>
-            <!-- svelte-ignore a11y_label_has_associated_control -->
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal</label>
-            <input
-              type="date"
-              bind:value={dateFromFilter}
-              on:change={handleFilterOrSearch}
-              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
-                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
-            />
-          </div>
-          <div>
-            <!-- svelte-ignore a11y_label_has_associated_control -->
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sampai Tanggal</label>
-            <input
-              type="date"
-              bind:value={dateToFilter}
-              on:change={handleFilterOrSearch}
-              class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
-                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
-            />
-          </div>
-          <div class="flex space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-            <button
-              on:click={clearFilters}
-              class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200
-                     dark:text-gray-200 dark:bg-neutral-800 dark:border-gray-700 dark:hover:bg-neutral-700"
-            >
-              Clear All
-            </button>
-            <button
-              on:click={() => { showDateFilter = false; }}
-              class="flex-1 px-3 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    {/if}
   </div>
 </div>
 

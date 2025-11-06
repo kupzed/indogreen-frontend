@@ -74,6 +74,11 @@
   let bcActiveView: 'table' | 'list' = 'table';
   const views: Array<'table' | 'list'> = ['table', 'list'];
 
+  // sort state (default created desc)
+  let bcSortBy: 'created' = 'created';
+  let bcSortDir: 'asc' | 'desc' = 'desc';
+
+
   function handleViewKeydown(e: KeyboardEvent) {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
       e.preventDefault();
@@ -171,7 +176,7 @@
     bcError = '';
     try {
       const res = await axiosClient.get('/barang-certificates', {
-        params: { search: bcSearch, mitra_id: mitra.id, page: bcCurrentPage, per_page: perPage }
+        params: { search: bcSearch, mitra_id: mitra.id, page: bcCurrentPage, per_page: perPage, sort_by: bcSortBy, sort_dir: bcSortDir }
       });
       bcItems = res.data?.data ?? [];
       bcCurrentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
@@ -334,6 +339,19 @@
     {#if activeTab === 'barang'}
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
+          <div class="flex w-full sm:w-auto space-x-2">
+            <select
+              bind:value={bcSortDir}
+              on:change={bcHandleSearchChange}
+              class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
+                    dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+              aria-label="Sortir create"
+              title="Sortir create"
+            >
+              <option value="desc">Sortir: Create Terbaru</option>
+              <option value="asc">Sortir: Create Terlama</option>
+            </select>
+          </div>
           <div class="w-full sm:w-auto flex-grow">
             <div class="relative w-full sm:w-auto">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

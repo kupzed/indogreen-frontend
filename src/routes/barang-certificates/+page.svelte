@@ -23,6 +23,10 @@
   let error = '';
   let search = '';
   let mitraFilter: number | '' = '';
+
+  let sortBy: 'created' = 'created';
+  let sortDir: 'asc' | 'desc' = 'desc';
+
   let currentPage = 1;
   let lastPage = 1;
   let totalItems = 0;
@@ -79,6 +83,8 @@
         params: {
           search,
           mitra_id: mitraFilter || undefined,
+          sort_by: sortBy,
+          sort_dir: sortDir,
           page: currentPage,
           per_page: perPage
         }
@@ -182,11 +188,23 @@
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
     <select
+      bind:value={sortDir}
+      on:change={handleFilterOrSearch}
+      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
+             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+      aria-label="Sortir create"
+      title="Sortir create"
+    >
+      <option value="desc">Create: Terbaru</option>
+      <option value="asc">Create: Terlama</option>
+    </select>
+
+    <select
       bind:value={mitraFilter}
       on:change={handleFilterOrSearch}
       class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
              dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
-      <option value="">Filter Mitra: Semua</option>
+      <option value="">Mitra: Semua</option>
       {#each mitras as m}
         <option value={m.id}>{m.nama}</option>
       {/each}
@@ -249,7 +267,6 @@
       aria-label="Table view"
       title="Table"
     >
-      <!-- Table icon -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
         <rect x="3.5" y="4.5" width="17" height="15" rx="2"></rect>
         <line x1="3.5" y1="9"  x2="20.5" y2="9"></line>
@@ -277,7 +294,6 @@
       aria-label="List view"
       title="List"
     >
-      <!-- List icon -->
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
         <circle cx="5" cy="6" r="1.3"></circle>
         <circle cx="5" cy="12" r="1.3"></circle>
