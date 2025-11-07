@@ -702,8 +702,34 @@
     catch (err: any) { alert('Gagal menghapus data: ' + (err.response?.data?.message || 'Terjadi kesalahan')); }
   }
 
-  // Tabs state
-  let certificateFormFileName = '';
+  // --- kunci scroll saat membuka drawer & modal ---
+  function lockBodyScroll(lock: boolean) {
+    const body = document.body;
+    if (!body) return;
+    if (lock) {
+      const scrollY = window.scrollY;
+      body.dataset.scrollY = String(scrollY);
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.left = '0';
+      body.style.right = '0';
+      body.style.overflow = 'hidden';
+      body.style.width = '100%';
+    } else {
+      const y = Number(body.dataset.scrollY || '0');
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      body.style.overflow = '';
+      body.style.width = '';
+      delete body.dataset.scrollY;
+      window.scrollTo(0, y);
+    }
+  }
+  $: lockBodyScroll(showEditProjectModal || showActivityDetailDrawer || 
+  showCreateActivityModal || showEditActivityModal || showCertificateDetailDrawer ||
+  showCreateCertificateModal || showEditCertificateModal);
 </script>
 
 <svelte:head>
