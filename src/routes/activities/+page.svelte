@@ -51,6 +51,7 @@
   // form includes existing_attachments with optional description and original_name
   let form: {
     name: string;
+    short_desc: string;
     description: string;
     project_id: string | number | '';
     kategori: string | '';
@@ -73,6 +74,7 @@
     removed_existing_ids?: number[];
   } = {
     name: '',
+    short_desc: '',
     description: '',
     project_id: '',
     kategori: '',
@@ -208,6 +210,7 @@
   function openCreateModal() {
     form = {
       name: '',
+      short_desc: '',
       description: '',
       project_id: '',
       kategori: '',
@@ -232,6 +235,7 @@
     editingActivity.activity_date = activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '';
     form = {
       name: editingActivity.name ?? '',
+      short_desc: editingActivity.short_desc ?? '',
       description: editingActivity.description ?? '',
       project_id: editingActivity.project_id ?? '',
       kategori: editingActivity.kategori ?? '',
@@ -282,6 +286,7 @@
   function buildFormDataForActivity() {
     const fd = new FormData();
     appendScalar(fd, 'name', form.name);
+    appendScalar(fd, 'short_desc', form.short_desc);
     appendScalar(fd, 'description', form.description);
     appendScalar(fd, 'project_id', form.project_id);
     appendScalar(fd, 'kategori', form.kategori);
@@ -698,24 +703,27 @@
         <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-neutral-900">
             <tr>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Tanggal Aktivitas</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Nama Aktivitas</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Project</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Kategori</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Jenis</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Mitra</th>
-              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Tanggal Aktivitas</th>
               <th class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-black">
             {#each activities as activity (activity.id)}
               <tr>
+                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
+                  {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                   <a href={`/activities/${activity.id}`} class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300" title="Detail">
                     {activity.name}
                   </a>
                   <br>
-                  <span class="text-xs text-gray-500 dark:text-gray-400">{activity.description?.substring(0, 40)}{activity.description?.length > 40 ? '...' : ''}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">{activity.short_desc}</span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   {activity.project?.name.substring(0, 25)}{activity.project?.name.length > 25 ? '...' : ''}
@@ -730,9 +738,6 @@
                   {#if (activity.jenis === 'Vendor' || activity.jenis === 'Customer') && activity.mitra}
                     {activity.mitra?.nama.substring(0, 25)}{activity.mitra?.nama.length > 25 ? '...' : ''}
                   {:else}-{/if}
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
-                  {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </td>
                 <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                   <div class="flex items-left space-x-2">

@@ -24,6 +24,7 @@
    */
   let form: {
     name: string;
+    short_desc: string;
     description: string;
     project_id: string | number | '';
     kategori: string | '';
@@ -46,6 +47,7 @@
     removed_existing_ids?: number[];
   } = {
     name: '',
+    short_desc: '',
     description: '',
     project_id: '',
     kategori: '',
@@ -77,6 +79,7 @@
       // Populate the form using the returned activity record
       form = {
         name: activity.name ?? '',
+        short_desc: activity.short_desc ?? '',
         description: activity.description ?? '',
         project_id: activity.project_id || '',
         kategori: activity.kategori || '',
@@ -160,6 +163,7 @@
   function buildFormDataForActivity() {
     const fd = new FormData();
     appendScalar(fd, 'name', form.name);
+    appendScalar(fd, 'short_desc', form.short_desc);
     appendScalar(fd, 'description', form.description);
     appendScalar(fd, 'project_id', form.project_id);
     appendScalar(fd, 'kategori', form.kategori);

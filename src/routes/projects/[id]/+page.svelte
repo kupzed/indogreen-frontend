@@ -70,6 +70,7 @@
   let showCreateActivityModal = false;
   let createActivityForm: {
     name: string;
+    short_desc: string;
     description: string;
     project_id: number | string | '';
     kategori: string | '';
@@ -83,6 +84,7 @@
     attachment_descriptions: string[];
   } = {
     name: '',
+    short_desc: '',
     description: '',
     project_id: '',
     kategori: '',
@@ -101,6 +103,7 @@
   let editingActivity: any = null;
   let editActivityForm: {
     name: string;
+    short_desc: string;
     description: string;
     project_id: number | string | '';
     kategori: string | '';
@@ -116,6 +119,7 @@
     removed_existing_ids: number[];
   } = {
     name: '',
+    short_desc: '',
     description: '',
     project_id: '',
     kategori: '',
@@ -314,6 +318,7 @@
   function openCreateActivityModal() {
     createActivityForm = {
       name: '',
+      short_desc: '',
       description: '',
       project_id: project.id,
       kategori: '',
@@ -335,7 +340,7 @@
   }
 
   function buildActivityFormData(data: {
-    name: string; description: string; project_id: number | string | '';
+    name: string; short_desc: string; description: string; project_id: number | string | '';
     kategori: string | ''; activity_date: string | ''; jenis: string | '';
     mitra_id: number | string | '' | null; from?: string | ''; to?: string | '';
     attachments: File[]; attachment_names: string[]; attachment_descriptions: string[];
@@ -344,6 +349,7 @@
   }) {
     const fd = new FormData();
     appendScalar(fd, 'name', data.name);
+    appendScalar(fd, 'short_desc', data.short_desc);
     appendScalar(fd, 'description', data.description);
     appendScalar(fd, 'project_id', data.project_id);
     appendScalar(fd, 'kategori', data.kategori);
@@ -396,6 +402,7 @@
     editingActivity = { ...activity, activity_date: activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '' };
     editActivityForm = {
       name: editingActivity.name ?? '',
+      short_desc: editingActivity.short_desc ?? '',
       description: editingActivity.description ?? '',
       project_id: editingActivity.project_id || '',
       kategori: editingActivity.kategori || '',
@@ -1159,17 +1166,20 @@
                 <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                   <thead class="bg-gray-50 dark:bg-neutral-900">
                     <tr>
+                      <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Tanggal Aktivitas</th>
                       <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Nama Aktivitas</th>
                       <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Kategori</th>
                       <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Jenis</th>
                       <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Mitra</th>
-                      <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Tanggal Aktivitas</th>
                       <th class="relative px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Aksi</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-black">
                     {#each activities as activity (activity.id)}
                       <tr>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
+                          {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                           <a 
                             href={`/activities/${activity.id}`}
@@ -1186,7 +1196,7 @@
                           >
                             {activity.name}
                           </a><br>
-                          <span class="text-xs text-gray-500 dark:text-gray-400">{activity.description.substring(0, 40)}{activity.description.length > 40 ? '...' : ''}</span>
+                          <span class="text-xs text-gray-500 dark:text-gray-400">{activity.short_desc}</span>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm">
                           <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-300">{activity.kategori}</span>
@@ -1196,9 +1206,6 @@
                           {#if activity.jenis === 'Vendor' && activity.mitra}{activity.mitra.nama}
                           {:else if activity.jenis === 'Customer' && activity.mitra}{activity.mitra.nama}
                           {:else}-{/if}
-                        </td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
-                          {new Date(activity.activity_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </td>
                         <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                           <div class="flex items-left space-x-2">
