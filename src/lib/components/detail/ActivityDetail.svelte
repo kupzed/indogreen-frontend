@@ -127,6 +127,14 @@
       </div>
 
       <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+        <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Deskripsi Singkat</dt>
+        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+          {activity.short_desc || '-'}
+        </dd>
+      </div>
+
+
+      <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Deskripsi</dt>
         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
           {activity.description}

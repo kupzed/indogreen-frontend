@@ -11,6 +11,7 @@
 
   export let form: {
     name: string;
+    short_desc: string;
     description: string;
     project_id: string | number | '';
     kategori: string | '';
@@ -27,6 +28,9 @@
     existing_attachments?: Array<{ id: number; name: string; description?: string; url: string; size?: number; original_name?: string }>;
     removed_existing_ids?: number[];
   };
+
+  const MAX_SHORT_DESC = 80;
+  $: shortDescLen = form.short_desc?.length ?? 0;
 
   function formatFileSize(bytes: number): string {
     if (!bytes) return '';
@@ -202,6 +206,28 @@
                      placeholder:text-gray-400 dark:placeholder:text-gray-500
                      focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
             />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label for="{idPrefix}_short_desc" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Deskripsi Singkat (Max: 80 Karakter)</label>
+        <div class="mt-2">
+          <textarea
+            id="{idPrefix}_short_desc"
+            bind:value={form.short_desc}
+            on:input={() => (form.short_desc = (form.short_desc ?? '').slice(0, MAX_SHORT_DESC))}
+            rows="2"
+            required
+            maxlength={MAX_SHORT_DESC}
+            placeholder="Masukkan deskripsi singkat"
+            class="block w-full rounded-md bg-white dark:bg-neutral-900 px-3 py-1.5 text-base text-gray-900 dark:text-gray-100
+                  outline-1 -outline-offset-1 outline-gray-300 dark:outline-gray-700
+                  placeholder:text-gray-400 dark:placeholder:text-gray-500
+                  focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+          ></textarea>
+          <div class="mt-1 text-xs text-gray-500 dark:text-gray-400 text-right">
+            {shortDescLen}/{MAX_SHORT_DESC}
           </div>
         </div>
       </div>
