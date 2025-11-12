@@ -1,3 +1,6 @@
 // src/lib/config.ts
-export const API_BASE_URL = 'http://192.168.1.44:8001/api';
-export const STORAGE_BASE_URL = 'http://192.168.1.44:8001/storage';
+import { PUBLIC_API_BASE_URL, PUBLIC_STORAGE_BASE_URL } from '$env/static/public';
+
+// Fallback kecil supaya tetap jalan bila env belum diset (opsional)
+export const API_BASE_URL = PUBLIC_API_BASE_URL || 'http://localhost:8001/api';
+export const STORAGE_BASE_URL = PUBLIC_STORAGE_BASE_URL || 'http://localhost:8001/storage';
