@@ -5,10 +5,10 @@ import { defineConfig, loadEnv } from 'vite';
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), '');
 
-	const host = env.DEV_HOST || '127.0.0.1';
+	const host = env.DEV_HOST || 'localhost';
 	const port = env.DEV_PORT ? Number(env.DEV_PORT) : 5173;
 
-	const previewHost = env.PREVIEW_HOST || '127.0.0.1';
+	const previewHost = env.PREVIEW_HOST || 'localhost';
 	const previewPort = env.PREVIEW_PORT ? Number(env.PREVIEW_PORT) : 4173;
 
 	const hmrHost = env.HMR_HOST || host;
