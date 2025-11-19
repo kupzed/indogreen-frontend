@@ -139,9 +139,9 @@
   let showActivityDetailDrawer = false;
   let selectedActivity: any = null;
 
-  // Lists
-  const activityKategoriList = ['Expense Report','Invoice','Invoice & FP','Purchase Order','Payment','Quotation','Faktur Pajak','Kasbon','Laporan Teknis','Surat Masuk','Surat Keluar','Kontrak', 'Berita Acara', 'Receive Item', 'Other'];
-  const activityJenisList = ['Internal','Customer','Vendor'];
+  // Lists dari backend
+  let activityKategoriList: string[] = [];
+  let activityJenisList: string[] = [];
 
   // === BADGE STATUS: konsisten dengan Dashboard (punya varian dark) ===
   function getStatusBadgeClasses(status: string) {
@@ -199,12 +199,17 @@
   async function fetchActivities() {
     loadingActivities = true;
     errorActivities = '';
+
     try {
       const pid = project?.id ?? $page.params.id;
-      if (!pid) { errorActivities = 'Project ID tidak ditemukan.'; return; }
+      if (!pid) {
+        errorActivities = 'Project ID tidak ditemukan.';
+        return;
+      }
 
-      const res = await axiosClient.get(`/projects/${pid}`, {
+      const res = await axiosClient.get('/activities', {
         params: {
+          project_id: pid, // <<— kunci: filter berdasarkan project
           jenis: activityJenisFilter,
           kategori: activityKategoriFilter,
           // kirim mitra_id hanya kalau Jenis = Vendor dan user pilih sesuatu
@@ -220,19 +225,30 @@
         }
       });
 
-      const data = res.data?.data ?? {};
-      activities = data.activities ?? [];
-      activityCurrentPage = data.activity_pagination?.current_page ?? 1;
-      activityLastPage = data.activity_pagination?.last_page ?? 1;
-      totalActivities = data.activity_pagination?.total ?? (Array.isArray(activities) ? activities.length : 0);
+      const root = res.data ?? {};
+      const items = root.data ?? [];
+      const pagination = root.pagination ?? {};
 
-      // <<— ambil opsi vendor khusus project (unik dari seluruh aktivitas project)
-      projectVendorOptions = Array.isArray(data.vendor_options) ? data.vendor_options : [];
+      activities = Array.isArray(items) ? items : [];
+      activityCurrentPage = pagination.current_page ?? 1;
+      activityLastPage = pagination.last_page ?? 1;
+      totalActivities =
+        pagination.total ??
+        (Array.isArray(activities) ? activities.length : 0);
+
+      // Vendor unik per project (buat dropdown "Vendor: ...")
+      projectVendorOptions = Array.isArray(root.vendor_options)
+        ? root.vendor_options
+        : [];
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        errorActivities = (err.response?.data as any)?.message || err.message || 'Gagal memuat aktivitas.';
+        errorActivities =
+          (err.response?.data as any)?.message ||
+          err.message ||
+          'Gagal memuat aktivitas.';
       } else {
-        errorActivities = (err as Error).message || 'Gagal memuat aktivitas.';
+        errorActivities =
+          (err as Error).message || 'Gagal memuat aktivitas.';
       }
     } finally {
       loadingActivities = false;
@@ -241,10 +257,20 @@
 
   async function fetchFormDependencies() {
     try {
-      const response = await axiosClient.get('/mitra/vendors');
-      vendors = response.data.data;
-      const customerResponse = await axiosClient.get('/mitra/customers');
-      customers = customerResponse.data.data;
+      const response = await axiosClient.get('/activity/getFormDependencies');
+
+      // vendors & customers untuk form
+      vendors = Array.isArray(response.data?.vendors) ? response.data.vendors : [];
+      customers = Array.isArray(response.data?.customers) ? response.data.customers : [];
+
+      // list kategori & jenis dari backend
+      activityKategoriList = Array.isArray(response.data?.kategori_list)
+        ? response.data.kategori_list
+        : [];
+
+      activityJenisList = Array.isArray(response.data?.jenis_list)
+        ? response.data.jenis_list
+        : [];
     } catch (err: any) {
       console.error('Failed to fetch form dependencies:', err);
     }
@@ -1670,6 +1696,8 @@
       projects={project ? [project] : []}
       showProjectSelect={false}
       {vendors}
+      {activityKategoriList}
+      {activityJenisList}
       allowRemoveAttachment={false}
       onSubmit={handleSubmitCreateActivity}
     />
@@ -1684,6 +1712,8 @@
         projects={project ? [project] : []}
         showProjectSelect={false}
         {vendors}
+        {activityKategoriList}
+        {activityJenisList}
         allowRemoveAttachment={true}
         onSubmit={handleSubmitUpdateActivity}
       />
