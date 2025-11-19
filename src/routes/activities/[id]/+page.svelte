@@ -63,6 +63,10 @@
     removed_existing_ids: []
   };
 
+  // list kategori & jenis diisi dari backend
+  let activityKategoriList: string[] = [];
+  let activityJenisList: string[] = [];
+
   // fetch the activity details from the server and populate the form
   async function fetchActivityDetails() {
     loadingActivity = true;
@@ -130,6 +134,12 @@
       const response = await axiosClient.get('/activity/getFormDependencies');
       projects = response.data.projects;
       vendors = response.data.vendors;
+      activityKategoriList = Array.isArray(response.data?.kategori_list)
+        ? response.data.kategori_list
+        : [];
+      activityJenisList = Array.isArray(response.data?.jenis_list)
+        ? response.data.jenis_list
+        : [];
       if (Array.isArray(projects) && Array.isArray(vendors)) {
         const vendorMap = new Map(vendors.map((v: any) => [v.id, v]));
         projects = projects.map((p: any) => ({
@@ -342,6 +352,8 @@
     {form}
     {projects}
     {vendors}
+    {activityKategoriList}
+    {activityJenisList}
     allowRemoveAttachment={true}
     onSubmit={handleSubmitUpdate}
   />

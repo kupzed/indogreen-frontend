@@ -48,12 +48,8 @@
   }> = [];
   export let vendors: Array<{ id: number; nama: string }> = [];
 
-  const activityKategoriList = [
-    'Expense Report','Invoice','Invoice & FP','Purchase Order','Payment','Quotation',
-    'Faktur Pajak','Kasbon','Laporan Teknis','Surat Masuk','Surat Keluar', 
-    'Kontrak', 'Berita Acara', 'Receive Item', 'Other',
-  ];
-  const activityJenisList = ['Internal', 'Customer', 'Vendor'];
+  export let activityKategoriList: string[] = [];
+  export let activityJenisList: string[] = [];
 
   export let onSubmit: () => Promise<void> | void;
 

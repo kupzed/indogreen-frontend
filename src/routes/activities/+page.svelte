@@ -90,13 +90,9 @@
     removed_existing_ids: []
   };
 
-  // constant lists for kategori and jenis
-  const activityKategoriList = [
-    'Expense Report','Invoice','Invoice & FP','Purchase Order','Payment','Quotation',
-    'Faktur Pajak','Kasbon','Laporan Teknis','Surat Masuk','Surat Keluar',
-    'Kontrak', 'Berita Acara', 'Receive Item', 'Other',
-  ];
-  const activityJenisList = ['Internal','Customer','Vendor'];
+  // list kategori & jenis diisi dari backend
+  let activityKategoriList: string[] = [];
+  let activityJenisList: string[] = [];
 
   // fetch list of activities with filters
   let sortBy: 'created' | 'activity_date' = 'created';
@@ -136,6 +132,12 @@
       const response = await axiosClient.get('/activity/getFormDependencies');
       projects = response.data.projects;
       vendors = response.data.vendors;
+      activityKategoriList = Array.isArray(response.data?.kategori_list)
+        ? response.data.kategori_list
+        : [];
+      activityJenisList = Array.isArray(response.data?.jenis_list)
+        ? response.data.jenis_list
+        : [];
 
       // fetch customers optionally
       try {
@@ -777,6 +779,8 @@
   {form}
   {projects}
   {vendors}
+  {activityKategoriList}
+  {activityJenisList}
   allowRemoveAttachment={false}
   onSubmit={handleSubmitCreate}
 />
@@ -790,6 +794,8 @@
     {form}
     {projects}
     {vendors}
+    {activityKategoriList}
+    {activityJenisList}
     allowRemoveAttachment={true}
     onSubmit={handleSubmitUpdate}
   />
