@@ -63,15 +63,8 @@
     is_cert_projects: false,
   };
 
-  const projectStatuses = ['Ongoing', 'Prospect', 'Complete', 'Cancel'];
-  const projectKategoris = [
-    'PLTS Hybrid',
-    'PLTS Ongrid',
-    'PLTS Offgrid',
-    'PJUTS All In One',
-    'PJUTS Two In One',
-    'PJUTS Konvensional'
-  ];
+  let projectStatuses: string[] = [];
+  let projectKategoris: string[] = [];
 
   async function fetchProjects() {
     loading = true;
@@ -103,18 +96,21 @@
     }
   }
 
-  async function fetchCustomers() {
+  async function fetchFormDependencies() {
     try {
-      const response = await axiosClient.get('/mitra/customers');
-      customers = response.data.data;
+      const res = await axiosClient.get('/projects/getFormDependencies');
+
+      customers = Array.isArray(res.data?.customers) ? res.data.customers : [];
+      projectStatuses = Array.isArray(res.data?.project_status_list) ? res.data.project_status_list : [];
+      projectKategoris = Array.isArray(res.data?.project_kategori_list) ? res.data.project_kategori_list : [];
     } catch (err) {
-      console.error('Failed to fetch customers:', err);
+      console.error('Failed to fetch project form dependencies:', err);
     }
   }
 
   onMount(() => {
     fetchProjects();
-    fetchCustomers();
+    fetchFormDependencies();
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   });

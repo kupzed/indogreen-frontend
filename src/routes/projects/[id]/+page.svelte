@@ -63,8 +63,8 @@
     no_so: '',
     is_cert_projects: false,
   };
-  const projectStatuses = ['Ongoing', 'Prospect', 'Complete', 'Cancel'];
-  const projectKategoris = ['PLTS Hybrid', 'PLTS Ongrid', 'PLTS Offgrid', 'PJUTS All In One', 'PJUTS Two In One', 'PJUTS Konvensional'];
+  let projectStatuses: string[] = [];
+  let projectKategoris: string[] = [];
 
   // Activity Create Modal (multi-file)
   let showCreateActivityModal = false;
@@ -165,8 +165,14 @@
     }
     try {
       const response = await axiosClient.get(`/projects/${projectId}`);
-      project = response.data.data.project;
-
+      const payload = response.data?.data ?? {};
+      project = payload.project;
+      projectStatuses = Array.isArray(payload.project_status_list)
+        ? payload.project_status_list
+        : [];
+      projectKategoris = Array.isArray(payload.project_kategori_list)
+        ? payload.project_kategori_list
+        : [];
       editProjectForm = {
         name: project.name,
         description: project.description,
