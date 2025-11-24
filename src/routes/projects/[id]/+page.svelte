@@ -36,8 +36,8 @@
   const perPageOptions = [10, 25, 50, 100];
 
   // Sorting (Activity)
-  let activitySortBy: 'created' | 'activity_date' = 'created';
-  let activitySortDir: 'asc' | 'desc' = 'desc';
+  let activitySortBy: 'created' | 'activity_date' = 'activity_date';
+  let activitySortDir: 'asc' | 'desc' = 'asc';
 
   // Date filter state
   let activityDateFromFilter = '';
@@ -297,8 +297,8 @@
     activitySearch = '';
     activityDateFromFilter = '';
     activityDateToFilter = '';
-    activitySortBy = 'created';
-    activitySortDir = 'desc';
+    activitySortBy = 'activity_date';
+    activitySortDir = 'asc';
     activityCurrentPage = 1;
     fetchActivities();
   }
@@ -872,17 +872,6 @@
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
           <div class="flex w-full sm:w-auto space-x-2">
-            <select
-              bind:value={activitySortDir}
-              on:change={() => { activitySortBy = 'created'; handleActivityFilterOrSearch(); }}
-              class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
-                     dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
-              title="Urutkan berdasarkan waktu dibuat"
-            >
-              <option value="desc">Create: Terbaru</option>
-              <option value="asc">Create: Terlama</option>
-            </select>
-
             <select bind:value={activityJenisFilter} on:change={handleActivityFilterOrSearch}
               class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
                      dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
@@ -1023,12 +1012,27 @@
 
             {#if showActivityDateFilter}
               <div class="absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-900 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10">
-                <div class="p-4">
+                <div class="space-y-3 p-4">
                   <div class="flex items-center justify-between mb-3">
                     <h3 class="text-sm font-medium text-gray-900 dark:text-white">Filter Tanggal Aktivitas</h3>
                     <button on:click={toggleActivityDateFilter} class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" aria-label="Tutup">
                       <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
+                  </div>
+                  <span class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+                    Urutkan Berdasarkan Create
+                  </span>
+                  <div class="inline-flex w-full rounded-md overflow-hidden border border-gray-300 dark:border-gray-700" role="tablist" aria-label="Urutan tanggal aktivitas">
+                    <select
+                      bind:value={activitySortDir}
+                      on:change={() => { activitySortBy = 'created'; handleActivityFilterOrSearch(); }}
+                      class="w-full px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900
+                            dark:bg-neutral-900 dark:text-gray-100"
+                      title="Urutkan berdasarkan waktu dibuat"
+                    >
+                      <option value="desc">Terbaru</option>
+                      <option value="asc">Terlama</option>
+                    </select>
                   </div>
                   <span class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                     Urutkan Tanggal Aktivitas
@@ -1065,36 +1069,33 @@
                       Terlama dulu
                     </button>
                   </div>
-
-                  <div class="space-y-3 mt-3">
-                    <div>
-                      <!-- svelte-ignore a11y_label_has_associated_control -->
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal</label>
-                      <input type="date" bind:value={activityDateFromFilter} on:change={handleActivityDateFilter}
-                        class="w-full px-3 py-2 border rounded-md text-sm border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
-                               dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700" />
-                    </div>
-                    <div>
-                      <!-- svelte-ignore a11y_label_has_associated_control -->
-                      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sampai Tanggal</label>
-                      <input type="date" bind:value={activityDateToFilter} on:change={handleActivityDateFilter}
-                        class="w-full px-3 py-2 border rounded-md text-sm border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
-                               dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700" />
-                    </div>
-
-                    {#if activityDateFromFilter || activityDateToFilter}
-                      <div class="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-neutral-800 p-2 rounded">
-                        <strong>Filter Aktif:</strong><br>
-                        {#if activityDateFromFilter && activityDateToFilter}
-                          {new Date(activityDateFromFilter).toLocaleDateString('id-ID')} - {new Date(activityDateToFilter).toLocaleDateString('id-ID')}
-                        {:else if activityDateFromFilter}
-                          Dari {new Date(activityDateFromFilter).toLocaleDateString('id-ID')}
-                        {:else if activityDateToFilter}
-                          Sampai {new Date(activityDateToFilter).toLocaleDateString('id-ID')}
-                        {/if}
-                      </div>
-                    {/if}
+                  <div>
+                    <!-- svelte-ignore a11y_label_has_associated_control -->
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dari Tanggal</label>
+                    <input type="date" bind:value={activityDateFromFilter} on:change={handleActivityDateFilter}
+                      class="w-full px-3 py-2 border rounded-md text-sm border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
+                             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700" />
                   </div>
+                  <div>
+                    <!-- svelte-ignore a11y_label_has_associated_control -->
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sampai Tanggal</label>
+                    <input type="date" bind:value={activityDateToFilter} on:change={handleActivityDateFilter}
+                      class="w-full px-3 py-2 border rounded-md text-sm border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500
+                             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700" />
+                  </div>
+
+                  {#if activityDateFromFilter || activityDateToFilter}
+                    <div class="text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-neutral-800 p-2 rounded">
+                      <strong>Filter Aktif:</strong><br>
+                      {#if activityDateFromFilter && activityDateToFilter}
+                        {new Date(activityDateFromFilter).toLocaleDateString('id-ID')} - {new Date(activityDateToFilter).toLocaleDateString('id-ID')}
+                      {:else if activityDateFromFilter}
+                        Dari {new Date(activityDateFromFilter).toLocaleDateString('id-ID')}
+                      {:else if activityDateToFilter}
+                        Sampai {new Date(activityDateToFilter).toLocaleDateString('id-ID')}
+                      {/if}
+                    </div>
+                  {/if}
 
                   <div class="flex justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" on:click={clearActivityFilters}

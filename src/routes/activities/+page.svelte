@@ -95,8 +95,8 @@
   let activityJenisList: string[] = [];
 
   // fetch list of activities with filters
-  let sortBy: 'created' | 'activity_date' = 'created';
-  let sortDir: 'desc' | 'asc' = 'desc';
+  let sortBy: 'created' | 'activity_date' = 'activity_date';
+  let sortDir: 'desc' | 'asc' = 'asc';
 
   async function fetchActivities() {
     loading = true; error = '';
@@ -183,8 +183,8 @@
     kategoriFilter = '';
     dateFromFilter = '';
     dateToFilter = '';
-    sortBy = 'created';
-    sortDir = 'desc';
+    sortBy = 'activity_date';
+    sortDir = 'asc';
     showDateFilter = false;
     currentPage = 1;
     fetchActivities();
@@ -416,16 +416,6 @@
 <!-- Toolbar: filters and search -->
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
-    <select
-      bind:value={sortDir}
-      on:change={() => { sortBy = 'created'; handleFilterOrSearch(); }}
-      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
-            dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
-      title="Urutkan berdasarkan waktu dibuat"
-    >
-      <option value="desc">Create: Terbaru</option>
-      <option value="asc">Create: Terlama</option>
-    </select>
     <select bind:value={jenisFilter} on:change={handleFilterOrSearch}
       class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300 dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
       <option value="">Jenis: Semua</option>
@@ -551,6 +541,21 @@
       <div class="date-filter-dropdown absolute right-0 mt-2 w-80 bg-white border border-gray-300 rounded-md shadow-lg z-10 p-4
                   dark:bg-neutral-900 dark:border-gray-700">
         <div class="space-y-3">
+          <span class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
+            Urutkan Berdasarkan Create
+          </span>
+          <div class="inline-flex w-full rounded-md overflow-hidden border border-gray-300 dark:border-gray-700" role="tablist" aria-label="Urutan tanggal aktivitas">
+            <select
+              bind:value={sortDir}
+              on:change={() => { sortBy = 'created'; handleFilterOrSearch(); }}
+              class="w-full px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900
+                    dark:bg-neutral-900 dark:text-gray-100"
+              title="Urutkan berdasarkan waktu dibuat"
+            >
+              <option value="desc">Terbaru</option>
+              <option value="asc">Terlama</option>
+            </select>
+          </div>
           <span class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
             Urutkan Tanggal Aktivitas
           </span>
