@@ -668,7 +668,7 @@
                     {#if (activity.jenis === 'Vendor' || activity.jenis === 'Customer') && activity.mitra}
                       | {activity.jenis}: {activity.mitra.nama}
                     {/if}
-                    | Deskripsi: {activity.description?.substring(0, 40)}{activity.description?.length > 40 ? '...' : ''}
+                    | From: {activity.from || '-'} | Deskripsi: {activity.short_desc}
                   </p>
                 </div>
                 <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-300 sm:mt-0">
@@ -730,7 +730,7 @@
                     {activity.name}
                   </a>
                   <br>
-                  <span class="text-xs text-gray-500 dark:text-gray-400">{activity.short_desc}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">From: {activity.from || '-'} | {activity.short_desc}</span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   {activity.project?.name.substring(0, 25)}{activity.project?.name.length > 25 ? '...' : ''}
