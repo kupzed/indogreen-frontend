@@ -277,17 +277,6 @@
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
     <select
-      bind:value={sortDir}
-      on:change={() => { sortBy = 'created'; handleFilterOrSearch(); }}
-      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold
-            bg-white text-gray-900 border border-gray-300
-            dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
-      title="Urutkan berdasarkan waktu dibuat"
-    >
-      <option value="desc">Create: Terbaru</option>
-      <option value="asc">Create: Terlama</option>
-    </select>
-    <select
       bind:value={statusFilter}
       on:change={handleFilterOrSearch}
       class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold
@@ -459,6 +448,20 @@
         <div class="space-y-3">
           <div>
             <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Urutkan Berdasarkan Create
+            </span>
+            <select
+              bind:value={sortDir}
+              on:change={() => { sortBy = 'created'; handleFilterOrSearch(); }}
+              class="w-full mb-2 px-3 py-2 rounded-md text-sm font-semibold
+                    bg-white text-gray-900 border border-gray-300
+                    dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
+              title="Urutkan berdasarkan waktu dibuat"
+            >
+              <option value="desc">Terbaru</option>
+              <option value="asc">Terlama</option>
+            </select>
+            <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Urutkan Tanggal Dilaksanakan
             </span>
             <div
@@ -498,7 +501,7 @@
               </button>
             </div>
             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-              Gunakan menu <b>Sortir</b> di bar atas untuk kembali ke urutan <b>Create</b>.
+              Gunakan menu <b>Clear All</b> di paling bawah untuk kembali ke urutan <b>Create Terbaru</b>.
             </p>
           </div>
           {#if dateFromFilter || dateToFilter}
