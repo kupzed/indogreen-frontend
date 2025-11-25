@@ -1283,16 +1283,6 @@
       <div class="mb-8">
         <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
           <div class="flex w-full sm:w-auto space-x-2">
-            <select
-              bind:value={certificateSortDir}
-              on:change={() => { certificateSortBy = 'created'; certificateCurrentPage = 1; fetchCertificates(); }}
-              class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
-                    dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
-              title="Urutkan berdasarkan waktu dibuat"
-            >
-              <option value="desc">Create: Terbaru</option>
-              <option value="asc">Create: Terlama</option>
-            </select>
             <select bind:value={certificateStatusFilter} on:change={handleCertificateFilterOrSearch}
               class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
                      dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
@@ -1421,7 +1411,22 @@
                     </button>
                   </div>
                   <div class="space-y-3">
-                    <div class="mb-3">
+                    <div class="space-y-1">
+                      <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Urutkan Berdasarkan Create
+                      </span>
+                      <div class="inline-flex w-full rounded-md overflow-hidden border border-gray-300 dark:border-gray-700" role="tablist" aria-label="Urutan tanggal sertifikat">
+                        <select
+                          bind:value={certificateSortDir}
+                          on:change={() => { certificateSortBy = 'created'; certificateCurrentPage = 1; fetchCertificates(); }}
+                          class="w-full px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900
+                                dark:bg-neutral-900 dark:text-gray-100"
+                          title="Urutkan berdasarkan waktu dibuat"
+                        >
+                          <option value="desc">Terbaru</option>
+                          <option value="asc">Terlama</option>
+                        </select>
+                      </div>
                       <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Urutkan Tanggal
                       </span>

@@ -377,12 +377,6 @@
 <!-- Toolbar & filters -->
 <div class="flex flex-col sm:flex-row items-center justify-between mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
   <div class="flex w-full sm:w-auto space-x-2">
-    <select bind:value={sortDir} on:change={handleFilterOrSearch}
-      class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
-             dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
-      <option value="desc">Create: Terbaru</option>
-      <option value="asc">Create: Terlama</option>
-    </select>
     <select bind:value={statusFilter} on:change={handleFilterOrSearch}
       class="w-full sm:w-auto px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
              dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
@@ -495,6 +489,15 @@
     {#if showDateFilter}
       <div class="date-filter-dropdown absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-900 border border-gray-300 dark:border-gray-700 rounded-md shadow-lg z-10 p-4">
         <div class="space-y-3">
+          <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Urutkan Berdasarkan Create
+          </span>
+          <select bind:value={sortDir} on:change={handleFilterOrSearch}
+            class="w-full px-3 py-2 rounded-md text-sm font-semibold bg-white text-gray-900 border border-gray-300
+                  dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700">
+            <option value="desc">Terbaru</option>
+            <option value="asc">Terlama</option>
+          </select>
           <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Urutkan Tanggal
           </span>
