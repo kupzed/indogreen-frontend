@@ -12,6 +12,7 @@
   import CertificateFormModal from '$lib/components/form/CertificateFormModal.svelte';
   import ActivityFormModal from '$lib/components/form/ActivityFormModal.svelte';
   import ProjectFormModal from '$lib/components/form/ProjectFormModal.svelte';
+  import { userPermissions } from '$lib/stores/permissions';
 
   let projectId: string | null = null;
   let project: any = null;
@@ -142,6 +143,28 @@
   // Lists dari backend
   let activityKategoriList: string[] = [];
   let activityJenisList: string[] = [];
+
+  // Permissions
+  let canUpdateProject = false;
+  let canDeleteProject = false;
+  let canCreateActivity = false;
+  let canUpdateActivity = false;
+  let canDeleteActivity = false;
+  let canCreateCertificate = false;
+  let canUpdateCertificate = false;
+  let canDeleteCertificate = false;
+
+  $: {
+    const perms = $userPermissions ?? [];
+    canUpdateProject = perms.includes('project-update');
+    canDeleteProject = perms.includes('project-delete');
+    canCreateActivity = perms.includes('activity-create');
+    canUpdateActivity = perms.includes('activity-update');
+    canDeleteActivity = perms.includes('activity-delete');
+    canCreateCertificate = perms.includes('certificate-create');
+    canUpdateCertificate = perms.includes('certificate-update');
+    canDeleteCertificate = perms.includes('certificate-delete');
+  }
 
   // === BADGE STATUS: konsisten dengan Dashboard (punya varian dark) ===
   function getStatusBadgeClasses(status: string) {
@@ -321,9 +344,19 @@
     return () => document.removeEventListener('click', handleClickOutside);
   });
 
-  function openEditProjectModal() { showEditProjectModal = true; }
+  function openEditProjectModal() {
+    if (!canUpdateProject) {
+      console.warn('User lacks project-update permission');
+      return;
+    }
+    showEditProjectModal = true;
+  }
   async function handleSubmitUpdateProject() {
     if (!project?.id) return;
+    if (!canUpdateProject) {
+      console.warn('User lacks project-update permission');
+      return;
+    }
     try {
       await axiosClient.put(`/projects/${project.id}`, editProjectForm);
       alert('Proyek berhasil diperbarui!');
@@ -337,6 +370,10 @@
   }
   async function handleDeleteProject() {
     if (!project?.id) return;
+    if (!canDeleteProject) {
+      console.warn('Delete attempt blocked: no permission');
+      return;
+    }
     if (!confirm('Apakah Anda yakin ingin menghapus proyek ini?')) return;
     try {
       await axiosClient.delete(`/projects/${project.id}`);
@@ -348,6 +385,10 @@
   }
 
   function openCreateActivityModal() {
+    if (!canCreateActivity) {
+      console.warn('User lacks activity-create permission');
+      return;
+    }
     createActivityForm = {
       name: '',
       short_desc: '',
@@ -417,6 +458,10 @@
   }
 
   async function handleSubmitCreateActivity() {
+    if (!canCreateActivity) {
+      console.warn('Create activity blocked by permission');
+      return;
+    }
     try {
       const fd = buildActivityFormData(createActivityForm);
       await axiosClient.post('/activities', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -431,6 +476,10 @@
   }
 
   function openEditActivityModal(activity: any) {
+    if (!canUpdateActivity) {
+      console.warn('User lacks activity-update permission');
+      return;
+    }
     editingActivity = { ...activity, activity_date: activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '' };
     editActivityForm = {
       name: editingActivity.name ?? '',
@@ -464,6 +513,10 @@
   function openActivityDetailDrawer(activity: any) { selectedActivity = { ...activity }; showActivityDetailDrawer = true; }
 
   async function handleSubmitUpdateActivity() {
+    if (!canUpdateActivity) {
+      console.warn('Update activity blocked by permission');
+      return;
+    }
     if (!editingActivity?.id) return;
     try {
       const fd = buildActivityFormData(editActivityForm);
@@ -480,6 +533,10 @@
   }
 
   async function handleDeleteActivity(activityId: number) {
+    if (!canDeleteActivity) {
+      console.warn('Delete activity blocked by permission');
+      return;
+    }
     if (!confirm('Apakah Anda yakin ingin menghapus aktivitas ini?')) return;
     try {
       await axiosClient.delete(`/activities/${activityId}`);
@@ -653,6 +710,10 @@
   let selectedCertificate: ProjectCertificate | null = null;
 
   function openCreateCertificateModal() {
+    if (!canCreateCertificate) {
+      console.warn('User lacks certificate-create permission');
+      return;
+    }
     certificateForm = {
       name: '', no_certificate: '', project_id: project?.id ?? '',
       barang_certificate_id: '', status: '',
@@ -663,6 +724,10 @@
     showCreateCertificateModal = true;
   }
   function openEditCertificateModal(item: ProjectCertificate) {
+    if (!canUpdateCertificate) {
+      console.warn('User lacks certificate-update permission');
+      return;
+    }
     editingCertificate = { ...item };
     certificateForm = {
       name: item.name ?? '', no_certificate: item.no_certificate ?? '', project_id: project?.id ?? '',
@@ -715,6 +780,10 @@
   }
 
   async function handleSubmitCreateCertificate() {
+    if (!canCreateCertificate) {
+      console.warn('Create certificate blocked by permission');
+      return;
+    }
     try {
       const fd = buildCertificateFormData();
       await axiosClient.post('/certificates', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -725,6 +794,10 @@
     }
   }
   async function handleSubmitUpdateCertificate() {
+    if (!canUpdateCertificate) {
+      console.warn('Update certificate blocked by permission');
+      return;
+    }
     if (!editingCertificate?.id) return;
     try {
       const fd = buildCertificateFormData(); fd.append('_method','PUT');
@@ -736,6 +809,10 @@
     }
   }
   async function handleDeleteCertificate(id: number) {
+    if (!canDeleteCertificate) {
+      console.warn('Delete certificate blocked by permission');
+      return;
+    }
     if (!confirm('Yakin ingin menghapus certificate ini?')) return;
     try { await axiosClient.delete(`/certificates/${id}`); alert('Certificate berhasil dihapus'); fetchCertificates(); }
     catch (err: any) { alert('Gagal menghapus data: ' + (err.response?.data?.message || 'Terjadi kesalahan')); }
@@ -801,18 +878,22 @@
         </div>
       </div>
       <div class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4">
-        <button
-          on:click={openEditProjectModal}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-                 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-          Edit Project
-        </button>
-        <button
-          on:click={handleDeleteProject}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-                 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">
-          Hapus Project
-        </button>
+        {#if canUpdateProject}
+          <button
+            on:click={openEditProjectModal}
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                  bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
+            Edit Project
+          </button>
+        {/if}
+        {#if canDeleteProject}
+          <button
+            on:click={handleDeleteProject}
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                  bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">
+            Hapus Project
+          </button>
+        {/if}
       </div>
     </div>
 
@@ -913,13 +994,15 @@
             </div>
           </div>
 
-          <button
-            on:click={openCreateActivityModal}
-            class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
-                   bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                   dark:focus:ring-offset-gray-800">
-            Tambah Aktivitas
-          </button>
+          {#if canCreateActivity}
+            <button
+              on:click={openCreateActivityModal}
+              class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
+                     bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                     dark:focus:ring-offset-gray-800">
+              Tambah Aktivitas
+            </button>
+          {/if}
         </div>
 
         <div class="flex items-center justify-between mb-4">
@@ -1173,8 +1256,12 @@
                     </a>
                     <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
                       <button on:click|stopPropagation={() => openActivityDetailDrawer(activity)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">Detail</button>
-                      <button on:click|stopPropagation={() => openEditActivityModal(activity)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">Edit</button>
-                      <button on:click|stopPropagation={() => handleDeleteActivity(activity.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">Hapus</button>
+                      {#if canUpdateActivity}
+                        <button on:click|stopPropagation={() => openEditActivityModal(activity)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">Edit</button>
+                      {/if}
+                      {#if canDeleteActivity}
+                        <button on:click|stopPropagation={() => handleDeleteActivity(activity.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">Hapus</button>
+                      {/if}
                     </div>
                   </li>
                 {/each}
@@ -1246,14 +1333,18 @@
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                               <span class="sr-only">Detail, {activity.name}</span>
                             </button>
-                            <button on:click|stopPropagation={() => openEditActivityModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                              <span class="sr-only">Edit, {activity.name}</span>
-                            </button>
-                            <button on:click|stopPropagation={() => handleDeleteActivity(activity.id)} title="Delete" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                              <span class="sr-only">Hapus, {activity.name}</span>
-                            </button>
+                            {#if canUpdateActivity}
+                              <button on:click|stopPropagation={() => openEditActivityModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <span class="sr-only">Edit, {activity.name}</span>
+                              </button>
+                            {/if}
+                            {#if canDeleteActivity}
+                              <button on:click|stopPropagation={() => handleDeleteActivity(activity.id)} title="Delete" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                <span class="sr-only">Hapus, {activity.name}</span>
+                              </button>
+                            {/if}
                           </div>
                         </td>
                       </tr>
@@ -1306,13 +1397,15 @@
           </div>
 
           <div class="flex space-x-2 w-full sm:w-auto">
-            <button
-              on:click={openCreateCertificateModal}
-              class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
-                     bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                     dark:focus:ring-offset-gray-800">
-              Tambah Sertif
-            </button>
+            {#if canCreateCertificate}
+              <button
+                on:click={openCreateCertificateModal}
+                class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
+                       bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                       dark:focus:ring-offset-gray-800">
+                Tambah Sertif
+              </button>
+            {/if}
           </div>
         </div>
 
@@ -1658,17 +1751,21 @@
                         <td class="relative whitespace-nowrap px-3 py-4 text-sm">
                           <div class="flex items-center space-x-2">
                             <button title="Detail" class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" on:click={() => openCertificateDetailDrawer(item)}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"/></svg>
                               <span class="sr-only">Detail, {item.name}</span>
                             </button>
-                            <button title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" on:click={() => openEditCertificateModal(item)}>
-                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                              <span class="sr-only">Edit, {item.name}</span>
-                            </button>
-                            <button title="Hapus" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" on:click={() => handleDeleteCertificate(item.id)}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                              <span class="sr-only">Hapus, {item.name}</span>
-                            </button>
+                            {#if canUpdateCertificate}
+                              <button title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" on:click={() => openEditCertificateModal(item)}>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <span class="sr-only">Edit, {item.name}</span>
+                              </button>
+                            {/if}
+                            {#if canDeleteCertificate}
+                              <button title="Hapus" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" on:click={() => handleDeleteCertificate(item.id)}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                <span class="sr-only">Hapus, {item.name}</span>
+                              </button>
+                            {/if}
                           </div>
                         </td>
                       </tr>

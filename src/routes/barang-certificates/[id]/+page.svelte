@@ -5,6 +5,7 @@
   import axiosClient from '$lib/axiosClient';
   import BarangCertificatesDetail from '$lib/components/detail/BarangCertificatesDetail.svelte';
   import BarangCertificateFormModal from '$lib/components/form/BarangCertificateFormModal.svelte';
+  import { userPermissions } from '$lib/stores/permissions';
 
   type Mitra = { id: number; nama: string };
 
@@ -17,6 +18,15 @@
 
   // Edit state
   let showEditModal = false;
+  let canUpdateBarangCert = false;
+  let canDeleteBarangCert = false;
+
+  $: {
+    const perms = $userPermissions ?? [];
+    canUpdateBarangCert = perms.includes('bc-update');
+    canDeleteBarangCert = perms.includes('bc-delete');
+  }
+
   let form: { name: string; no_seri: string; mitra_id: number | '' | null } = {
     name: '',
     no_seri: '',
@@ -51,6 +61,10 @@
   });
 
   function openEditModal() {
+    if (!canUpdateBarangCert) {
+      console.warn('User lacks bc-update permission');
+      return;
+    }
     if (!item) return;
     form = {
       name: item.name ?? '',
@@ -61,6 +75,10 @@
   }
 
   async function handleSubmitUpdate() {
+    if (!canUpdateBarangCert) {
+      console.warn('Update barang certificate blocked by permission');
+      return;
+    }
     try {
       await axiosClient.put(`/barang-certificates/${id}`, form);
       alert('Data berhasil diperbarui!');
@@ -77,6 +95,10 @@
   }
 
   async function handleDelete() {
+    if (!canDeleteBarangCert) {
+      console.warn('Delete barang certificate blocked by permission');
+      return;
+    }
     if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
     try {
       await axiosClient.delete(`/barang-certificates/${id}`);
@@ -138,22 +160,26 @@
         </div>
       </div>
       <div class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4">
-        <button
-          on:click={openEditModal}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-                 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                 dark:focus:ring-offset-gray-800"
-        >
-          Edit
-        </button>
-        <button
-          on:click={handleDelete}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-                 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
-                 dark:focus:ring-offset-gray-800"
-        >
-          Hapus
-        </button>
+        {#if canUpdateBarangCert}
+          <button
+            on:click={openEditModal}
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                   bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                   dark:focus:ring-offset-gray-800"
+          >
+            Edit
+          </button>
+        {/if}
+        {#if canDeleteBarangCert}
+          <button
+            on:click={handleDelete}
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                   bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+                   dark:focus:ring-offset-gray-800"
+          >
+            Hapus
+          </button>
+        {/if}
       </div>
     </div>
 

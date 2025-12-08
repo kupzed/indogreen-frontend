@@ -6,6 +6,7 @@
   import Pagination from '$lib/components/Pagination.svelte';
   import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
   import ActivityFormModal from '$lib/components/form/ActivityFormModal.svelte';
+  import { userPermissions } from '$lib/stores/permissions';
 
   // List of activities and form dependencies
   let activities: any[] = [];
@@ -93,6 +94,18 @@
   // list kategori & jenis diisi dari backend
   let activityKategoriList: string[] = [];
   let activityJenisList: string[] = [];
+
+  // Permissions derived from store (reactive)
+  let canCreateActivity = false;
+  let canUpdateActivity = false;
+  let canDeleteActivity = false;
+
+  $: {
+    const perms = $userPermissions ?? [];
+    canCreateActivity = perms.includes('activity-create');
+    canUpdateActivity = perms.includes('activity-update');
+    canDeleteActivity = perms.includes('activity-delete');
+  }
 
   // fetch list of activities with filters
   let sortBy: 'created' | 'activity_date' = 'activity_date';
@@ -210,6 +223,10 @@
 
   // open create modal: reset form
   function openCreateModal() {
+    if (!canCreateActivity) {
+      console.warn('User lacks activity-create permission');
+      return;
+    }
     form = {
       name: '',
       short_desc: '',
@@ -232,6 +249,10 @@
 
   // open edit modal: populate form with existing activity
   function openEditModal(activity: any) {
+    if (!canUpdateActivity) {
+      console.warn('User lacks activity-update permission');
+      return;
+    }
     editingActivity = { ...activity };
     // convert date to YYYY-MM-DD for input
     editingActivity.activity_date = activity.activity_date ? new Date(activity.activity_date).toISOString().split('T')[0] : '';
@@ -335,6 +356,10 @@
 
   // submit handlers
   async function handleSubmitCreate() {
+    if (!canCreateActivity) {
+      console.warn('Create activity blocked by permission');
+      return;
+    }
     try {
       const formData = buildFormDataForActivity();
       await axiosClient.post('/activities', formData, { headers: { 'Content-Type':'multipart/form-data' } });
@@ -352,6 +377,10 @@
   }
 
   async function handleSubmitUpdate() {
+    if (!canUpdateActivity) {
+      console.warn('Update activity blocked by permission');
+      return;
+    }
     if (!editingActivity?.id) return;
     try {
       const formData = buildFormDataForActivity();
@@ -371,6 +400,10 @@
   }
 
   async function handleDelete(activityId: number) {
+    if (!canDeleteActivity) {
+      console.warn('Delete activity blocked by permission');
+      return;
+    }
     if (!confirm('Apakah Anda yakin ingin menghapus aktivitas ini?')) return;
     try {
       await axiosClient.delete(`/activities/${activityId}`);
@@ -442,13 +475,15 @@
     </div>
   </div>
 
-  <button
-    on:click={openCreateModal}
-    class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
-           bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-           dark:focus:ring-offset-gray-800">
-    Tambah Aktivitas
-  </button>
+  {#if canCreateActivity}
+    <button
+      on:click={openCreateModal}
+      class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
+             bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+             dark:focus:ring-offset-gray-800">
+      Tambah Aktivitas
+    </button>
+  {/if}
 </div>
 
 <!-- Date filter button and dropdown -->
@@ -682,16 +717,20 @@
                 class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">
                 Detail
               </button>
-              <button on:click|stopPropagation={() => openEditModal(activity)}
-                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700
-                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
-                Edit
-              </button>
-              <button on:click|stopPropagation={() => handleDelete(activity.id)}
-                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700
-                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">
-                Hapus
-              </button>
+              {#if canUpdateActivity}
+                <button on:click|stopPropagation={() => openEditModal(activity)}
+                  class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700
+                         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
+                  Edit
+                </button>
+              {/if}
+              {#if canDeleteActivity}
+                <button on:click|stopPropagation={() => handleDelete(activity.id)}
+                  class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700
+                         focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">
+                  Hapus
+                </button>
+              {/if}
             </div>
           </li>
         {/each}
@@ -752,14 +791,18 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {activity.name}</span>
                     </button>
-                    <button on:click|stopPropagation={() => openEditModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                      <span class="sr-only">Edit, {activity.name}</span>
-                    </button>
-                    <button on:click|stopPropagation={() => handleDelete(activity.id)} title="Delete" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                      <span class="sr-only">Hapus, {activity.name}</span>
-                    </button>
+                    {#if canUpdateActivity}
+                      <button on:click|stopPropagation={() => openEditModal(activity)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <span class="sr-only">Edit, {activity.name}</span>
+                      </button>
+                    {/if}
+                    {#if canDeleteActivity}
+                      <button on:click|stopPropagation={() => handleDelete(activity.id)} title="Delete" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        <span class="sr-only">Hapus, {activity.name}</span>
+                      </button>
+                    {/if}
                   </div>
                 </td>
               </tr>

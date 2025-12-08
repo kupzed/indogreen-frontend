@@ -5,6 +5,7 @@
   import axiosClient from '$lib/axiosClient';
   import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
   import ActivityFormModal from '$lib/components/form/ActivityFormModal.svelte';
+  import { userPermissions } from '$lib/stores/permissions';
 
   // local state for the current activity id and loaded record
   let activityId: string | null = null;
@@ -13,6 +14,16 @@
   let vendors: any[] = [];
   let loadingActivity = true;
   let errorActivity = '';
+
+  // permissions
+  let canUpdateActivity = false;
+  let canDeleteActivity = false;
+
+  $: {
+    const perms = $userPermissions ?? [];
+    canUpdateActivity = perms.includes('activity-update');
+    canDeleteActivity = perms.includes('activity-delete');
+  }
 
   // show/hide the edit modal
   let showEditModal: boolean = false;
@@ -158,6 +169,10 @@
   });
 
   function openEditModal() {
+    if (!canUpdateActivity) {
+      console.warn('User lacks activity-update permission');
+      return;
+    }
     showEditModal = true;
   }
 
@@ -211,6 +226,11 @@
 
   async function handleSubmitUpdate() {
     if (!activity?.id) return;
+    if (!canUpdateActivity) {
+      console.warn('Update activity blocked by permission');
+      return;
+    }
+
     try {
       const formData = buildFormDataForActivity();
       formData.append('_method', 'PUT');
@@ -315,18 +335,22 @@
       <div
         class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4"
       >
-        <button
-          on:click={openEditModal}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
-        >
-          Edit Aktivitas
-        </button>
-        <button
-          on:click={handleDelete}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800"
-        >
-          Hapus Aktivitas
-        </button>
+        {#if canUpdateActivity}
+          <button
+            on:click={openEditModal}
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+          >
+            Edit Aktivitas
+          </button>
+        {/if}
+        {#if canDeleteActivity}
+          <button
+            on:click={handleDelete}
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800"
+          >
+            Hapus Aktivitas
+          </button>
+        {/if}
       </div>
     </div>
 

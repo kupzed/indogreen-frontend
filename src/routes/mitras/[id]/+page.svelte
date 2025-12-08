@@ -9,6 +9,7 @@
   import MitraDetail from '$lib/components/detail/MitraDetail.svelte';
   import MitraFormModal from '$lib/components/form/MitraFormModal.svelte';
   import BarangCertificateFormModal from '$lib/components/form/BarangCertificateFormModal.svelte';
+  import { userPermissions } from '$lib/stores/permissions';
 
   let mitraId: string | null = null;
   let mitra: any = null;
@@ -39,6 +40,22 @@
   let editingMitra: any = true;
 
   const mitraKategoriOptions = ['Pribadi', 'Perusahaan', 'Customer', 'Vendor'];
+
+  // Permissions
+  let canUpdateMitra = false;
+  let canDeleteMitra = false;
+  let canCreateBarangCert = false;
+  let canUpdateBarangCert = false;
+  let canDeleteBarangCert = false;
+
+  $: {
+    const perms = $userPermissions ?? [];
+    canUpdateMitra = perms.includes('mitra-update');
+    canDeleteMitra = perms.includes('mitra-delete');
+    canCreateBarangCert = perms.includes('bc-create');
+    canUpdateBarangCert = perms.includes('bc-update');
+    canDeleteBarangCert = perms.includes('bc-delete');
+  }
 
   // Tabs state
   let activeTab: 'detail' | 'barang' = 'detail';
@@ -120,10 +137,20 @@
     fetchMitraDetails();
   });
 
-  function openEditModal() { showEditModal = true; }
+  function openEditModal() {
+    if (!canUpdateMitra) {
+      console.warn('User lacks mitra-update permission');
+      return;
+    }
+    showEditModal = true;
+  }
 
   async function handleSubmitUpdate() {
     if (!mitra?.id) return;
+    if (!canUpdateMitra) {
+      console.warn('User lacks mitra-update permission');
+      return;
+    }
     try {
       await axiosClient.put(`/mitras/${mitra.id}`, form);
       alert('Mitra berhasil diperbarui!');
@@ -141,6 +168,10 @@
 
   async function handleDelete() {
     if (!mitra?.id) return;
+    if (!canDeleteMitra) {
+      console.warn('Delete mitra blocked by permission');
+      return;
+    }
     if (confirm('Apakah Anda yakin ingin menghapus mitra ini?')) {
       try {
         await axiosClient.delete(`/mitras/${mitra.id}`);
@@ -192,8 +223,20 @@
 
   function bcHandleSearchChange() { bcCurrentPage = 1; fetchBarangCertificates(); }
   function bcGoToPage(page: number) { if (page > 0 && page <= bcLastPage) { bcCurrentPage = page; fetchBarangCertificates(); } }
-  function bcOpenCreateModal() { if (!mitra?.id) return; bcForm = { name: '', no_seri: '', mitra_id: mitra.id }; bcShowCreateModal = true; }
+  function bcOpenCreateModal() {
+    if (!canCreateBarangCert) {
+      console.warn('User lacks bc-create permission');
+      return;
+    }
+    if (!mitra?.id) return;
+    bcForm = { name: '', no_seri: '', mitra_id: mitra.id };
+    bcShowCreateModal = true;
+  }
   function bcOpenEditModal(item: BarangCertificate) {
+    if (!canUpdateBarangCert) {
+      console.warn('User lacks bc-update permission');
+      return;
+    }
     bcEditingItem = { ...item };
     bcForm = { name: item.name ?? '', no_seri: item.no_seri ?? '', mitra_id: mitra?.id ?? '' };
     bcShowEditModal = true;
@@ -201,6 +244,10 @@
   function bcOpenDetailDrawer(item: BarangCertificate) { bcSelectedItem = { ...item }; bcShowDetailDrawer = true; }
 
   async function bcHandleSubmitCreate() {
+    if (!canCreateBarangCert) {
+      console.warn('Create barang certificate blocked by permission');
+      return;
+    }
     try {
       if (mitra?.id) bcForm.mitra_id = mitra.id;
       await axiosClient.post('/barang-certificates', bcForm);
@@ -217,6 +264,10 @@
   }
 
   async function bcHandleSubmitUpdate() {
+    if (!canUpdateBarangCert) {
+      console.warn('Update barang certificate blocked by permission');
+      return;
+    }
     if (!bcEditingItem?.id) return;
     try {
       if (mitra?.id) bcForm.mitra_id = mitra.id;
@@ -234,6 +285,10 @@
   }
 
   async function bcHandleDelete(id: number) {
+    if (!canDeleteBarangCert) {
+      console.warn('Delete barang certificate blocked by permission');
+      return;
+    }
     if (!confirm('Yakin ingin menghapus data ini?')) return;
     try {
       await axiosClient.delete(`/barang-certificates/${id}`);
@@ -303,22 +358,26 @@
         </div>
       </div>
       <div class="flex flex-col md:flex-row mt-2 mb-4 md:mt-0 md:ml-4 md:mb-4 space-y-2 md:space-y-0 md:space-x-4">
-        <button
-          on:click={openEditModal}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-                 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                 dark:focus:ring-offset-gray-800"
-        >
-          Edit Mitra
-        </button>
-        <button
-          on:click={handleDelete}
-          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-                 bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
-                 dark:focus:ring-offset-gray-800"
-        >
-          Hapus Mitra
-        </button>
+        {#if canUpdateMitra}
+          <button
+            on:click={openEditModal}
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                  bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                  dark:focus:ring-offset-gray-800"
+          >
+            Edit Mitra
+          </button>
+        {/if}
+        {#if canDeleteMitra}
+          <button
+            on:click={handleDelete}
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
+                  bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+                  dark:focus:ring-offset-gray-800"
+          >
+            Hapus Mitra
+          </button>
+        {/if}
       </div>
     </div>
 
@@ -398,14 +457,16 @@
             </div>
           </div>
           <div class="flex space-x-2 w-full sm:w-auto">
-            <button
-              on:click={bcOpenCreateModal}
-              class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
-                     bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-                     dark:focus:ring-offset-gray-800"
-            >
-              Tambah Barang
-            </button>
+            {#if canCreateBarangCert}
+              <button
+                on:click={bcOpenCreateModal}
+                class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
+                      bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                      dark:focus:ring-offset-gray-800"
+              >
+                Tambah Barang
+              </button>
+            {/if}
           </div>
         </div>
 
@@ -520,8 +581,12 @@
                     </a>
                     <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
                       <button on:click|stopPropagation={() => bcOpenDetailDrawer(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">Detail</button>
-                      <button on:click|stopPropagation={() => bcOpenEditModal(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
-                      <button on:click|stopPropagation={() => bcHandleDelete(item.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700">Hapus</button>
+                      {#if canUpdateBarangCert}
+                        <button on:click|stopPropagation={() => bcOpenEditModal(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
+                      {/if}
+                      {#if canDeleteBarangCert}
+                        <button on:click|stopPropagation={() => bcHandleDelete(item.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700">Hapus</button>
+                      {/if}
                     </div>
                   </li>
                 {/each}
@@ -580,14 +645,18 @@
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                               <span class="sr-only">Detail, {item.name}</span>
                             </button>
-                            <button on:click={() => bcOpenEditModal(item)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                              <span class="sr-only">Edit, {item.name}</span>
-                            </button>
-                            <button on:click={() => bcHandleDelete(item.id)} title="Hapus" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                              <span class="sr-only">Hapus, {item.name}</span>
-                            </button>
+                            {#if canUpdateBarangCert}
+                              <button on:click={() => bcOpenEditModal(item)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <span class="sr-only">Edit, {item.name}</span>
+                              </button>
+                            {/if}
+                            {#if canDeleteBarangCert}
+                              <button on:click={() => bcHandleDelete(item.id)} title="Hapus" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                <span class="sr-only">Hapus, {item.name}</span>
+                              </button>
+                            {/if}
                           </div>
                         </td>
                       </tr>

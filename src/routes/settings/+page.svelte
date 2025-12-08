@@ -197,6 +197,7 @@
 
   let users: RoleUser[] = [];
   let myRoles: string[] = [];
+  $: thisIsSuperAdmin = myRoles.includes('super_admin');
   let canManageRoles = false;
   let currentIsOnlyAdmin = false;
   let selectedUserIsSuperAdmin = false;
@@ -764,6 +765,24 @@
               <fieldset class="sm:col-span-3">
                 <legend class="text-sm/6 font-semibold text-gray-900 dark:text-gray-100">Pilih Role</legend>
                 <div class="mt-6 space-y-3">
+                  {#if thisIsSuperAdmin}
+                    <div class="flex items-center gap-x-3">
+                      <input
+                        id="push-super_admin"
+                        type="radio"
+                        bind:group={role.selectedRole}
+                        value="super_admin"
+                        disabled={currentIsOnlyAdmin && selectedUserIsSuperAdmin}
+                        class="relative size-4 appearance-none rounded-full border border-gray-300 dark:border-gray-600
+                               bg-white dark:bg-neutral-900 before:absolute before:inset-1 before:rounded-full before:bg-white dark:before:bg-neutral-900
+                               not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600
+                               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                      />
+                      <label for="push-super_admin" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">
+                        Super Admin
+                      </label>
+                    </div>
+                  {/if}
                   <div class="flex items-center gap-x-3">
                     <input
                       id="push-admin"

@@ -5,6 +5,7 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
   import { theme } from '$lib/stores/theme';
+  import { setPermissions, setRoles } from '$lib/stores/permissions';
 
   onMount(() => {
     // Berlangganan tanpa menggunakan nilainya; ini memastikan efek samping dijalankan
@@ -16,6 +17,7 @@
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
   import TopNav from '$lib/components/layout/TopNav.svelte';
   import MobileSidebar from '$lib/components/layout/MobileSidebar.svelte';
+	import { browser } from '$app/environment';
 
   // State sidebar
   let sidebarOpen: boolean = false;       // Untuk mobile sidebar
@@ -37,6 +39,20 @@
       }
     }
   }
+
+  onMount(async () => {
+    if (!browser) return;
+    try {
+      const res = await axiosClient.get('/auth/role/me');
+      if (res.status === 200) {
+        const data = await res.data;
+        setRoles(data.roles ?? []);
+        setPermissions(data.permissions ?? []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch user roles/permissions:', err);
+    }
+  });
 
   // Cek apakah halaman saat ini adalah rute auth
   $: isAuthRoute = $page.url.pathname.startsWith('/auth');

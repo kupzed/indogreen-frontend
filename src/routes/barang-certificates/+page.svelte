@@ -5,6 +5,7 @@
   import Drawer from '$lib/components/Drawer.svelte';
   import BarangCertificatesDetail from '$lib/components/detail/BarangCertificatesDetail.svelte';
   import BarangCertificateFormModal from '$lib/components/form/BarangCertificateFormModal.svelte';
+  import { userPermissions } from '$lib/stores/permissions';
 
   type Mitra = { id: number; nama: string };
   type BarangCertificate = {
@@ -32,6 +33,18 @@
   let totalItems = 0;
   let perPage: number = 50;
   const perPageOptions = [10, 25, 50, 100];
+
+  // Permissions
+  let canCreateBarangCert = false;
+  let canUpdateBarangCert = false;
+  let canDeleteBarangCert = false;
+
+  $: {
+    const perms = $userPermissions ?? [];
+    canCreateBarangCert = perms.includes('bc-create');
+    canUpdateBarangCert = perms.includes('bc-update');
+    canDeleteBarangCert = perms.includes('bc-delete');
+  }
 
   // Modal state
   let showCreateModal = false;
@@ -118,11 +131,19 @@
   }
 
   function openCreateModal() {
+    if (!canCreateBarangCert) {
+      console.warn('User lacks bc-create permission');
+      return;
+    }
     form = { name: '', no_seri: '', mitra_id: '' };
     showCreateModal = true;
   }
 
   function openEditModal(item: BarangCertificate) {
+    if (!canUpdateBarangCert) {
+      console.warn('User lacks bc-update permission');
+      return;
+    }
     editingItem = { ...item };
     form = {
       name: item.name ?? '',
@@ -138,6 +159,10 @@
   }
 
   async function handleSubmitCreate() {
+    if (!canCreateBarangCert) {
+      console.warn('Create barang certificate blocked by permission');
+      return;
+    }
     try {
       await axiosClient.post('/barang-certificates', form);
       alert('Data berhasil ditambahkan');
@@ -153,6 +178,10 @@
   }
 
   async function handleSubmitUpdate() {
+    if (!canUpdateBarangCert) {
+      console.warn('Update barang certificate blocked by permission');
+      return;
+    }
     if (!editingItem?.id) return;
     try {
       await axiosClient.put(`/barang-certificates/${editingItem.id}`, form);
@@ -169,6 +198,10 @@
   }
 
   async function handleDelete(id: number) {
+    if (!canDeleteBarangCert) {
+      console.warn('Delete barang certificate blocked by permission');
+      return;
+    }
     if (!confirm('Yakin ingin menghapus data ini?')) return;
     try {
       await axiosClient.delete(`/barang-certificates/${id}`);
@@ -256,14 +289,16 @@
     </div>
   </div>
   <div class="flex space-x-2 w-full sm:w-auto">
-    <button
-      on:click={openCreateModal}
-      class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
-             bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-             dark:focus:ring-offset-gray-800"
-    >
-      Tambah Barang
-    </button>
+    {#if canCreateBarangCert}
+      <button
+        on:click={openCreateModal}
+        class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
+               bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+               dark:focus:ring-offset-gray-800"
+      >
+        Tambah Barang
+      </button>
+    {/if}
   </div>
 </div>
 
@@ -366,8 +401,12 @@
             </a>
             <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
               <button on:click|stopPropagation={() => openDetailDrawer(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">Detail</button>
-              <button on:click|stopPropagation={() => openEditModal(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
-              <button on:click|stopPropagation={() => handleDelete(item.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700">Hapus</button>
+              {#if canUpdateBarangCert}
+                <button on:click|stopPropagation={() => openEditModal(item)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
+              {/if}
+              {#if canDeleteBarangCert}
+                <button on:click|stopPropagation={() => handleDelete(item.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700">Hapus</button>
+              {/if}
             </div>
           </li>
         {/each}
@@ -418,14 +457,18 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {item.name}</span>
                     </button>
-                    <button on:click={() => openEditModal(item)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                      <span class="sr-only">Edit, {item.name}</span>
-                    </button>
-                    <button on:click={() => handleDelete(item.id)} title="Hapus" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                      <span class="sr-only">Hapus, {item.name}</span>
-                    </button>
+                    {#if canUpdateBarangCert}
+                      <button on:click={() => openEditModal(item)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        <span class="sr-only">Edit, {item.name}</span>
+                      </button>
+                    {/if}
+                    {#if canDeleteBarangCert}
+                      <button on:click={() => handleDelete(item.id)} title="Hapus" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        <span class="sr-only">Hapus, {item.name}</span>
+                      </button>
+                    {/if}
                   </div>
                 </td>
               </tr>

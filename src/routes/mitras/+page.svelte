@@ -6,6 +6,7 @@
   import MitraDetail from '$lib/components/detail/MitraDetail.svelte'; 
   import Pagination from '$lib/components/Pagination.svelte';
   import MitraFormModal from '$lib/components/form/MitraFormModal.svelte';
+  import { userPermissions } from '$lib/stores/permissions';
 
   let mitras: any[] = [];
   let loading = true;
@@ -61,6 +62,18 @@
   };
 
   const mitraKategoriOptions = ['pribadi', 'perusahaan', 'customer', 'vendor'];
+
+  // Permissions
+  let canCreateMitra = false;
+  let canUpdateMitra = false;
+  let canDeleteMitra = false;
+
+  $: {
+    const perms = $userPermissions ?? [];
+    canCreateMitra = perms.includes('mitra-create');
+    canUpdateMitra = perms.includes('mitra-update');
+    canDeleteMitra = perms.includes('mitra-delete');
+  }
 
   async function fetchMitras() {
     loading = true;
@@ -132,6 +145,10 @@
   }
 
   function openCreateModal() {
+    if (!canCreateMitra) {
+      console.warn('User lacks mitra-create permission');
+      return;
+    }
     form = {
       nama: '',
       is_pribadi: false,
@@ -152,6 +169,10 @@
   }
 
   function openEditModal(mitra: any) {
+    if (!canUpdateMitra) {
+      console.warn('User lacks mitra-update permission');
+      return;
+    }
     editingMitra = { ...mitra };
     form = { ...editingMitra };
     showEditModal = true;
@@ -163,6 +184,10 @@
   }
 
   async function handleSubmitCreate() {
+    if (!canCreateMitra) {
+      console.warn('Create mitra blocked by permission');
+      return;
+    }
     try {
       await axiosClient.post('/mitras', form);
       alert('Mitra berhasil ditambahkan!');
@@ -179,6 +204,10 @@
   }
 
   async function handleSubmitUpdate() {
+    if (!canUpdateMitra) {
+      console.warn('Update mitra blocked by permission');
+      return;
+    }
     if (!editingMitra?.id) return;
     try {
       await axiosClient.put(`/mitras/${editingMitra.id}`, form);
@@ -196,6 +225,10 @@
   }
 
   async function handleDelete(mitraId: number) {
+    if (!canDeleteMitra) {
+      console.warn('Delete mitra blocked by permission');
+      return;
+    }
     if (confirm('Apakah Anda yakin ingin menghapus mitra ini?')) {
       try {
         await axiosClient.delete(`/mitras/${mitraId}`);
@@ -298,14 +331,16 @@
     </div>
   </div>
 
-  <button
-    on:click={openCreateModal}
-    class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
-           bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-           dark:focus:ring-offset-gray-800"
-  >
-    Tambah Mitra
-  </button>
+  {#if canCreateMitra}
+    <button
+      on:click={openCreateModal}
+      class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm text-white
+             bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+             dark:focus:ring-offset-gray-800"
+    >
+      Tambah Mitra
+    </button>
+  {/if}
 </div>
 
 <div class="flex items-center justify-between mb-4">
@@ -429,18 +464,22 @@
                 class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">
                 Detail
               </button>
-              <button
-                on:click|stopPropagation={() => openEditModal(mitra)}
-                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
-              >
-                Edit
-              </button>
-              <button
-                on:click|stopPropagation={() => handleDelete(mitra.id)}
-                class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800"
-              >
-                Hapus
-              </button>
+              {#if canUpdateMitra}
+                <button
+                  on:click|stopPropagation={() => openEditModal(mitra)}
+                  class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
+                >
+                  Edit
+                </button>
+              {/if}
+              {#if canDeleteMitra}
+                <button
+                  on:click|stopPropagation={() => handleDelete(mitra.id)}
+                  class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800"
+                >
+                  Hapus
+                </button>
+              {/if}
             </div>
           </li>
         {/each}
@@ -519,16 +558,20 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {mitra.nama}</span>
                     </button>
-                    <button on:click|stopPropagation={() => openEditModal(mitra)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      <span class="sr-only">Edit, {mitra.nama}</span>
-                    </button>
-                    <button on:click|stopPropagation={() => handleDelete(mitra.id)} title="Delete" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                      <span class="sr-only">Hapus, {mitra.nama}</span>
-                    </button>
+                    {#if canUpdateMitra}
+                      <button on:click|stopPropagation={() => openEditModal(mitra)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span class="sr-only">Edit, {mitra.nama}</span>
+                      </button>
+                    {/if}
+                    {#if canDeleteMitra}
+                      <button on:click|stopPropagation={() => handleDelete(mitra.id)} title="Delete" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        <span class="sr-only">Hapus, {mitra.nama}</span>
+                      </button>
+                    {/if}
                   </div>
                 </td>
               </tr>

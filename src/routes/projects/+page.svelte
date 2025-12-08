@@ -6,6 +6,7 @@
   import ProjectDetail from '$lib/components/detail/ProjectDetail.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import ProjectFormModal from '$lib/components/form/ProjectFormModal.svelte';
+  import { userPermissions } from '$lib/stores/permissions';
 
   let projects: any[] = [];
   let customers: any[] = [];
@@ -65,6 +66,21 @@
 
   let projectStatuses: string[] = [];
   let projectKategoris: string[] = [];
+
+  // Permissions derived from store (reactive)
+  let canCreate = false;
+  let canUpdate = false;
+  let canDelete = false;
+
+  // Use Svelte auto-subscription to userPermissions store
+  // $userPermissions will update reactively
+  $: {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const perms = $userPermissions ?? [];
+    canCreate = perms.includes('project-create');
+    canUpdate = perms.includes('project-update');
+    canDelete = perms.includes('project-delete');
+  }
 
   async function fetchProjects() {
     loading = true;
@@ -152,6 +168,11 @@
   }
 
   function openCreateModal() {
+    if (!canCreate) {
+      // safety: do not open if user lacks permission
+      console.warn('User tried to open create modal but lacks project-create permission');
+      return;
+    }
     form = {
       name: '',
       description: '',
@@ -169,6 +190,10 @@
   }
 
   function openEditModal(project: any) {
+    if (!canUpdate) {
+      console.warn('User tried to open edit modal but lacks project-update permission');
+      return;
+    }
     editingProject = { ...project };
     form = {
       ...editingProject,
@@ -184,6 +209,10 @@
   }
 
   async function handleSubmitCreate() {
+    if (!canCreate) {
+      console.warn('Create attempt blocked: no permission');
+      return;
+    }
     try {
       await axiosClient.post('/projects', form);
       alert('Project berhasil ditambahkan!');
@@ -201,6 +230,10 @@
 
   async function handleSubmitUpdate() {
     if (!editingProject?.id) return;
+    if (!canUpdate) {
+      console.warn('Update attempt blocked: no permission');
+      return;
+    }
     try {
       await axiosClient.put(`/projects/${editingProject.id}`, form);
       alert('Project berhasil diperbarui!');
@@ -217,6 +250,10 @@
   }
 
   async function handleDelete(projectId: number) {
+    if (!canDelete) {
+      console.warn('Delete attempt blocked: no permission');
+      return;
+    }
     if (confirm('Apakah Anda yakin ingin menghapus project ini?')) {
       try {
         await axiosClient.delete(`/projects/${projectId}`);
@@ -338,16 +375,19 @@
     </div>
   </div>
 
-  <button
-    on:click={openCreateModal}
-    class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm
-           text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
-           dark:focus:ring-offset-gray-800"
-  >
-    Tambah Project
-  </button>
+  {#if canCreate}
+    <button
+      on:click={openCreateModal}
+      class="px-4 py-2 w-full sm:w-auto border border-transparent text-sm font-medium rounded-md shadow-sm
+             text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+             dark:focus:ring-offset-gray-800"
+    >
+      Tambah Project
+    </button>
+  {/if}
 </div>
 
+<!-- Rest of UI remains the same but wrap Edit/Delete buttons with permission checks -->
 <!-- Switch Table/Simple -->
 <div class="flex items-center justify-between mb-4">
   <!-- Segmented icon toggle (Table / List) -->
@@ -555,7 +595,7 @@
     {/if}
   </div>
 </div>
-
+<!-- Example in list view: -->
 {#if loading}
   <p class="text-gray-900 dark:text-white">Memuat project...</p>
 {:else if error}
@@ -611,12 +651,18 @@
               <button on:click|stopPropagation={() => openDetailDrawer(project)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">
                 Detail
               </button>
-              <button on:click|stopPropagation={() => openEditModal(project)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800">
-                Edit
-              </button>
-              <button on:click|stopPropagation={() => handleDelete(project.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800">
-                Hapus
-              </button>
+
+              {#if canUpdate}
+                <button on:click|stopPropagation={() => openEditModal(project)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  Edit
+                </button>
+              {/if}
+
+              {#if canDelete}
+                <button on:click|stopPropagation={() => handleDelete(project.id)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                  Hapus
+                </button>
+              {/if}
             </div>
           </li>
         {/each}
@@ -695,16 +741,22 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {project.name}</span>
                     </button>
-                    <button on:click|stopPropagation={() => openEditModal(project)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
-                      <span class="sr-only">Edit, {project.name}</span>
-                    </button>
-                    <button on:click|stopPropagation={() => handleDelete(project.id)} title="Delete" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                      <span class="sr-only">Hapus, {project.name}</span>
-                    </button>
+
+                    {#if canUpdate}
+                      <button on:click|stopPropagation={() => openEditModal(project)} title="Edit" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span class="sr-only">Edit, {project.name}</span>
+                      </button>
+                    {/if}
+
+                    {#if canDelete}
+                      <button on:click|stopPropagation={() => handleDelete(project.id)} title="Delete" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        <span class="sr-only">Hapus, {project.name}</span>
+                      </button>
+                    {/if}
                   </div>
                 </td>
               </tr>
