@@ -581,7 +581,7 @@
   type Option = { id: number; name?: string; nama?: string; title?: string; no_seri?: string };
   type ProjectCertificate = {
     id: number; name: string; no_certificate: string;
-    status: 'Belum' | 'Tidak Aktif' | 'Aktif';
+    status: string;
     date_of_issue: string; date_of_expired: string;
     attachments?: Array<{ id: number; name: string; url: string; size?: number }>;
     barang_certificate?: { id: number; name: string } | null;
@@ -600,7 +600,7 @@
   let totalCertificates = 0;
   let certificatesInitialized = false;
   let certificateDependenciesInitialized = false;
-  const certificateStatuses = ['Belum','Tidak Aktif','Aktif'] as const;
+  let certificateStatuses: string[] = [];
   let certificateBarangOptions: Option[] = [];
 
   function getCertificateStatusBadgeClasses(status: string) {
@@ -613,18 +613,18 @@
   }
 
   async function fetchCertificateDependencies() {
-    if (!project?.id) return;
     try {
-      const res = await axiosClient.get(`/certificate/getBarangCertificatesByProject/${project.id}`);
-      certificateBarangOptions = res.data?.data ?? [];
+      const resDeps = await axiosClient.get('/certificate/getFormDependencies');
+      certificateStatuses = resDeps.data?.statuses ?? resDeps.data?.data?.statuses ?? [];
     } catch (err: any) {
       console.error('Failed to fetch certificate dependencies', err);
-      certificateBarangOptions = [];
+      certificateStatuses = [];
     }
   }
   async function fetchCertificates() {
     if (!project?.id) return;
-    loadingCertificates = true; errorCertificates = '';
+    loadingCertificates = true;
+    errorCertificates = '';
     try {
       const res = await axiosClient.get('/certificates', {
         params: {
@@ -641,9 +641,13 @@
         },
       });
       certificates = res.data?.data ?? [];
-      certificateCurrentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
-      certificateLastPage = res.data?.pagination?.last_page ?? res.data?.last_page ?? 1;
-      totalCertificates = res.data?.pagination?.total ?? res.data?.total ?? certificates.length;
+      if (res.data?.barang_options) {
+        certificateBarangOptions = res.data.barang_options;
+      }
+      const pag = res.data?.pagination ?? {};
+      certificateCurrentPage = pag.current_page ?? 1;
+      certificateLastPage = pag.last_page ?? 1;
+      totalCertificates = pag.total ?? certificates.length;
     } catch (err: any) {
       errorCertificates = err?.response?.data?.message || 'Gagal memuat sertifikat.';
     } finally { loadingCertificates = false; }
@@ -681,7 +685,7 @@
     no_certificate: string;
     project_id: number | string | '';
     barang_certificate_id: number | string | '' | null;
-    status: 'Belum' | 'Tidak Aktif' | 'Aktif' | '';
+    status: string | '';
     date_of_issue: string;
     date_of_expired: string;
     attachments: File[];
@@ -1840,7 +1844,7 @@
       form={certificateForm}
       projects={[]}
       barangOptions={certificateBarangOptions}
-      statuses={Array.from(certificateStatuses)}
+      statuses={certificateStatuses}
       allowRemoveAttachment={true}
       showProjectSelect={false}
       onSubmit={handleSubmitCreateCertificate}
@@ -1855,7 +1859,7 @@
         form={certificateForm}
         projects={[]}
         barangOptions={certificateBarangOptions}
-        statuses={Array.from(certificateStatuses)}
+        statuses={certificateStatuses}
         allowRemoveAttachment={true}
         showProjectSelect={false}
         onSubmit={handleSubmitUpdateCertificate}

@@ -54,7 +54,7 @@
     no_certificate: string;
     project_id: number | '' | null;
     barang_certificate_id: number | '' | null;
-    status: 'Belum' | 'Tidak Aktif' | 'Aktif' | '';
+    status: string;
     date_of_issue: string;
     date_of_expired: string;
     attachments: File[];
@@ -77,7 +77,7 @@
     removed_existing_ids: []
   };
 
-  const statuses = ['Belum', 'Tidak Aktif', 'Aktif'] as const;
+  let statuses: string[] = [];
 
   $: id = $page.params.id;
 
@@ -87,6 +87,7 @@
       const res = await axiosClient.get('/certificate/getFormDependencies');
       projects = res.data?.data?.projects ?? res.data?.projects ?? [];
       barangCertificates = res.data?.data?.barang_certificates ?? res.data?.barang_certificates ?? [];
+      statuses = res.data?.data?.statuses ?? res.data?.statuses ?? [];
       filteredBarangCertificates = [];
     } catch (err) {
       /* ignore */

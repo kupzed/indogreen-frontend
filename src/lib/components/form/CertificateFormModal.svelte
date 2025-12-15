@@ -36,7 +36,7 @@
 
   export let projects: Array<{ id: number; name?: string; title?: string; mitra?: { id: number; nama: string; is_customer?: boolean }; }> = [];
   export let barangOptions: Array<{ id: number; name?: string; title?: string; no_seri?: string }> = [];
-  export let statuses: string[] = ['Belum', 'Tidak Aktif', 'Aktif'];
+  export let statuses: string[] = [];
   export let handleProjectChange: ((projectId: number | '' | null) => void) | undefined = undefined;
 
   export let onSubmit: () => void | Promise<void>;
