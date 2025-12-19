@@ -75,6 +75,7 @@
     description: string;
     project_id: number | string | '';
     kategori: string | '';
+    value: number;
     activity_date: string | '';
     jenis: string | '';
     mitra_id: number | string | '' | null;
@@ -89,6 +90,7 @@
     description: '',
     project_id: '',
     kategori: '',
+    value: 0,
     activity_date: '',
     jenis: '',
     mitra_id: null,
@@ -108,6 +110,7 @@
     description: string;
     project_id: number | string | '';
     kategori: string | '';
+    value: number;
     activity_date: string | '';
     jenis: string | '';
     mitra_id: number | string | '' | null;
@@ -124,6 +127,7 @@
     description: '',
     project_id: '',
     kategori: '',
+    value: 0,
     activity_date: '',
     jenis: '',
     mitra_id: null,
@@ -395,6 +399,7 @@
       description: '',
       project_id: project.id,
       kategori: '',
+      value: 0,
       activity_date: '',
       jenis: project.mitra && project.mitra.is_customer ? 'Customer' : '',
       mitra_id: project.mitra && project.mitra.is_customer ? project.mitra.id : null,
@@ -414,7 +419,7 @@
 
   function buildActivityFormData(data: {
     name: string; short_desc: string; description: string; project_id: number | string | '';
-    kategori: string | ''; activity_date: string | ''; jenis: string | '';
+    kategori: string | ''; value:number; activity_date: string | ''; jenis: string | '';
     mitra_id: number | string | '' | null; from?: string | ''; to?: string | '';
     attachments: File[]; attachment_names: string[]; attachment_descriptions: string[];
     removed_existing_ids?: number[];
@@ -426,6 +431,7 @@
     appendScalar(fd, 'description', data.description);
     appendScalar(fd, 'project_id', data.project_id);
     appendScalar(fd, 'kategori', data.kategori);
+    appendScalar(fd, 'value', data.value);
     appendScalar(fd, 'activity_date', data.activity_date);
     appendScalar(fd, 'jenis', data.jenis);
     appendScalar(fd, 'from', data.from);
@@ -487,6 +493,7 @@
       description: editingActivity.description ?? '',
       project_id: editingActivity.project_id || '',
       kategori: editingActivity.kategori || '',
+      value: editingActivity.value || 0,
       activity_date: editingActivity.activity_date || '',
       jenis: editingActivity.jenis || '',
       mitra_id: editingActivity.mitra_id || '',
@@ -1235,7 +1242,7 @@
                       <div class="flex items-center justify-between">
                         <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">{activity.name}</p>
                         <div class="ml-2 flex-shrink-0 flex">
-                          <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-300">
+                          <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                             {activity.kategori}
                           </span>
                         </div>
@@ -1323,7 +1330,7 @@
                           <span class="text-xs text-gray-500 dark:text-gray-400">From: {activity.from || '-'} | {activity.short_desc}</span>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm">
-                          <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-300">{activity.kategori}</span>
+                          <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100">{activity.kategori}</span>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{activity.jenis}</td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">

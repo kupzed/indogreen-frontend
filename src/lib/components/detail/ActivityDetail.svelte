@@ -3,6 +3,15 @@
 
   export let activity: any = null;
 
+  function formatRupiah(val: number) {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(val);
+  }
+
   let attachments: NormalizedAttachment[] = [];
 
   // ====== Helpers Lampiran (nama/label + deskripsi) ======
@@ -140,6 +149,15 @@
           {activity.description}
         </dd>
       </div>
+
+      {#if activity.value !== null && activity.value !== undefined && Number(activity.value) !== 0}
+        <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Nilai / Value</dt>
+          <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+            {formatRupiah(activity.value)}
+          </dd>
+        </div>
+      {/if}
 
       <div class="bg-white dark:bg-black px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
         <dt class="text-sm font-medium text-gray-500 dark:text-gray-300">Tanggal Aktivitas</dt>

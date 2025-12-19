@@ -39,6 +39,7 @@
     description: string;
     project_id: string | number | '';
     kategori: string | '';
+    value: number;
     activity_date: string | '';
     jenis: string | '';
     mitra_id: number | string | '' | null;
@@ -62,6 +63,7 @@
     description: '',
     project_id: '',
     kategori: '',
+    value: 0,
     activity_date: '',
     jenis: '',
     mitra_id: null,
@@ -98,6 +100,7 @@
         description: activity.description ?? '',
         project_id: activity.project_id || '',
         kategori: activity.kategori || '',
+        value: activity.kategori || 0,
         activity_date: activity.activity_date
           ? new Date(activity.activity_date).toISOString().split('T')[0]
           : '',
@@ -192,6 +195,7 @@
     appendScalar(fd, 'description', form.description);
     appendScalar(fd, 'project_id', form.project_id);
     appendScalar(fd, 'kategori', form.kategori);
+    appendScalar(fd, 'value', form.value);
     appendScalar(fd, 'activity_date', form.activity_date);
     appendScalar(fd, 'jenis', form.jenis);
     appendScalar(fd, 'from', form.from);

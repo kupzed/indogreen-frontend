@@ -56,6 +56,7 @@
     description: string;
     project_id: string | number | '';
     kategori: string | '';
+    value: number;
     activity_date: string | '';
     jenis: string | '';
     mitra_id: number | string | '' | null;
@@ -79,6 +80,7 @@
     description: '',
     project_id: '',
     kategori: '',
+    value: 0,
     activity_date: '',
     jenis: '',
     mitra_id: null,
@@ -233,6 +235,7 @@
       description: '',
       project_id: '',
       kategori: '',
+      value: 0,
       activity_date: '',
       jenis: '',
       mitra_id: null,
@@ -260,6 +263,7 @@
       name: editingActivity.name ?? '',
       short_desc: editingActivity.short_desc ?? '',
       description: editingActivity.description ?? '',
+      value: editingActivity.value ?? 0,
       project_id: editingActivity.project_id ?? '',
       kategori: editingActivity.kategori ?? '',
       activity_date: editingActivity.activity_date ?? '',
@@ -313,6 +317,7 @@
     appendScalar(fd, 'description', form.description);
     appendScalar(fd, 'project_id', form.project_id);
     appendScalar(fd, 'kategori', form.kategori);
+    appendScalar(fd, 'value', form.value);
     appendScalar(fd, 'activity_date', form.activity_date);
     appendScalar(fd, 'jenis', form.jenis);
     appendScalar(fd, 'from', form.from);
@@ -690,7 +695,7 @@
               <div class="flex items-center justify-between">
                 <p class="text-sm font-medium text-indigo-600 dark:text-indigo-400 truncate">{activity.name}</p>
                 <div class="ml-2 flex-shrink-0 flex">
-                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-300">
+                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                     {activity.kategori}
                   </span>
                 </div>
@@ -775,7 +780,7 @@
                   {activity.project?.name.substring(0, 25)}{activity.project?.name.length > 25 ? '...' : ''}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm">
-                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-300">
+                  <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                     {activity.kategori}
                   </span>
                 </td>
