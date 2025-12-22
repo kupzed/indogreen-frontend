@@ -1,10 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import axiosClient from '$lib/axiosClient';
+  import Drawer from '$lib/components/Drawer.svelte';
+  import FinanceDetail from '$lib/components/detail/FinanceDetail.svelte';
 
   let loading = false;
   let reportData: any[] = [];
   let meta = { total_records: 0, total_value: 0, period: '' };
+  let showDetailDrawer = false;
+  let selectedFinanceItem: any = null;
 
   // Default ke bulan & tahun saat ini
   let selectedMonth = new Date().getMonth() + 1;
@@ -30,14 +34,14 @@
       const res = await axiosClient.get('/finance/monthly-report', {
         params: { month: selectedMonth, year: selectedYear }
       });
-        reportData = res.data.data;
-        meta = res.data.meta;
-      } catch (e) {
-        console.error(e);
-        alert('Gagal mengambil laporan keuangan');
-      } finally {
-        loading = false;
-      }
+      reportData = res.data.data;
+      meta = res.data.meta;
+    } catch (e) {
+      console.error(e);
+      alert('Gagal mengambil laporan keuangan');
+    } finally {
+      loading = false;
+    }
   }
 
   function formatRupiah(val: number) {
@@ -51,6 +55,67 @@
   onMount(() => {
     fetchReport();
   });
+
+  function openFinanceDetailDrawer(item: any) {
+    selectedFinanceItem = item;
+    showDetailDrawer = true;
+  }
+
+  function closeFinanceDetailDrawer() {
+    showDetailDrawer = false;
+  }
+
+  function handleFinanceValueSaved(event: CustomEvent) {
+    const detail = event.detail ?? {};
+    const activityId = detail.activityId;
+    if (!activityId) return;
+
+    reportData = reportData.map((row) => {
+      if (row?.activity?.id === activityId) {
+        const nextValue = Number(detail.value ?? row.value ?? 0);
+        const updated = {
+          ...row,
+          value: nextValue,
+          value_formatted: detail.value_formatted ?? formatRupiah(nextValue),
+          activity: detail.activity ?? row.activity
+        };
+        return updated;
+      }
+      return row;
+    });
+
+    meta = {
+      ...meta,
+      total_value: reportData.reduce((sum, row) => sum + Number(row.value ?? 0), 0)
+    };
+  }
+
+  // --- kunci scroll saat membuka drawer & modal ---
+  function lockBodyScroll(lock: boolean) {
+    const body = document.body;
+    if (!body) return;
+    if (lock) {
+      const scrollY = window.scrollY;
+      body.dataset.scrollY = String(scrollY);
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.left = '0';
+      body.style.right = '0';
+      body.style.overflow = 'hidden';
+      body.style.width = '100%';
+    } else {
+      const y = Number(body.dataset.scrollY || '0');
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      body.style.overflow = '';
+      body.style.width = '';
+      delete body.dataset.scrollY;
+      window.scrollTo(0, y);
+    }
+  }
+  $: lockBodyScroll(showDetailDrawer);
 </script>
 
 <div class="flex flex-col gap-6">
@@ -120,7 +185,19 @@
                   </span>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
-                  {item.activity_name}
+                  <button
+                    type="button"
+                    class="text-left font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                    on:click={() => openFinanceDetailDrawer(item)}
+                    on:keydown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        openFinanceDetailDrawer(item);
+                      }
+                    }}
+                  >
+                    {item.activity_name}
+                  </button>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   {item.project_name}
@@ -136,3 +213,7 @@
     </div>
   </div>
 </div>
+
+<Drawer bind:show={showDetailDrawer} title="Detail Dokumen Keuangan" on:close={() => (showDetailDrawer = false)}>
+  <FinanceDetail item={selectedFinanceItem} on:saved={handleFinanceValueSaved} />
+</Drawer>
