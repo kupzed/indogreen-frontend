@@ -1,8 +1,17 @@
 <script lang="ts">
   import axiosClient from '$lib/axiosClient';
   import { createEventDispatcher } from 'svelte';
+  import { userPermissions } from '$lib/stores/permissions';
 
   export let item: any = null;
+
+  // Permission
+  let canUpdateFinance = false;
+
+  $: {
+    const perms = $userPermissions ?? [];
+    canUpdateFinance = perms.includes('finance-update');
+  }
 
   const dispatch = createEventDispatcher();
 
@@ -81,6 +90,10 @@
   }
 
   async function handleSave() {
+    if (!canUpdateFinance) {
+      console.warn('User lacks finance-update permission');
+      return;
+    }
     if (!activity?.id) return;
     submitting = true;
     errorMessage = '';
@@ -130,17 +143,19 @@
             <!-- <p class="text-base font-semibold text-gray-900 dark:text-white">{formatRupiah(valueInput)}</p> -->
             <p class="text-base font-semibold text-gray-900 dark:text-white">{formatRupiah(activity.value)}</p>
           </div>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1 rounded-md border border-gray-200 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-700 transition hover:bg-gray-50 hover:text-emerald-700 dark:border-white/15 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-emerald-300"
-            on:click={() => (showValueEditor = !showValueEditor)}
-            aria-expanded={showValueEditor}
-          >
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            {showValueEditor ? 'Batal' : 'Edit'}
-          </button>
+          {#if canUpdateFinance}
+            <button
+              type="button"
+              class="inline-flex items-center gap-1 rounded-md border border-gray-200 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-700 transition hover:bg-gray-50 hover:text-emerald-700 dark:border-white/15 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-emerald-300"
+              on:click={() => (showValueEditor = !showValueEditor)}
+              aria-expanded={showValueEditor}
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              {showValueEditor ? 'Batal' : 'Edit'}
+            </button>
+          {/if}
         </header>
 
         {#if showValueEditor}

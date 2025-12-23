@@ -5,6 +5,7 @@
   import FinanceDetail from '$lib/components/detail/FinanceDetail.svelte';
 
   let loading = false;
+  let error = '';
   let reportData: any[] = [];
   let meta = { total_records: 0, total_value: 0, period: '' };
   let showDetailDrawer = false;
@@ -30,15 +31,16 @@
 
   async function fetchReport() {
     loading = true;
+    error = '';
     try {
       const res = await axiosClient.get('/finance/monthly-report', {
         params: { month: selectedMonth, year: selectedYear }
       });
       reportData = res.data.data;
       meta = res.data.meta;
-    } catch (e) {
-      console.error(e);
-      alert('Gagal mengambil laporan keuangan');
+    } catch (err: any) {
+      console.error(err);
+      error = err.response?.data?.message || 'Gagal mengambil laporan keuangan';
     } finally {
       loading = false;
     }
@@ -168,6 +170,8 @@
         <tbody class="divide-y divide-gray-100 dark:divide-gray-700 text-sm text-gray-700 dark:text-gray-200">
           {#if loading}
             <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Memuat data...</td></tr>
+          {:else if error}
+            <tr><td colspan="6" class="px-6 py-8 text-center text-red-600 dark:text-red-400">{error}</td></tr>
           {:else if reportData.length === 0}
             <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 italic">Tidak ada data keuangan pada periode ini.</td></tr>
           {:else}
