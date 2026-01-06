@@ -6,10 +6,17 @@
 
   let loading = false;
   let error = '';
+  type ReportMode = 'month' | 'project';
+
   let reportData: any[] = [];
-  let meta = { total_records: 0, total_value: 0, period: '' };
+  let meta: Record<string, any> = { total_records: 0, total_value: 0, period: '', project: null, filters: {} };
   let showDetailDrawer = false;
   let selectedFinanceItem: any = null;
+  let reportMode: ReportMode = 'month';
+  let projects: Array<{ id: number; name: string }> = [];
+  let selectedProjectId: number | string = '';
+  let projectStartDate = '';
+  let projectEndDate = '';
 
   // Default ke bulan & tahun saat ini
   let selectedMonth = new Date().getMonth() + 1;
@@ -33,9 +40,39 @@
     loading = true;
     error = '';
     try {
-      const res = await axiosClient.get('/finance/monthly-report', {
-        params: { month: selectedMonth, year: selectedYear }
-      });
+      let endpoint = '/finance/monthly-report';
+      let params: Record<string, any> = { month: selectedMonth, year: selectedYear };
+
+      if (reportMode === 'project') {
+        endpoint = '/finance/project-report';
+
+        const normalizedProjectId =
+          typeof selectedProjectId === 'number'
+            ? selectedProjectId
+            : Number(selectedProjectId || 0);
+
+        if (!normalizedProjectId) {
+          error = 'Silakan pilih project terlebih dahulu.';
+          return;
+        }
+
+        if (projectStartDate && projectEndDate) {
+          const start = new Date(projectStartDate);
+          const end = new Date(projectEndDate);
+          if (start > end) {
+            error = 'Tanggal mulai tidak boleh lebih besar dari tanggal selesai.';
+            return;
+          }
+        }
+
+        params = {
+          project_id: normalizedProjectId,
+          start_date: projectStartDate || undefined,
+          end_date: projectEndDate || undefined
+        };
+      }
+
+      const res = await axiosClient.get(endpoint, { params });
       reportData = res.data.data;
       meta = res.data.meta;
     } catch (err: any) {
@@ -43,6 +80,31 @@
       error = err.response?.data?.message || 'Gagal mengambil laporan keuangan';
     } finally {
       loading = false;
+    }
+  }
+
+  async function fetchProjects() {
+    try {
+      const res = await axiosClient.get('/projects', { params: { per_page: 500 } });
+      const payload = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : [];
+      projects = payload.map((project: any) => ({ id: project.id, name: project.name }));
+    } catch (err) {
+      console.error('Gagal memuat daftar project:', err);
+    }
+  }
+
+  function handleModeChange(mode: ReportMode) {
+    if (reportMode === mode) return;
+    reportMode = mode;
+    error = '';
+    reportData = [];
+    meta = { total_records: 0, total_value: 0, period: '', project: null, filters: {} };
+
+    if (mode === 'month') {
+      selectedProjectId = '';
+      projectStartDate = '';
+      projectEndDate = '';
+      fetchReport();
     }
   }
 
@@ -54,8 +116,13 @@
     }).format(val);
   }
 
+  $: reportSubtitle = reportMode === 'month'
+    ? 'Rekapitulasi aktivitas keuangan per bulan'
+    : 'Rekapitulasi aktivitas keuangan per project';
+
   onMount(() => {
     fetchReport();
+    fetchProjects();
   });
 
   function openFinanceDetailDrawer(item: any) {
@@ -121,38 +188,110 @@
 </script>
 
 <div class="flex flex-col gap-6">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dokumen Keuangan</h1>
-      <p class="text-gray-500 dark:text-gray-400 text-sm">Rekapitulasi aktivitas keuangan per bulan</p>
+      <h1 class="text-2xl font-bold tracking-tight text-gray-800 dark:text-white">Dokumen Keuangan</h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">{reportSubtitle}</p>
+      
+      <div class="mt-4 inline-flex p-1 rounded-lg bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+        <label class="relative flex cursor-pointer items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium transition-all {reportMode === 'month' ? 'bg-white text-emerald-600 shadow-sm dark:bg-emerald-600 dark:text-white' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'}">
+          <input
+            type="radio"
+            name="report-mode"
+            class="sr-only"
+            checked={reportMode === 'month'}
+            on:change={() => handleModeChange('month')}
+          />
+          <span>Per Bulan</span>
+        </label>
+        <label class="relative flex cursor-pointer items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium transition-all {reportMode === 'project' ? 'bg-white text-emerald-600 shadow-sm dark:bg-emerald-600 dark:text-white' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'}">
+          <input
+            type="radio"
+            name="report-mode"
+            class="sr-only"
+            checked={reportMode === 'project'}
+            on:change={() => handleModeChange('project')}
+          />
+          <span>Per Project</span>
+        </label>
+      </div>
     </div>
 
-    <div class="flex items-center gap-2 bg-white dark:bg-black p-2 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-      <select bind:value={selectedMonth} on:change={fetchReport} class="form-select text-sm border-gray-300 dark:border-gray-600 rounded-md focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-black text-gray-900 dark:text-white">
-        {#each months as m}
-          <option value={m.val}>{m.label}</option>
-        {/each}
-      </select>
-      <select bind:value={selectedYear} on:change={fetchReport} class="form-select text-sm border-gray-300 dark:border-gray-600 rounded-md focus:ring-emerald-500 focus:border-emerald-500 bg-white dark:bg-black text-gray-900 dark:text-white">
-        {#each years as y}
-          <option value={y}>{y}</option>
-        {/each}
-      </select>
-      <button on:click={fetchReport} class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+    <div class="flex flex-col sm:flex-row gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-black shadow-sm">
+      {#if reportMode === 'month'}
+        <select 
+          bind:value={selectedMonth} 
+          on:change={fetchReport} 
+          class="h-10 w-full sm:w-40 px-2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
+        >
+          {#each months as m}
+            <option value={m.val}>{m.label}</option>
+          {/each}
+        </select>
+
+        <select 
+          bind:value={selectedYear} 
+          on:change={fetchReport} 
+          class="h-10 w-full sm:w-28 px-2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
+        >
+          {#each years as y}
+            <option value={y}>{y}</option>
+          {/each}
+        </select>
+
+      {:else}
+        <select 
+          bind:value={selectedProjectId} 
+          on:change={fetchReport} 
+          class="h-10 w-full sm:w-48 px-2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
+        >
+          <option value="">Pilih Project</option>
+          {#each projects as project}
+            <option value={project.id}>{project.name}</option>
+          {/each}
+        </select>
+        <input 
+          type="date" 
+          bind:value={projectStartDate} 
+          on:change={fetchReport} 
+          class="h-10 w-full sm:w-auto px-2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" 
+        />
+        
+        <span class="hidden sm:flex items-center text-gray-400">-</span>
+        <input 
+          type="date" 
+          bind:value={projectEndDate} 
+          on:change={fetchReport} 
+          class="h-10 w-full sm:w-auto px-2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500" 
+        />
+      {/if}
+      <button 
+        on:click={fetchReport} 
+        class="h-10 px-5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm whitespace-nowrap"
+      >
         Refresh
       </button>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div class="bg-white dark:bg-black p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 md:col-span-1">
-      <p class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase tracking-wide">Total Nilai (Bulan Ini)</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase tracking-wide">
+        {reportMode === 'month' ? 'Total Nilai (Periode Terpilih)' : 'Total Nilai (Project Terpilih)'}
+      </p>
       <h2 class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
         {formatRupiah(meta.total_value || 0)}
       </h2>
+      <p class="text-xs text-gray-400 mt-1">
+        {reportMode === 'month' && meta.period
+          ? `Periode ${meta.period}`
+          : reportMode === 'project' && meta?.project?.name
+            ? `Project ${meta.project.name}`
+            : ''}
+      </p>
       <p class="text-xs text-gray-400 mt-1">Total {meta.total_records} transaksi</p>
     </div>
-  </div>
+  </div> -->
 
   <div class="bg-white dark:bg-black shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
