@@ -136,6 +136,16 @@
     fetchProjects();
   }
 
+  let searchTimer: ReturnType<typeof setTimeout>;
+
+  function handleSearchDebounced() {
+    clearTimeout(searchTimer);
+    
+    searchTimer = setTimeout(() => {
+      handleFilterOrSearch();
+    }, 800);
+  }
+
   function clearFilters() {
     search = '';
     statusFilter = '';
@@ -366,7 +376,7 @@
         type="text"
         placeholder="Cari project..."
         bind:value={search}
-        on:input={handleFilterOrSearch}
+        on:input={handleSearchDebounced}
         class="block w-full pl-10 pr-3 py-2 border rounded-md leading-5
                bg-white text-gray-900 placeholder-gray-500 border-gray-300
                focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm

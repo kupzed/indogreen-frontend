@@ -317,6 +317,17 @@
   }
   function handleActivityFilterOrSearch() { activityCurrentPage = 1; fetchActivities(); }
 
+  let searchTimer: ReturnType<typeof setTimeout>;
+
+  function handleSearchDebounced() {
+    clearTimeout(searchTimer);
+    
+    searchTimer = setTimeout(() => {
+      handleActivityFilterOrSearch();
+      handleCertificateSearchChange();
+    }, 800);
+  }
+
   function clearActivityFilters() {
     activityJenisFilter = '';
     activityKategoriFilter = '';
@@ -997,7 +1008,7 @@
                 <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" /></svg>
               </div>
               <input
-                type="text" placeholder="Cari aktivitas..." bind:value={activitySearch} on:input={handleActivityFilterOrSearch}
+                type="text" placeholder="Cari aktivitas..." bind:value={activitySearch} on:input={handleSearchDebounced}
                 class="block w-full pl-10 pr-3 py-2 border rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 border-gray-300
                        focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm
                        dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700"
@@ -1399,7 +1410,7 @@
                 <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" /></svg>
               </div>
               <input
-                type="text" placeholder="Cari sertifikat..." bind:value={certificateSearch} on:input={handleCertificateSearchChange}
+                type="text" placeholder="Cari sertifikat..." bind:value={certificateSearch} on:input={handleSearchDebounced}
                 class="block w-full pl-10 pr-3 py-2 border rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 border-gray-300
                        focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm
                        dark:bg-neutral-900 dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700"
