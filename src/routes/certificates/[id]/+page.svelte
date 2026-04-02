@@ -81,18 +81,7 @@
 
   $: id = $page.params.id;
 
-  // Fetch static dependencies (projects and barang certificates) for the form
-  async function fetchDependencies() {
-    try {
-      const res = await axiosClient.get('/certificate/getFormDependencies');
-      projects = res.data?.data?.projects ?? res.data?.projects ?? [];
-      barangCertificates = res.data?.data?.barang_certificates ?? res.data?.barang_certificates ?? [];
-      statuses = res.data?.data?.statuses ?? res.data?.statuses ?? [];
-      filteredBarangCertificates = [];
-    } catch (err) {
-      /* ignore */
-    }
-  }
+  // Dependencies are fetched alongside detail via form_dependencies
 
   // Fetch certificates by project when user selects a different project
   async function fetchBarangCertificatesByProject(projectId: number) {
@@ -130,7 +119,19 @@
     error = '';
     try {
       const res = await axiosClient.get(`/certificates/${id}`);
-      item = res.data?.data ?? res.data;
+      const root = res.data ?? {};
+      item = root.data ?? root;
+
+      const formDeps = root.form_dependencies ?? root.meta?.form_dependencies ?? {};
+      if (formDeps.projects && projects.length === 0) {
+        projects = formDeps.projects;
+      }
+      if (formDeps.barang_certificates && barangCertificates.length === 0) {
+        barangCertificates = formDeps.barang_certificates;
+      }
+      if (formDeps.statuses && statuses.length === 0) {
+        statuses = formDeps.statuses;
+      }
     } catch (err: any) {
       error = err.response?.data?.message || 'Gagal memuat detail.';
     } finally {
@@ -139,7 +140,6 @@
   }
 
   onMount(() => {
-    fetchDependencies();
     fetchDetail();
   });
 

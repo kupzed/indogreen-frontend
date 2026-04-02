@@ -133,6 +133,29 @@
         const selectedProject = projects.find((p) => p.id == form.project_id);
         if (selectedProject?.mitra_id) form.mitra_id = selectedProject.mitra_id;
       }
+
+      // Extract form dependencies from the same response
+      if (response.data.form_dependencies) {
+        const deps = response.data.form_dependencies;
+        projects = deps.projects || [];
+        vendors = deps.vendors || [];
+        // Optional customers fetch isn't provided by default unless it's in the payload. Backend returns customers via getFormDependenciesArray.
+        let customers = deps.customers || [];
+        
+        activityKategoriList = Array.isArray(deps.kategori_list) ? deps.kategori_list : [];
+        activityJenisList = Array.isArray(deps.jenis_list) ? deps.jenis_list : [];
+        
+        if (Array.isArray(projects) && Array.isArray(vendors)) {
+          const vendorMap = new Map(vendors.map((v: any) => [v.id, v]));
+          // Map customers too
+          const customerMap = new Map(customers.map((c: any) => [c.id, c]));
+          projects = projects.map((p: any) => ({
+            ...p,
+            mitra: p.mitra || (p.mitra_id ? vendorMap.get(p.mitra_id) : (p.customer_id ? customerMap.get(p.customer_id) : undefined))
+          }));
+        }
+      }
+
     } catch (err: any) {
       errorActivity =
         err.response?.data?.message || 'Gagal memuat detail aktivitas.';
@@ -142,33 +165,10 @@
     }
   }
 
-  // load dependencies for select lists
-  async function fetchFormDependencies() {
-    try {
-      const response = await axiosClient.get('/activity/getFormDependencies');
-      projects = response.data.projects;
-      vendors = response.data.vendors;
-      activityKategoriList = Array.isArray(response.data?.kategori_list)
-        ? response.data.kategori_list
-        : [];
-      activityJenisList = Array.isArray(response.data?.jenis_list)
-        ? response.data.jenis_list
-        : [];
-      if (Array.isArray(projects) && Array.isArray(vendors)) {
-        const vendorMap = new Map(vendors.map((v: any) => [v.id, v]));
-        projects = projects.map((p: any) => ({
-          ...p,
-          mitra: p.mitra || (p.mitra_id ? vendorMap.get(p.mitra_id) : undefined)
-        }));
-      }
-    } catch (err) {
-      console.error('Failed to fetch form dependencies:', err);
-    }
-  }
+
 
   onMount(() => {
     fetchActivityDetails();
-    fetchFormDependencies();
   });
 
   function openEditModal() {

@@ -193,13 +193,18 @@
     try {
       const response = await axiosClient.get(`/projects/${projectId}`);
       const payload = response.data?.data ?? {};
-      project = payload.project;
-      projectStatuses = Array.isArray(payload.project_status_list)
-        ? payload.project_status_list
-        : [];
-      projectKategoris = Array.isArray(payload.project_kategori_list)
-        ? payload.project_kategori_list
-        : [];
+      project = payload.project ?? payload;
+      
+      if (response.data?.form_dependencies) {
+        projectStatuses = Array.isArray(response.data.form_dependencies.project_status_list) ? response.data.form_dependencies.project_status_list : [];
+        projectKategoris = Array.isArray(response.data.form_dependencies.project_kategori_list) ? response.data.form_dependencies.project_kategori_list : [];
+        if (!customers?.length) {
+          customers = Array.isArray(response.data.form_dependencies.customers) ? response.data.form_dependencies.customers : [];
+        }
+      } else {
+        projectStatuses = Array.isArray(payload.project_status_list) ? payload.project_status_list : [];
+        projectKategoris = Array.isArray(payload.project_kategori_list) ? payload.project_kategori_list : [];
+      }
       editProjectForm = {
         name: project.name,
         description: project.description,
@@ -260,19 +265,26 @@
 
       const root = res.data ?? {};
       const items = root.data ?? [];
-      const pagination = root.pagination ?? {};
+      const pagination = root.meta ?? root.pagination ?? {};
 
       activities = Array.isArray(items) ? items : [];
-      activityCurrentPage = pagination.current_page ?? 1;
-      activityLastPage = pagination.last_page ?? 1;
+      activityCurrentPage = pagination.current_page ?? root.current_page ?? 1;
+      activityLastPage = pagination.last_page ?? root.last_page ?? 1;
       totalActivities =
-        pagination.total ??
-        (Array.isArray(activities) ? activities.length : 0);
+        pagination.total ?? root.total ?? (Array.isArray(activities) ? activities.length : 0);
 
       // Vendor unik per project (buat dropdown "Vendor: ...")
-      projectVendorOptions = Array.isArray(root.vendor_options)
-        ? root.vendor_options
-        : [];
+      projectVendorOptions = Array.isArray(root.vendor_options) ? root.vendor_options : [];
+
+      if (root.form_dependencies) {
+        const dep = root.form_dependencies;
+        vendors = Array.isArray(dep.vendors) ? dep.vendors : [];
+        if (Array.isArray(dep.customers) && dep.customers.length > 0) {
+          customers = dep.customers;
+        }
+        activityKategoriList = Array.isArray(dep.kategori_list) ? dep.kategori_list : [];
+        activityJenisList = Array.isArray(dep.jenis_list) ? dep.jenis_list : [];
+      }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         errorActivities =
@@ -288,26 +300,7 @@
     }
   }
 
-  async function fetchFormDependencies() {
-    try {
-      const response = await axiosClient.get('/activity/getFormDependencies');
 
-      // vendors & customers untuk form
-      vendors = Array.isArray(response.data?.vendors) ? response.data.vendors : [];
-      customers = Array.isArray(response.data?.customers) ? response.data.customers : [];
-
-      // list kategori & jenis dari backend
-      activityKategoriList = Array.isArray(response.data?.kategori_list)
-        ? response.data.kategori_list
-        : [];
-
-      activityJenisList = Array.isArray(response.data?.jenis_list)
-        ? response.data.jenis_list
-        : [];
-    } catch (err: any) {
-      console.error('Failed to fetch form dependencies:', err);
-    }
-  }
 
   function goToActivityPage(page: number) {
     if (page > 0 && page <= activityLastPage) {
@@ -353,8 +346,16 @@
 
   onMount(() => {
     fetchProjectDetails();
-    fetchActivities();
-    fetchFormDependencies();
+    
+    if (activeTab === 'activity') {
+      activitiesInitialized = true;
+      fetchActivities();
+    }
+    if (activeTab === 'certificates') {
+      certificatesInitialized = true;
+      fetchCertificates();
+    }
+    
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   });
@@ -630,15 +631,6 @@
     }
   }
 
-  async function fetchCertificateDependencies() {
-    try {
-      const resDeps = await axiosClient.get('/certificate/getFormDependencies');
-      certificateStatuses = resDeps.data?.statuses ?? resDeps.data?.data?.statuses ?? [];
-    } catch (err: any) {
-      console.error('Failed to fetch certificate dependencies', err);
-      certificateStatuses = [];
-    }
-  }
   async function fetchCertificates() {
     if (!project?.id) return;
     loadingCertificates = true;
@@ -655,14 +647,22 @@
           per_page: certificatePerPage,
           sort_by: certificateSortBy,
           sort_dir: certificateSortDir,
-          date_sort_field: certificateDateSortField,
         },
       });
-      certificates = res.data?.data ?? [];
-      if (res.data?.barang_options) {
-        certificateBarangOptions = res.data.barang_options;
+
+      const root = res.data ?? {};
+      certificates = root.data ?? [];
+      
+      const formDeps = root.form_dependencies ?? {};
+      if (formDeps.barang_options) {
+        certificateBarangOptions = formDeps.barang_options;
       }
-      const pag = res.data?.pagination ?? {};
+      if (formDeps.statuses && !certificateDependenciesInitialized) {
+        certificateStatuses = formDeps.statuses;
+        certificateDependenciesInitialized = true;
+      }
+
+      const pag = root.meta ?? root.pagination ?? {};
       certificateCurrentPage = pag.current_page ?? 1;
       certificateLastPage = pag.last_page ?? 1;
       totalCertificates = pag.total ?? certificates.length;
@@ -693,8 +693,8 @@
   $: if (activeTab === 'activity' && project?.id && !activitiesInitialized) { activitiesInitialized = true; fetchActivities(); }
   $: if (activeTab === 'certificates' && project && !project.is_cert_projects) { activeTab = 'detail'; }
   $: if (activeTab === 'certificates' && project?.id && !certificatesInitialized) {
-    certificatesInitialized = true; fetchCertificates();
-    if (!certificateDependenciesInitialized) { certificateDependenciesInitialized = true; fetchCertificateDependencies(); }
+    certificatesInitialized = true; 
+    fetchCertificates();
   }
 
   // Certificate create/edit forms (multi-file)

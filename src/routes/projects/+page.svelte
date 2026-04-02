@@ -88,22 +88,31 @@
     try {
       const response = await axiosClient.get('/projects', {
         params: {
-          search,
-          status: statusFilter,
-          kategori: kategoriFilter,
-          is_cert_projects: certProjectFilter || undefined,
-          date_from: dateFromFilter,
-          date_to: dateToFilter,
+          search: search || undefined,
+          status: statusFilter || undefined,
+          kategori: kategoriFilter || undefined,
+          is_cert_projects: certProjectFilter ? 1 : undefined,
+          date_from: dateFromFilter || undefined,
+          date_to: dateToFilter || undefined,
           page: currentPage,
           per_page: perPage,
           sort_by: sortBy,
           sort_dir: sortDir,
         }
       });
-      projects = response.data.data;
-      currentPage = response.data.pagination.current_page;
-      lastPage = response.data.pagination.last_page;
-      totalProjects = response.data.pagination.total;
+      
+      const payload = response.data || {};
+      projects = payload.data || [];
+      const meta = payload.meta || payload.pagination || {};
+      currentPage = meta.current_page || payload.current_page || 1;
+      lastPage = meta.last_page || payload.last_page || 1;
+      totalProjects = meta.total || payload.total || projects.length;
+
+      if (payload.form_dependencies) {
+        customers = Array.isArray(payload.form_dependencies.customers) ? payload.form_dependencies.customers : [];
+        projectStatuses = Array.isArray(payload.form_dependencies.project_status_list) ? payload.form_dependencies.project_status_list : [];
+        projectKategoris = Array.isArray(payload.form_dependencies.project_kategori_list) ? payload.form_dependencies.project_kategori_list : [];
+      }
     } catch (err: any) {
       error = err.response?.data?.message || 'Gagal memuat project.';
       console.error('Error fetching projects:', err);
@@ -112,21 +121,8 @@
     }
   }
 
-  async function fetchFormDependencies() {
-    try {
-      const res = await axiosClient.get('/projects/getFormDependencies');
-
-      customers = Array.isArray(res.data?.customers) ? res.data.customers : [];
-      projectStatuses = Array.isArray(res.data?.project_status_list) ? res.data.project_status_list : [];
-      projectKategoris = Array.isArray(res.data?.project_kategori_list) ? res.data.project_kategori_list : [];
-    } catch (err) {
-      console.error('Failed to fetch project form dependencies:', err);
-    }
-  }
-
   onMount(() => {
     fetchProjects();
-    fetchFormDependencies();
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   });

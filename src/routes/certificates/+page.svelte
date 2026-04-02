@@ -113,17 +113,7 @@
   };
 
   // fetch dependencies for select options (projects and barang certificates)
-  async function fetchDependencies() {
-    try {
-      const res = await axiosClient.get('/certificate/getFormDependencies');
-      projects = res.data?.data?.projects ?? res.data?.projects ?? [];
-      barangCertificates = res.data?.data?.barang_certificates ?? res.data?.barang_certificates ?? [];
-      statuses = res.data?.data?.statuses ?? res.data?.statuses ?? [];
-      filteredBarangCertificates = [];
-    } catch (err) {
-      console.error('Failed to fetch dependencies', err);
-    }
-  }
+  // Dependencies are now fetched alongside the list via form_dependencies
 
   // fetch barang certificates by project for dependent select
   async function fetchBarangCertificatesByProject(projectId: number) {
@@ -168,10 +158,24 @@
           sort_dir: sortDir
         }
       });
-      items = res.data?.data ?? [];
-      currentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
-      lastPage = res.data?.pagination?.last_page ?? res.data?.last_page ?? 1;
-      totalItems = res.data?.pagination?.total ?? res.data?.total ?? items.length;
+      const root = res.data ?? {};
+      items = root.data ?? [];
+      
+      const formDeps = root.form_dependencies ?? {};
+      if (formDeps.projects && projects.length === 0) {
+        projects = formDeps.projects;
+      }
+      if (formDeps.barang_certificates && barangCertificates.length === 0) {
+        barangCertificates = formDeps.barang_certificates;
+      }
+      if (formDeps.statuses && statuses.length === 0) {
+        statuses = formDeps.statuses;
+      }
+
+      const pag = root.meta ?? root.pagination ?? {};
+      currentPage = pag.current_page ?? 1;
+      lastPage = pag.last_page ?? 1;
+      totalItems = pag.total ?? items.length;
     } catch (err: any) {
       error = err?.response?.data?.message || 'Gagal memuat data.';
     } finally {
@@ -181,7 +185,6 @@
 
   // mount lifecycle: fetch dependencies and list
   onMount(() => {
-    fetchDependencies();
     fetchList();
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);

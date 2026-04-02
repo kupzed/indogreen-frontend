@@ -116,23 +116,52 @@
   async function fetchActivities() {
     loading = true; error = '';
     try {
-      const response = await axiosClient.get('/activities', {
-        params: {
-          search,
-          jenis: jenisFilter,
-          kategori: kategoriFilter,
-          date_from: dateFromFilter,
-          date_to: dateToFilter,
-          page: currentPage,
-          per_page: perPage,
-          sort_by: sortBy,
-          sort_dir: sortDir
+      const filters = {
+        search,
+        jenis: jenisFilter,
+        kategori: kategoriFilter,
+        date_from: dateFromFilter,
+        date_to: dateToFilter,
+        page: currentPage,
+        per_page: perPage,
+        sort_by: sortBy,
+        sort_dir: sortDir
+      };
+
+      // Strip empty/null/undefined params dynamically
+      const cleanParams: Record<string, any> = {};
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          cleanParams[key] = value;
         }
       });
+
+      const response = await axiosClient.get('/activities', { params: cleanParams });
       activities = response.data.data;
-      currentPage = response.data.pagination.current_page;
-      lastPage = response.data.pagination.last_page;
-      totalActivities = response.data.pagination.total;
+      currentPage = response.data.meta?.current_page || 1;
+      lastPage = response.data.meta?.last_page || 1;
+      totalActivities = response.data.meta?.total || 0;
+
+      // Extract form dependencies from the same response (only load once or update lightly)
+      if (response.data.form_dependencies) {
+        const deps = response.data.form_dependencies;
+        projects = deps.projects || [];
+        vendors = deps.vendors || [];
+        customers = deps.customers || [];
+        activityKategoriList = Array.isArray(deps.kategori_list) ? deps.kategori_list : [];
+        activityJenisList = Array.isArray(deps.jenis_list) ? deps.jenis_list : [];
+
+        // assign mitra to projects based on vendors/customers
+        if (Array.isArray(projects)) {
+          const mitraMap = new Map<any, any>();
+          if (Array.isArray(vendors)) vendors.forEach((v: any) => mitraMap.set(v.id, v));
+          if (Array.isArray(customers)) customers.forEach((c: any) => mitraMap.set(c.id, c));
+          projects = projects.map((p: any) => ({
+            ...p,
+            mitra: p.mitra || (p.mitra_id ? mitraMap.get(p.mitra_id) : (p.customer_id ? mitraMap.get(p.customer_id) : undefined))
+          }));
+        }
+      }
     } catch (err: any) {
       error = err.response?.data?.message || 'Gagal memuat aktivitas.';
       console.error('Error fetching activities:', err);
@@ -141,47 +170,11 @@
     }
   }
 
-  // fetch dependencies for form (projects, vendors, customers)
-  async function fetchFormDependencies() {
-    try {
-      const response = await axiosClient.get('/activity/getFormDependencies');
-      projects = response.data.projects;
-      vendors = response.data.vendors;
-      activityKategoriList = Array.isArray(response.data?.kategori_list)
-        ? response.data.kategori_list
-        : [];
-      activityJenisList = Array.isArray(response.data?.jenis_list)
-        ? response.data.jenis_list
-        : [];
 
-      // fetch customers optionally
-      try {
-        const custResp = await axiosClient.get('/mitra/customers');
-        customers = Array.isArray(custResp.data?.data) ? custResp.data.data : [];
-      } catch (e) {
-        customers = [];
-        console.warn('Fetch customers failed (optional):', e);
-      }
-
-      // assign mitra to projects based on vendors/customers
-      if (Array.isArray(projects)) {
-        const mitraMap = new Map<any, any>();
-        if (Array.isArray(vendors)) vendors.forEach((v: any) => mitraMap.set(v.id, v));
-        if (Array.isArray(customers)) customers.forEach((c: any) => mitraMap.set(c.id, c));
-        projects = projects.map((p: any) => ({
-          ...p,
-          mitra: p.mitra || (p.mitra_id ? mitraMap.get(p.mitra_id) : (p.customer_id ? mitraMap.get(p.customer_id) : undefined))
-        }));
-      }
-    } catch (err) {
-      console.error('Failed to fetch form dependencies:', err);
-    }
-  }
 
   // lifecycle: fetch activities and dependencies on mount
   onMount(() => {
     fetchActivities();
-    fetchFormDependencies();
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   });
