@@ -35,12 +35,7 @@
 
   $: id = $page.params.id;
 
-  async function fetchDependencies() {
-    try {
-      const res = await axiosClient.get('/barang-certificate/getFormDependencies');
-      mitras = res.data?.data?.mitras ?? res.data?.mitras ?? [];
-    } catch (err) { /* ignore */ }
-  }
+
 
   async function fetchDetail() {
     loading = true;
@@ -48,6 +43,7 @@
     try {
       const res = await axiosClient.get(`/barang-certificates/${id}`);
       item = res.data?.data ?? res.data;
+      mitras = res.data?.form_dependencies?.mitras ?? mitras;
     } catch (err: any) {
       error = err.response?.data?.message || 'Gagal memuat detail.';
     } finally {
@@ -56,7 +52,6 @@
   }
 
   onMount(() => {
-    fetchDependencies();
     fetchDetail();
   });
 

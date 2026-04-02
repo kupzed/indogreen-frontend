@@ -61,7 +61,7 @@
     kontak_2_jabatan: '',
   };
 
-  const mitraKategoriOptions = ['pribadi', 'perusahaan', 'customer', 'vendor'];
+  let mitraKategoriOptions: Array<{value: string, label: string}> = [];
 
   // Permissions
   let canCreateMitra = false;
@@ -92,9 +92,15 @@
         }
       });
       mitras = response.data.data;
-      currentPage = response.data.pagination.current_page;
-      lastPage = response.data.pagination.last_page;
-      totalMitras = response.data.pagination.total;
+      
+      const meta = response.data.meta || response.data.pagination || response.data;
+      currentPage = meta.current_page ?? 1;
+      lastPage = meta.last_page ?? 1;
+      totalMitras = meta.total ?? 0;
+
+      if (response.data.form_dependencies?.kategori_options) {
+        mitraKategoriOptions = response.data.form_dependencies.kategori_options;
+      }
     } catch (err: any) {
       error = err.response?.data?.message || 'Gagal memuat mitra.';
       console.error('Error fetching mitras:', err);
@@ -316,8 +322,8 @@
              dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
     >
       <option value="">Kategori: Semua</option>
-      {#each mitraKategoriOptions as kategori}
-        <option value={kategori}>{kategori.charAt(0).toUpperCase() + kategori.slice(1)}</option>
+      {#each mitraKategoriOptions as kategori (kategori.value)}
+        <option value={kategori.value}>{kategori.label}</option>
       {/each}
     </select>
   </div>

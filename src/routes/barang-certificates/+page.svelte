@@ -79,15 +79,6 @@
     mitra_id: ''
   };
 
-  async function fetchDependencies() {
-    try {
-      const res = await axiosClient.get('/barang-certificate/getFormDependencies');
-      mitras = res.data?.data?.mitras ?? res.data?.mitras ?? [];
-    } catch (err) {
-      console.error('Failed to fetch dependencies', err);
-    }
-  }
-
   async function fetchList() {
     loading = true;
     error = '';
@@ -103,9 +94,10 @@
         }
       });
       items = res.data?.data ?? [];
-      currentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
-      lastPage = res.data?.pagination?.last_page ?? res.data?.last_page ?? 1;
-      totalItems = res.data?.pagination?.total ?? res.data?.total ?? items.length;
+      mitras = res.data?.form_dependencies?.mitras ?? mitras;
+      currentPage = res.data?.meta?.current_page ?? res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
+      lastPage = res.data?.meta?.last_page ?? res.data?.pagination?.last_page ?? res.data?.last_page ?? 1;
+      totalItems = res.data?.meta?.total ?? res.data?.pagination?.total ?? res.data?.total ?? items.length;
     } catch (err: any) {
       error = err?.response?.data?.message || 'Gagal memuat data.';
     } finally {
@@ -114,7 +106,6 @@
   }
 
   onMount(() => {
-    fetchDependencies();
     fetchList();
   });
 

@@ -134,7 +134,10 @@
   }
 
   onMount(() => {
+    mitraId = $page.params.id;
     fetchMitraDetails();
+    fetchBarangCertificates();
+    bcInitialized = true;
   });
 
   function openEditModal() {
@@ -202,17 +205,17 @@
 
   // ===== Barang Certificates handlers =====
   async function fetchBarangCertificates() {
-    if (!mitra?.id) return;
+    if (!mitraId) return;
     bcLoading = true;
     bcError = '';
     try {
       const res = await axiosClient.get('/barang-certificates', {
-        params: { search: bcSearch, mitra_id: mitra.id, page: bcCurrentPage, per_page: perPage, sort_by: bcSortBy, sort_dir: bcSortDir }
+        params: { search: bcSearch, mitra_id: mitraId, page: bcCurrentPage, per_page: perPage, sort_by: bcSortBy, sort_dir: bcSortDir }
       });
       bcItems = res.data?.data ?? [];
-      bcCurrentPage = res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
-      bcLastPage = res.data?.pagination?.last_page ?? res.data?.last_page ?? 1;
-      bcTotalItems = res.data?.pagination?.total ?? res.data?.total ?? bcItems.length;
+      bcCurrentPage = res.data?.meta?.current_page ?? res.data?.pagination?.current_page ?? res.data?.current_page ?? 1;
+      bcLastPage = res.data?.meta?.last_page ?? res.data?.pagination?.last_page ?? res.data?.last_page ?? 1;
+      bcTotalItems = res.data?.meta?.total ?? res.data?.pagination?.total ?? res.data?.total ?? bcItems.length;
     } catch (err: any) {
       bcError = err?.response?.data?.message || 'Gagal memuat data.';
       console.error('Error fetching barang certificates:', err?.response || err);
@@ -309,7 +312,7 @@
     }
   }
 
-  $: if (activeTab === 'barang' && mitra?.id && !bcInitialized) {
+  $: if (activeTab === 'barang' && !bcInitialized) {
     bcInitialized = true;
     fetchBarangCertificates();
   }
