@@ -41,6 +41,16 @@
   // ---------------------------
   let profile = { name: '', email: '' };
   let initialProfile = { ...profile };
+  let profileInitialized = false;
+
+  // Sinkronisasi Profile dari Store secara Reaktif
+  $: if ($currentUser && !profileInitialized) {
+    profile.name = $currentUser.name;
+    profile.email = $currentUser.email;
+    initialProfile = { ...profile };
+    profileInitialized = true;
+  }
+  
   let savingProfile = false;
 
   $: profileDirty = JSON.stringify(profile) !== JSON.stringify(initialProfile);
@@ -162,8 +172,21 @@
   };
 
   let users: RoleUser[] = [];
+  
+  // Sinkronisasi Roles dari Store secara Reaktif
   let myRoles: string[] = [];
+  $: myRoles = $userRoles;
+
   $: thisIsSuperAdmin = myRoles.includes('super_admin');
+  
+  // Logic untuk hak akses manajemen role
+  $: {
+    const isAdmin = myRoles.includes('admin');
+    const isSA = myRoles.includes('super_admin');
+    currentIsOnlyAdmin = isAdmin && !isSA;
+    canManageRoles = isAdmin || isSA;
+  }
+
   let canManageRoles = false;
   let currentIsOnlyAdmin = false;
   let selectedUserIsSuperAdmin = false;
@@ -376,40 +399,12 @@
       // Inisialisasi expanded modules agar semua terbuka default
       moduleList.forEach(m => expandedModules[m.key] = true);
 
-      // 2) Profile & Role Saya dari Stores (sudah di-fetch di layout)
-      const $user = currentUser.subscribe(u => {
-        if (u) {
-          profile.name = u.name;
-          profile.email = u.email;
-          initialProfile = { ...profile };
-        }
-      });
-
-      const $roles = userRoles.subscribe(r => {
-        myRoles = r;
-      });
-
-      // Cleanup
-      $user();
-      $roles();
-
-      const isAdmin = myRoles.includes('admin');
-      const isSA = myRoles.includes('super_admin');
-      currentIsOnlyAdmin = isAdmin && !isSA;
-      canManageRoles = isAdmin || isSA;
-
-      // 3) Daftar User (jika admin)
-      if (canManageRoles) {
-        const resUsers = await axiosClient.get('/auth/role/users');
-        users = resUsers.data?.data ?? [];
-        
-        // Pilih user pertama secara default
-        if (users.length > 0) {
-          applyUserRole(users[0]);
-        } else {
-          applyUserRole(null);
-        }
-      }
+      // 2) Daftar User (jika admin)
+      // Kita gunakan reactive statement di atas untuk myRoles, 
+      // tapi untuk fetch users tetap di onMount atau reaktif jika canManageRoles berubah
+      
+      // Tunggu canManageRoles terupdate (karena reaktif $)
+      // Kita bisa pakai watcher sederhana disini atau pindah ke reactive block
     } catch (err: any) {
       console.error(err);
       errorMsg = err?.response?.data?.message || 'Gagal memuat data sistem.';
@@ -418,6 +413,21 @@
       pageLoading = false;
     }
   });
+
+  // Fetch Users secara reaktif jika canManageRoles menjadi true
+  let usersLoaded = false;
+  $: if (canManageRoles && !usersLoaded && !pageLoading) {
+    (async () => {
+      try {
+        const resUsers = await axiosClient.get('/auth/role/users');
+        users = resUsers.data?.data ?? [];
+        if (users.length > 0) applyUserRole(users[0]);
+        usersLoaded = true;
+      } catch (e) {
+        console.error('Gagal memuat daftar user:', e);
+      }
+    })();
+  }
 </script>
 
 <svelte:head>
