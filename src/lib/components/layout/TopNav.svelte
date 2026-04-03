@@ -2,26 +2,14 @@
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import { fade } from 'svelte/transition';
   import { goto } from '$app/navigation';
-  import axiosClient from '$lib/axiosClient';
   import { theme, toggleTheme } from '$lib/stores/theme';
-  import { currentUser, setUser } from '$lib/stores/user';
-  import { get } from 'svelte/store';
+  import { currentUser } from '$lib/stores/user';
 
   const dispatch = createEventDispatcher();
 
   let showUserDropdown = false;
 
-  // Ambil user jika store belum ada (misalnya refresh di halaman lain)
-  onMount(async () => {
-    if (!get(currentUser)) {
-      try {
-        const { data } = await axiosClient.post('/auth/me');
-        setUser({ name: data?.name ?? '', email: data?.email ?? '' });
-      } catch (e) {
-        // kalau gagal ya sudah, biarkan kosong
-        console.debug('TopNav: gagal memuat user', e);
-      }
-    }
+  onMount(() => {
     document.addEventListener('click', handleClickOutside);
   });
 

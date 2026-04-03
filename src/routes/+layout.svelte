@@ -6,6 +6,7 @@
   import { onMount } from 'svelte';
   import { theme } from '$lib/stores/theme';
   import { setPermissions, setRoles } from '$lib/stores/permissions';
+  import { setUser } from '$lib/stores/user';
 
   onMount(() => {
     // Berlangganan tanpa menggunakan nilainya; ini memastikan efek samping dijalankan
@@ -43,14 +44,21 @@
   onMount(async () => {
     if (!browser) return;
     try {
-      const res = await axiosClient.get('/auth/role/me');
+      const res = await axiosClient.get('/auth/me');
       if (res.status === 200) {
-        const data = await res.data;
+        const data = res.data?.data ?? res.data;
+        // Update user info
+        setUser({
+          id: data.id,
+          name: data.name,
+          email: data.email
+        });
+        // Update roles & permissions
         setRoles(data.roles ?? []);
         setPermissions(data.permissions ?? []);
       }
     } catch (err) {
-      console.error('Failed to fetch user roles/permissions:', err);
+      console.error('Failed to fetch user data:', err);
     }
   });
 

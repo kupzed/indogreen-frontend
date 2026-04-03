@@ -2,7 +2,8 @@
   import { onMount } from 'svelte';
   import Swal from 'sweetalert2';
   import axiosClient from '$lib/axiosClient';
-  import { setUser, patchUser } from '$lib/stores/user';
+  import { userRoles } from '$lib/stores/permissions';
+  import { currentUser, setUser, patchUser } from '$lib/stores/user';
 
   // ---------------------------
   // Global UI
@@ -367,34 +368,37 @@
     pageLoading = true;
     errorMsg = '';
     try {
-      // Fetch data secara parallel agar lebih cepat
-      const [configRes, meRes, myRoleRes] = await Promise.all([
-         axiosClient.get('/auth/role/config'),
-         axiosClient.post('/auth/me'),
-         axiosClient.get('/auth/role/me')
-      ]);
-
       // 1) Set Config dari Backend
+      const configRes = await axiosClient.get('/auth/role/config');
       moduleList = configRes.data?.modules ?? [];
       actionList = configRes.data?.actions ?? [];
 
       // Inisialisasi expanded modules agar semua terbuka default
       moduleList.forEach(m => expandedModules[m.key] = true);
 
-      // 2) Profile Saya
-      profile.name = meRes.data?.name ?? '';
-      profile.email = meRes.data?.email ?? '';
-      initialProfile = { ...profile };
-      setUser({ name: profile.name, email: profile.email });
+      // 2) Profile & Role Saya dari Stores (sudah di-fetch di layout)
+      const $user = currentUser.subscribe(u => {
+        if (u) {
+          profile.name = u.name;
+          profile.email = u.email;
+          initialProfile = { ...profile };
+        }
+      });
 
-      // 3) Role Saya
-      myRoles = myRoleRes.data?.roles ?? [];
+      const $roles = userRoles.subscribe(r => {
+        myRoles = r;
+      });
+
+      // Cleanup
+      $user();
+      $roles();
+
       const isAdmin = myRoles.includes('admin');
       const isSA = myRoles.includes('super_admin');
       currentIsOnlyAdmin = isAdmin && !isSA;
       canManageRoles = isAdmin || isSA;
 
-      // 4) Daftar User (jika admin)
+      // 3) Daftar User (jika admin)
       if (canManageRoles) {
         const resUsers = await axiosClient.get('/auth/role/users');
         users = resUsers.data?.data ?? [];
