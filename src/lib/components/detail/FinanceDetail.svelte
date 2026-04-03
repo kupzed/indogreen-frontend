@@ -78,8 +78,8 @@
   let lastActivityId: number | null = null;
   let showValueEditor = false;
 
-  $: activity = item?.activity ?? null;
-  $: attachments = normalizeAttachments(activity?.attachments ?? activity?.attachment);
+  $: activity = item;
+  $: attachments = normalizeAttachments(activity?.attachments);
 
   $: if (activity?.id && activity.id !== lastActivityId) {
     lastActivityId = activity.id;
@@ -100,14 +100,14 @@
     successMessage = '';
     try {
       const payload = { value: Number(valueInput) || 0 };
-      const { data } = await axiosClient.patch(`/finance/${activity.id}/value`, payload);
+      const { data } = await axiosClient.put(`/finance/${activity.id}`, payload);
       successMessage = 'Nilai berhasil diperbarui';
       valueInput = Number(data.data.value ?? payload.value);
       dispatch('saved', {
         activityId: activity.id,
         value: data.data.value,
         value_formatted: data.meta?.value_formatted,
-        activity: data.data
+        item: data.data
       });
     } catch (err: any) {
       errorMessage = err?.response?.data?.message ?? 'Gagal memperbarui nilai';
@@ -127,7 +127,7 @@
             <p class="font-semibold text-gray-900 dark:text-white">{activity.kategori}</p>
           </div>
           <span class="rounded-full bg-gray-900/5 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-white/10 dark:text-gray-200">
-            {item?.activity_date}
+            {activity.activity_date}
           </span>
         </div>
         <p class="text-lg font-semibold text-emerald-600 dark:text-emerald-400">{activity.name}</p>
@@ -161,7 +161,7 @@
         {#if showValueEditor}
           <div class="flex flex-col gap-3">
             <label class="text-sm font-medium text-gray-700 dark:text-gray-200" for="value-input">
-              Nilai Activity (IDR)
+              (IDR)
             </label>
             <div class="flex flex-col gap-3 sm:flex-row">
               <input
@@ -238,7 +238,7 @@
       <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-300">Lampiran</h3>
         {#if attachments.length}
           <ul role="list" class="divide-y divide-gray-100 dark:divide-white/5 rounded-md border border-gray-200/80 dark:border-white/20">
-            {#each attachments as file}
+            {#each attachments as file (file.url)}
               <li class="py-4 pr-5 pl-4">
                 <div class="flex items-start gap-3">
                   <!-- Icon -->

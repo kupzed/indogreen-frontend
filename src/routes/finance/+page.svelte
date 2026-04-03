@@ -40,12 +40,14 @@
     loading = true;
     error = '';
     try {
-      let endpoint = '/finance/monthly-report';
-      let params: Record<string, any> = { month: selectedMonth, year: selectedYear };
+      let endpoint = '/finance';
+      let params: Record<string, any> = { 
+        type: reportMode,
+        month: selectedMonth, 
+        year: selectedYear 
+      };
 
       if (reportMode === 'project') {
-        endpoint = '/finance/project-report';
-
         const normalizedProjectId =
           typeof selectedProjectId === 'number'
             ? selectedProjectId
@@ -53,6 +55,7 @@
 
         if (!normalizedProjectId) {
           error = 'Silakan pilih project terlebih dahulu.';
+          loading = false;
           return;
         }
 
@@ -61,11 +64,13 @@
           const end = new Date(projectEndDate);
           if (start > end) {
             error = 'Tanggal mulai tidak boleh lebih besar dari tanggal selesai.';
+            loading = false;
             return;
           }
         }
 
         params = {
+          type: 'project',
           project_id: normalizedProjectId,
           start_date: projectStartDate || undefined,
           end_date: projectEndDate || undefined
@@ -140,15 +145,14 @@
     if (!activityId) return;
 
     reportData = reportData.map((row) => {
-      if (row?.activity?.id === activityId) {
+      if (row?.id === activityId) {
         const nextValue = Number(detail.value ?? row.value ?? 0);
-        const updated = {
+        return {
           ...row,
+          ...detail.item, // Update with data from new FinanceResource
           value: nextValue,
-          value_formatted: detail.value_formatted ?? formatRupiah(nextValue),
-          activity: detail.activity ?? row.activity
+          value_formatted: detail.value_formatted ?? formatRupiah(nextValue)
         };
-        return updated;
       }
       return row;
     });
@@ -224,7 +228,7 @@
           on:change={fetchReport} 
           class="h-10 w-full sm:w-40 px-2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
         >
-          {#each months as m}
+          {#each months as m (m.val)}
             <option value={m.val}>{m.label}</option>
           {/each}
         </select>
@@ -234,7 +238,7 @@
           on:change={fetchReport} 
           class="h-10 w-full sm:w-28 px-2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
         >
-          {#each years as y}
+          {#each years as y (y)}
             <option value={y}>{y}</option>
           {/each}
         </select>
@@ -246,7 +250,7 @@
           class="h-10 w-full sm:w-48 px-2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-neutral-900 text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-emerald-500"
         >
           <option value="">Pilih Project</option>
-          {#each projects as project}
+          {#each projects as project (project.id)}
             <option value={project.id}>{project.name}</option>
           {/each}
         </select>
@@ -314,7 +318,7 @@
           {:else if reportData.length === 0}
             <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 italic">Tidak ada data keuangan pada periode ini.</td></tr>
           {:else}
-            {#each reportData as item, i}
+            {#each reportData as item, i (item.id)}
               <tr class="hover:bg-gray-50 dark:hover:bg-neutral-950 transition-colors">
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
                   {i + 1}
@@ -339,14 +343,14 @@
                       }
                     }}
                   >
-                    {item.activity_name}
+                    {item.name}
                   </button>
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
-                  {item.project_name}
+                  {item.project?.name || '-'}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-right font-bold text-gray-800 dark:text-white font-mono">
-                  {formatRupiah(item.value)}
+                  {item.value_formatted}
                 </td>
               </tr>
               {/each}
@@ -357,6 +361,6 @@
   </div>
 </div>
 
-<Drawer bind:show={showDetailDrawer} title="Detail Dokumen Keuangan" on:close={() => (showDetailDrawer = false)}>
+<Drawer bind:show={showDetailDrawer} title="Detail Dokumen Keuangan" on:close={closeFinanceDetailDrawer}>
   <FinanceDetail item={selectedFinanceItem} on:saved={handleFinanceValueSaved} />
 </Drawer>
