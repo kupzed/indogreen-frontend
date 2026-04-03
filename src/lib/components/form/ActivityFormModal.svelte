@@ -1,6 +1,7 @@
 <script lang="ts">
   import Modal from '$lib/components/Modal.svelte';
   import FileAttachment from '$lib/components/FileAttachment.svelte';
+  import axiosClient from '$lib/axiosClient';
 
   export let show: boolean = false;
   export let title: string = 'Form Aktivitas';
@@ -80,20 +81,160 @@
     try { await onSubmit?.(); }
     finally { isSubmitting = false; }
   }
+
+  // ─── AI Auto-Fill State ───────────────────────────────────────────
+  let isExtracting = false;
+  let aiFileInput: HTMLInputElement;
+  let toastMessage = '';
+  let toastType: 'success' | 'error' = 'success';
+  let toastVisible = false;
+  let toastTimer: ReturnType<typeof setTimeout>;
+
+  function showToast(message: string, type: 'success' | 'error' = 'success') {
+    clearTimeout(toastTimer);
+    toastMessage = message;
+    toastType = type;
+    toastVisible = true;
+    toastTimer = setTimeout(() => { toastVisible = false; }, 5000);
+  }
+
+  function triggerAIFileInput() {
+    aiFileInput?.click();
+  }
+
+  async function handleAIAutoFill(file: File) {
+    if (!file) return;
+    isExtracting = true;
+
+    try {
+      const formData = new FormData();
+      formData.append('document', file);
+
+      const response = await axiosClient.post('/activities/extract-document', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      const extracted = response.data?.data;
+      if (!extracted) throw new Error('Respons AI tidak valid.');
+
+      // ─── Map AI response → form fields ───────────────────────────
+      if (extracted.name)          form.name          = extracted.name;
+      if (extracted.short_desc)    form.short_desc    = extracted.short_desc.slice(0, MAX_SHORT_DESC);
+      if (extracted.description)   form.description   = extracted.description;
+      if (extracted.kategori)      form.kategori      = extracted.kategori;
+      if (extracted.jenis)         form.jenis         = extracted.jenis;
+      if (extracted.value != null) form.value         = Number(extracted.value);
+      if (extracted.activity_date) form.activity_date = extracted.activity_date;
+      if (extracted.from != null)  form.from          = extracted.from;
+      if (extracted.to != null)    form.to            = extracted.to;
+
+      form = form;
+
+      showToast('✅ Ekstraksi berhasil, silakan periksa kembali data sebelum menyimpan.', 'success');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Ekstraksi gagal. Pastikan file jelas dan coba lagi.';
+      showToast(`❌ ${message}`, 'error');
+    } finally {
+      isExtracting = false;
+      // Reset the hidden input so the same file can be re-selected if needed
+      if (aiFileInput) aiFileInput.value = '';
+    }
+  }
+
+  function onAIFileChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (file) handleAIAutoFill(file);
+  }
 </script>
+
+<!-- Hidden file input for AI extraction (separate from the main attachment uploader) -->
+<input
+  bind:this={aiFileInput}
+  type="file"
+  accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt"
+  class="hidden"
+  on:change={onAIFileChange}
+  aria-hidden="true"
+  tabindex="-1"
+  id="{idPrefix}_ai_file_input"
+/>
+
+<!-- ─── Toast Notification ─────────────────────────────────────────── -->
+{#if toastVisible}
+  <div
+    role="alert"
+    aria-live="polite"
+    class="fixed bottom-5 right-5 z-[9999] max-w-sm rounded-xl px-5 py-3.5 shadow-2xl text-sm font-medium transition-all duration-300
+      {toastType === 'success'
+        ? 'bg-emerald-600 text-white'
+        : 'bg-red-600 text-white'}"
+  >
+    {toastMessage}
+    <button
+      type="button"
+      class="ml-3 opacity-70 hover:opacity-100 font-bold"
+      on:click={() => { toastVisible = false; }}
+      aria-label="Tutup notifikasi"
+    >&times;</button>
+  </div>
+{/if}
 
 <Modal bind:show={show} {title} maxWidth="max-w-xl">
   {#if form.project_id}
     <h1 class="text-center text-base font-bold tracking-tight text-gray-900 dark:text-white">
       Project : {selectedProject?.name}
     </h1>
-    <h1 class="text-center text-base font-bold tracking-tight text-gray-900 dark:text-white mb-6">
+    <h1 class="text-center text-base font-bold tracking-tight text-gray-900 dark:text-white mb-4">
       Customer : {selectedProject?.mitra?.nama}
     </h1>
   {/if}
 
+  <!-- ─── Auto-Fill via AI Button ──────────────────────────────────── -->
+  <div class="mb-5 flex items-center justify-center">
+    <button
+      type="button"
+      id="{idPrefix}_ai_autofill_btn"
+      on:click={triggerAIFileInput}
+      disabled={isExtracting || isSubmitting}
+      aria-busy={isExtracting}
+      class="group relative inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200
+        bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md
+        hover:from-violet-500 hover:to-indigo-500 hover:shadow-violet-500/30 hover:shadow-lg hover:-translate-y-0.5
+        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600
+        disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none"
+    >
+      {#if isExtracting}
+        <!-- Spinner -->
+        <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25" stroke-width="4"></circle>
+          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"></path>
+        </svg>
+        <span>Mengekstrak dokumen...</span>
+      {:else}
+        <!-- Magic wand icon -->
+        <svg class="h-4 w-4 transition-transform duration-200 group-hover:rotate-12" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
+        </svg>
+        <span>Auto-Fill with AI</span>
+      {/if}
+    </button>
+  </div>
+
+  {#if isExtracting}
+    <!-- Overlay hint while extracting -->
+    <div class="mb-4 flex items-center gap-2 rounded-lg bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700 px-4 py-2.5 text-sm text-violet-700 dark:text-violet-300">
+      <svg class="h-4 w-4 animate-pulse shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+      </svg>
+      <span>AI sedang menganalisis dokumen Anda. Ini mungkin memerlukan beberapa detik...</span>
+    </div>
+  {/if}
+
   <form on:submit|preventDefault={handleSubmit} autocomplete="off">
-    <fieldset disabled={isSubmitting} class="space-y-4">
+    <fieldset disabled={isSubmitting || isExtracting} class="space-y-4">
       <div>
         <label for="{idPrefix}_name" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Nama Aktivitas</label>
         <div class="mt-2">
@@ -319,7 +460,7 @@
     </fieldset>
 
     <div class="mt-6">
-      <button type="submit" class="flex w-full justify-center items-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed" disabled={isSubmitting} aria-busy={isSubmitting}>
+      <button type="submit" class="flex w-full justify-center items-center gap-2 rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-60 disabled:cursor-not-allowed" disabled={isSubmitting || isExtracting} aria-busy={isSubmitting}>
         {#if isSubmitting}
           <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-opacity="0.25" stroke-width="4"></circle><path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4"></path></svg>
           <span>Menyimpan...</span>
