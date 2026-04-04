@@ -108,9 +108,13 @@
 
     try {
       const formData = new FormData();
+      formData.append('action', 'extract');
       formData.append('document', file);
+      if (form.project_id) {
+        formData.append('project_id', String(form.project_id));
+      }
 
-      const response = await axiosClient.post('/activities/extract-document', formData, {
+      const response = await axiosClient.post('/activities', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
