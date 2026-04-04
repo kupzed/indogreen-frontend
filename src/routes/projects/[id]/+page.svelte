@@ -195,15 +195,13 @@
       const payload = response.data?.data ?? {};
       project = payload.project ?? payload;
       
-      if (response.data?.form_dependencies) {
-        projectStatuses = Array.isArray(response.data.form_dependencies.project_status_list) ? response.data.form_dependencies.project_status_list : [];
-        projectKategoris = Array.isArray(response.data.form_dependencies.project_kategori_list) ? response.data.form_dependencies.project_kategori_list : [];
+      const deps = response.data?.form_dependencies;
+      if (deps) {
+        projectStatuses = Array.isArray(deps.project_status_list) ? deps.project_status_list : [];
+        projectKategoris = Array.isArray(deps.project_kategori_list) ? deps.project_kategori_list : [];
         if (!customers?.length) {
-          customers = Array.isArray(response.data.form_dependencies.customers) ? response.data.form_dependencies.customers : [];
+          customers = Array.isArray(deps.customers) ? deps.customers : [];
         }
-      } else {
-        projectStatuses = Array.isArray(payload.project_status_list) ? payload.project_status_list : [];
-        projectKategoris = Array.isArray(payload.project_kategori_list) ? payload.project_kategori_list : [];
       }
       editProjectForm = {
         name: project.name,

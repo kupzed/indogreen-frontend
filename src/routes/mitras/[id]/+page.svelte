@@ -39,7 +39,7 @@
 
   let editingMitra: any = true;
 
-  const mitraKategoriOptions = ['Pribadi', 'Perusahaan', 'Customer', 'Vendor'];
+  let mitraKategoriOptions: Array<{value: string, label: string}> = [];
 
   // Permissions
   let canUpdateMitra = false;
@@ -125,6 +125,9 @@
       const response = await axiosClient.get(`/mitras/${mitraId}`);
       mitra = response.data.data;
       form = { ...mitra };
+      if (response.data.form_dependencies?.kategori_options) {
+        mitraKategoriOptions = response.data.form_dependencies.kategori_options;
+      }
     } catch (err: any) {
       errorMitra = err.response?.data?.message || 'Gagal memuat detail mitra.';
       console.error('Error fetching mitra details:', err.response || err);

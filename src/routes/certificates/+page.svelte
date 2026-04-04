@@ -161,16 +161,11 @@
       const root = res.data ?? {};
       items = root.data ?? [];
       
-      const formDeps = root.form_dependencies ?? {};
-      if (formDeps.projects && projects.length === 0) {
-        projects = formDeps.projects;
-      }
-      if (formDeps.barang_certificates && barangCertificates.length === 0) {
-        barangCertificates = formDeps.barang_certificates;
-      }
-      if (formDeps.statuses && statuses.length === 0) {
-        statuses = formDeps.statuses;
-      }
+      const formDeps = root.form_dependencies ?? root.meta?.form_dependencies ?? {};
+      if (formDeps.projects) projects = formDeps.projects;
+      if (formDeps.barang_certificates) barangCertificates = formDeps.barang_certificates;
+      if (formDeps.statuses) statuses = formDeps.statuses;
+      if (formDeps.barang_options) filteredBarangCertificates = formDeps.barang_options;
 
       const pag = root.meta ?? root.pagination ?? {};
       currentPage = pag.current_page ?? 1;
