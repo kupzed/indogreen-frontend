@@ -3,7 +3,7 @@
   import Swal from 'sweetalert2';
   import axiosClient from '$lib/axiosClient';
   import { userRoles } from '$lib/stores/permissions';
-  import { currentUser, setUser, patchUser } from '$lib/stores/user';
+  import { currentUser, patchUser } from '$lib/stores/user';
 
   // ---------------------------
   // Global UI
@@ -144,12 +144,13 @@
   const ROLE_ENDPOINT = '/auth/role';
 
   // Tipe data untuk struktur config dari backend
-  type ModuleConfig = { key: string; label: string };
   type ActionConfig = { key: string; label: string };
+  type ModuleConfig = { key: string; label: string; actions?: ActionConfig[] };
 
   // Variable state untuk menyimpan config
   let moduleList: ModuleConfig[] = [];
   let actionList: ActionConfig[] = [];
+  let roleList: { key: string; label: string }[] = [];
   
   // State untuk expand/collapse modul di UI
   let expandedModules: Record<string, boolean> = {};
@@ -174,12 +175,9 @@
   let users: RoleUser[] = [];
   
   // Sinkronisasi Roles dari Store secara Reaktif
-  let myRoles: string[] = [];
   $: myRoles = $userRoles;
 
-  $: thisIsSuperAdmin = myRoles.includes('super_admin');
-  
-  // Logic untuk hak akses manajemen role
+  // Logic untuk hak akses manajemen role secara reaktif
   $: {
     const isAdmin = myRoles.includes('admin');
     const isSA = myRoles.includes('super_admin');
@@ -215,7 +213,8 @@
 
     for (const m of moduleList) {
       mods[m.key] = {};
-      for (const a of actionList) {
+      const actions = m.actions ?? actionList;
+      for (const a of actions) {
         mods[m.key][a.key] = false;
       }
     }
@@ -245,10 +244,11 @@
 
     // Map permissions string ("project-view") ke struktur object
     for (const m of moduleList) {
-      for (const a of actionList) {
+      const actions = m.actions ?? actionList;
+      for (const a of actions) {
         const permName = `${m.key}-${a.key}`;
         if (modules[m.key]) {
-             modules[m.key][a.key] = perms.includes(permName);
+            modules[m.key][a.key] = perms.includes(permName);
         }
       }
     }
@@ -276,7 +276,8 @@
       const modState = r.modules[m.key];
       if (!modState) continue;
       
-      for (const a of actionList) {
+      const actions = m.actions ?? actionList;
+      for (const a of actions) {
         permissions[`${m.key}-${a.key}`] = modState[a.key];
       }
     }
@@ -288,7 +289,10 @@
     const updatedModule = { ...role.modules[moduleKey] };
     
     // Set semua action menjadi checked/unchecked
-    for (const a of actionList) {
+    const modConfig = moduleList.find(m => m.key === moduleKey);
+    const actions = modConfig?.actions ?? actionList;
+
+    for (const a of actions) {
         updatedModule[a.key] = checked;
     }
 
@@ -318,14 +322,18 @@
   function moduleAllChecked(moduleKey: string): boolean {
     const mod = role.modules[moduleKey];
     if (!mod) return false;
-    return actionList.every((a) => mod[a.key]);
+    const modConfig = moduleList.find(m => m.key === moduleKey);
+    const actions = modConfig?.actions ?? actionList;
+    return actions.every((a) => mod[a.key]);
   }
 
   function moduleSomeChecked(moduleKey: string): boolean {
     const mod = role.modules[moduleKey];
     if (!mod) return false;
-    const any = actionList.some((a) => mod[a.key]);
-    const all = actionList.every((a) => mod[a.key]);
+    const modConfig = moduleList.find(m => m.key === moduleKey);
+    const actions = modConfig?.actions ?? actionList;
+    const any = actions.some((a) => mod[a.key]);
+    const all = actions.every((a) => mod[a.key]);
     return any && !all;
   }
 
@@ -391,20 +399,7 @@
     pageLoading = true;
     errorMsg = '';
     try {
-      // 1) Set Config dari Backend
-      const configRes = await axiosClient.get('/auth/role/config');
-      moduleList = configRes.data?.modules ?? [];
-      actionList = configRes.data?.actions ?? [];
-
-      // Inisialisasi expanded modules agar semua terbuka default
-      moduleList.forEach(m => expandedModules[m.key] = true);
-
-      // 2) Daftar User (jika admin)
-      // Kita gunakan reactive statement di atas untuk myRoles, 
-      // tapi untuk fetch users tetap di onMount atau reaktif jika canManageRoles berubah
-      
-      // Tunggu canManageRoles terupdate (karena reaktif $)
-      // Kita bisa pakai watcher sederhana disini atau pindah ke reactive block
+      // Data profile dan password tetap di-bootstrap di sini
     } catch (err: any) {
       console.error(err);
       errorMsg = err?.response?.data?.message || 'Gagal memuat data sistem.';
@@ -414,17 +409,35 @@
     }
   });
 
-  // Fetch Users secara reaktif jika canManageRoles menjadi true
+  // Fetch Config & Users secara reaktif jika canManageRoles menjadi true
   let usersLoaded = false;
-  $: if (canManageRoles && !usersLoaded && !pageLoading) {
+  let configLoaded = false;
+  $: if (canManageRoles && !pageLoading) {
     (async () => {
-      try {
-        const resUsers = await axiosClient.get('/auth/role/users');
-        users = resUsers.data?.data ?? [];
-        if (users.length > 0) applyUserRole(users[0]);
-        usersLoaded = true;
-      } catch (e) {
-        console.error('Gagal memuat daftar user:', e);
+      // 1. Fetch Config Jika Belum
+      if (!configLoaded) {
+        try {
+          const configRes = await axiosClient.get('/auth/role/config');
+          roleList = configRes.data?.roles ?? [];
+          moduleList = configRes.data?.modules ?? [];
+          actionList = configRes.data?.actions ?? [];
+          moduleList.forEach(m => expandedModules[m.key] = true);
+          configLoaded = true;
+        } catch (e) {
+          console.error('Gagal memuat config role:', e);
+        }
+      }
+
+      // 2. Fetch Users Jika Belum (Hanya setelah config ready)
+      if (configLoaded && !usersLoaded) {
+        try {
+          const resUsers = await axiosClient.get('/auth/role/users');
+          users = resUsers.data?.data ?? [];
+          if (users.length > 0) applyUserRole(users[0]);
+          usersLoaded = true;
+        } catch (e) {
+          console.error('Gagal memuat daftar user:', e);
+        }
       }
     })();
   }
@@ -756,7 +769,7 @@
                   {#if !users.length}
                     <option value="">Tidak ada user lain</option>
                   {:else}
-                    {#each users as u}
+                    {#each users as u (u.id)}
                       <option value={String(u.id)}>{u.name} ({u.email})</option>
                     {/each}
                   {/if}
@@ -768,24 +781,21 @@
               <fieldset class="sm:col-span-3">
                 <legend class="text-sm/6 font-semibold text-gray-900 dark:text-gray-100">Pilih Role</legend>
                 <div class="mt-6 space-y-3">
-                  {#if thisIsSuperAdmin}
+                  {#each roleList as r (r.key)}
                     <div class="flex items-center gap-x-3">
-                      <input id="push-super_admin" type="radio" bind:group={role.selectedRole} value="super_admin" disabled={currentIsOnlyAdmin && selectedUserIsSuperAdmin} class="relative size-4 appearance-none rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-neutral-900 checked:border-indigo-600 checked:bg-indigo-600 focus:outline-indigo-600"/>
-                      <label for="push-super_admin" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">Super Admin</label>
+                      <input 
+                        id="push-{r.key}" 
+                        type="radio" 
+                        bind:group={role.selectedRole} 
+                        value={r.key} 
+                        disabled={(currentIsOnlyAdmin && r.key === 'super_admin') || (currentIsOnlyAdmin && selectedUserIsSuperAdmin)} 
+                        class="relative size-4 appearance-none rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-neutral-900 checked:border-indigo-600 checked:bg-indigo-600 focus:outline-indigo-600"
+                      />
+                      <label for="push-{r.key}" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">
+                        {r.label}
+                      </label>
                     </div>
-                  {/if}
-                  <div class="flex items-center gap-x-3">
-                    <input id="push-admin" type="radio" bind:group={role.selectedRole} value="admin" disabled={currentIsOnlyAdmin && selectedUserIsSuperAdmin} class="relative size-4 appearance-none rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-neutral-900 checked:border-indigo-600 checked:bg-indigo-600 focus:outline-indigo-600"/>
-                    <label for="push-admin" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">Admin</label>
-                  </div>
-                  <div class="flex items-center gap-x-3">
-                    <input id="push-staff" type="radio" bind:group={role.selectedRole} value="staff" class="relative size-4 appearance-none rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-neutral-900 checked:border-indigo-600 checked:bg-indigo-600 focus:outline-indigo-600"/>
-                    <label for="push-staff" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">Staff</label>
-                  </div>
-                  <div class="flex items-center gap-x-3">
-                    <input id="push-user" type="radio" bind:group={role.selectedRole} value="user" class="relative size-4 appearance-none rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-neutral-900 checked:border-indigo-600 checked:bg-indigo-600 focus:outline-indigo-600"/>
-                    <label for="push-user" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">User</label>
-                  </div>
+                  {/each}
                 </div>
               </fieldset>
 
@@ -817,7 +827,7 @@
 
                       {#if expandedModules[mod.key]}
                         <div class="mt-3 pl-6 space-y-2">
-                          {#each actionList as act (act.key)}
+                          {#each mod.actions ?? actionList as act (act.key)}
                             <div class="flex items-center gap-3">
                               <input
                                 type="checkbox"
