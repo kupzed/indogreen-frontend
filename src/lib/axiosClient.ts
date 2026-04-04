@@ -57,9 +57,11 @@ axiosClient.interceptors.response.use(
 		// dan belum pernah di-retry.
 		if (
 			browser &&
+			localStorage.getItem('jwt_token') &&
 			error.response?.status === 401 &&
 			!originalRequest._retry &&
-			!originalRequest.url?.includes('/refresh')
+			!originalRequest.url?.includes('/auth/refresh') &&
+			!originalRequest.url?.includes('/auth/login')
 		) {
 			// Jika refresh sedang berjalan, antri request ini
 			if (isRefreshing) {
@@ -76,7 +78,7 @@ axiosClient.interceptors.response.use(
 
 			try {
 				// Coba refresh token ke backend
-				const { data } = await axiosClient.post('/refresh');
+				const { data } = await axiosClient.post('/auth/refresh');
 				const newToken: string = data.access_token;
 
 				// Simpan token baru

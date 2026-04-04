@@ -41,8 +41,13 @@
     }
   }
 
+  // Cek apakah halaman saat ini adalah rute auth
+  $: isAuthRoute = $page.url.pathname.startsWith('/auth');
+
   onMount(async () => {
     if (!browser) return;
+    if (isAuthRoute || !localStorage.getItem('jwt_token')) return;
+
     try {
       const res = await axiosClient.get('/auth/me');
       if (res.status === 200) {
@@ -61,9 +66,6 @@
       console.error('Failed to fetch user data:', err);
     }
   });
-
-  // Cek apakah halaman saat ini adalah rute auth
-  $: isAuthRoute = $page.url.pathname.startsWith('/auth');
 
   // Fungsi untuk mendapatkan title berdasarkan route
   function getPageTitle(pathname: string): string {
