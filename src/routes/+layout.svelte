@@ -6,7 +6,7 @@
   import { onMount } from 'svelte';
   import { theme } from '$lib/stores/theme';
   import { setPermissions, setRoles } from '$lib/stores/permissions';
-  import { setUser } from '$lib/stores/user';
+  import { setUser, currentUser } from '$lib/stores/user';
 
   onMount(() => {
     // Berlangganan tanpa menggunakan nilainya; ini memastikan efek samping dijalankan
@@ -18,7 +18,7 @@
   import Sidebar from '$lib/components/layout/Sidebar.svelte';
   import TopNav from '$lib/components/layout/TopNav.svelte';
   import MobileSidebar from '$lib/components/layout/MobileSidebar.svelte';
-	import { browser } from '$app/environment';
+  import { browser } from '$app/environment';
 
   // State sidebar
   let sidebarOpen: boolean = false;       // Untuk mobile sidebar
@@ -44,9 +44,13 @@
   // Cek apakah halaman saat ini adalah rute auth
   $: isAuthRoute = $page.url.pathname.startsWith('/auth');
 
-  onMount(async () => {
+  // Load user data dari server
+  async function loadUserData() {
     if (!browser) return;
     if (isAuthRoute || !localStorage.getItem('jwt_token')) return;
+    
+    // Jangan fetch ulang jika data sudah ada di store
+    if ($currentUser) return;
 
     try {
       const res = await axiosClient.get('/auth/me');
@@ -65,7 +69,12 @@
     } catch (err) {
       console.error('Failed to fetch user data:', err);
     }
-  });
+  }
+
+  // Re-run setiap kali navigasi ke rute non-auth atau ketika isAuthRoute berubah
+  $: if (browser && !isAuthRoute && $page.url.pathname) {
+    loadUserData();
+  }
 
   // Fungsi untuk mendapatkan title berdasarkan route
   function getPageTitle(pathname: string): string {

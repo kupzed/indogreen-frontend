@@ -94,7 +94,8 @@ axiosClient.interceptors.response.use(
 				// Refresh gagal → bersihkan state & redirect ke login
 				processQueue(refreshError, null);
 				clearUser();
-				goto('/auth/login');
+				const currentUrl = window.location.pathname + window.location.search;
+				goto(`/auth/login?redirect=${encodeURIComponent(currentUrl)}`);
 				return Promise.reject(refreshError);
 			} finally {
 				isRefreshing = false;

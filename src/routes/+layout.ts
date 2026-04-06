@@ -13,9 +13,9 @@ export async function load({ url }) {
 	// SSR is disabled.
 	const token = localStorage.getItem('jwt_token');
 	if (!token) {
-		// Redirect unauthenticated users to the login page. Use 307 (temporary)
-		// to preserve the method.
-		throw redirect(307, '/auth/login');
+		// Redirect unauthenticated users to the login page with a callback URL.
+		const redirectUrl = `/auth/login?redirect=${encodeURIComponent(url.pathname + url.search)}`;
+		throw redirect(307, redirectUrl);
 	}
 	return {};
 }

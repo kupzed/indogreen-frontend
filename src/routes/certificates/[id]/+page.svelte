@@ -90,8 +90,12 @@
       return;
     }
     try {
-      const res = await axiosClient.get(`/certificate/getBarangCertificatesByProject/${projectId}`);
-      filteredBarangCertificates = res.data?.data ?? [];
+      // Panggil endpoint utama /certificates dengan filter project_id
+      // Agar kita bisa mendapat form_dependencies yang terfilter secara otomatis
+      const res = await axiosClient.get('/certificates', { params: { project_id: projectId, per_page: 5 } });
+      const root = res.data ?? {};
+      const formDeps = root.form_dependencies ?? root.meta?.form_dependencies ?? {};
+      filteredBarangCertificates = formDeps.barang_options ?? [];
     } catch (err) {
       console.error('Failed to fetch barang certificates by project', err);
       filteredBarangCertificates = [];

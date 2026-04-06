@@ -11,17 +11,17 @@
   let loading = false;
   let error: string | null = null;
 
-  // helper next yang aman
-  function getSafeNext(u: URL) {
-    const n = u.searchParams.get('next') || '';
-    return n.startsWith('/') && !n.startsWith('/auth/') ? n : '/dashboard';
+  // helper redirect yang aman
+  function getSafeRedirect(u: URL) {
+    const r = u.searchParams.get('redirect') || '';
+    return r.startsWith('/') && !r.startsWith('/auth/') ? r : '/dashboard';
   }
 
   // ⬇️ Jika sudah login dan buka /auth/login, langsung redirect
   onMount(() => {
     const token = localStorage.getItem('jwt_token');
     if (token) {
-      goto(getSafeNext($page.url));
+      goto(getSafeRedirect($page.url));
     }
   });
 
@@ -35,7 +35,7 @@
       if (!token) throw new Error('Token tidak ditemukan');
       localStorage.setItem('jwt_token', token);
 
-      goto(getSafeNext($page.url));   // ⬅️ gunakan next bila ada
+      goto(getSafeRedirect($page.url));   // ⬅️ gunakan redirect bila ada
     } catch (err: any) {
       error =
         err?.response?.data?.error ||
