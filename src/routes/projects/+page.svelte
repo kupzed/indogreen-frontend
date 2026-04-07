@@ -4,6 +4,7 @@
   import axiosClient from '$lib/axiosClient';
   import Drawer from '$lib/components/Drawer.svelte';
   import ProjectDetail from '$lib/components/detail/ProjectDetail.svelte';
+  import ActivityDetail from '$lib/components/detail/ActivityDetail.svelte';
   import Pagination from '$lib/components/Pagination.svelte';
   import ProjectFormModal from '$lib/components/form/ProjectFormModal.svelte';
   import { userPermissions } from '$lib/stores/permissions';
@@ -49,6 +50,9 @@
   let showDetailDrawer = false;
   let selectedProject: any = null;
 
+  let showActivityDetailDrawer = false;
+  let selectedActivity: any = null;
+
   // form
   let form = {
     name: '',
@@ -71,6 +75,7 @@
   let canCreate = false;
   let canUpdate = false;
   let canDelete = false;
+  let canViewActivity = false;
 
   // Use Svelte auto-subscription to userPermissions store
   // $userPermissions will update reactively
@@ -80,6 +85,7 @@
     canCreate = perms.includes('project-create');
     canUpdate = perms.includes('project-update');
     canDelete = perms.includes('project-delete');
+    canViewActivity = perms.includes('activity-view');
   }
 
   async function fetchProjects() {
@@ -214,6 +220,11 @@
     showDetailDrawer = true;
   }
 
+  function openActivityDetail(act: any, project: any) {
+    selectedActivity = { ...act, project };
+    showActivityDetailDrawer = true;
+  }
+
   async function handleSubmitCreate() {
     if (!canCreate) {
       console.warn('Create attempt blocked: no permission');
@@ -284,6 +295,15 @@
     }
   }
 
+  // --- Kegiatan ---
+  let openActivities: Record<number, boolean> = {};
+
+  function toggleActivities(id: number) {
+    const currentState = !!openActivities[id];
+    openActivities = {}; // Tutup semua (eksklusif)
+    openActivities[id] = !currentState;
+  }
+
   // --- kunci scroll saat membuka drawer & modal ---
   function lockBodyScroll(lock: boolean) {
     const body = document.body;
@@ -309,7 +329,7 @@
       window.scrollTo(0, y);
     }
   }
-  $: lockBodyScroll(showDetailDrawer || showCreateModal || showEditModal);
+  $: lockBodyScroll(showDetailDrawer || showActivityDetailDrawer || showCreateModal || showEditModal);
 </script>
 
 <svelte:head>
@@ -327,7 +347,7 @@
              dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
     >
       <option value="">Status: Semua</option>
-      {#each projectStatuses as status}
+      {#each projectStatuses as status (status)}
         <option value={status}>{status}</option>
       {/each}
     </select>
@@ -340,7 +360,7 @@
              dark:bg-neutral-900 dark:text-gray-100 dark:border-gray-700"
     >
       <option value="">Kategori: Semua</option>
-      {#each projectKategoris as kategori}
+      {#each projectKategoris as kategori (kategori)}
         <option value={kategori}>{kategori}</option>
       {/each}
     </select>
@@ -654,6 +674,29 @@
             </a>
 
             <div class="flex justify-end px-4 py-2 sm:px-6 space-x-2">
+            {#if canViewActivity}
+              <button
+                on:click|stopPropagation={() => toggleActivities(project.id)}
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  ><rect x="3" y="5" width="6" height="6" rx="1" /><path d="m3 17 2 2 4-4" /><path
+                    d="M13 6h8"
+                  /><path d="M13 12h8" /><path d="M13 18h8" /></svg
+                >
+                Kegiatan
+              </button>
+            {/if}
+
               <button on:click|stopPropagation={() => openDetailDrawer(project)} class="inline-flex items-center px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700">
                 Detail
               </button>
@@ -670,6 +713,83 @@
                 </button>
               {/if}
             </div>
+
+            {#if canViewActivity && openActivities[project.id]}
+              <div
+                class="mt-0 border-t border-gray-100 bg-gray-50/50 p-5 dark:border-neutral-800 dark:bg-neutral-900/30"
+              >
+                <h4 class="mb-5 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  Riwayat Kegiatan Proyek
+                </h4>
+
+                <div class="relative pl-8 pr-4">
+                  <!-- Garis Timeline -->
+                  <div
+                    class="absolute top-0 bottom-0 left-[15px] w-[2px] bg-gray-200 dark:bg-neutral-800"
+                  ></div>
+
+                  <div class="space-y-7">
+                    {#if !project.activities || project.activities.length === 0}
+                      <p class="py-2 text-xs text-gray-500 italic">Tidak ada kegiatan tercatat</p>
+                    {:else}
+                      {#each project.activities as act (act.id)}
+                        <div class="relative">
+                          <!-- Dot Timeline -->
+                          <div
+                            class="absolute -left-[21px] top-1.5 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 ring-2 ring-emerald-500/20 dark:border-black"
+                          ></div>
+
+                          <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
+                            <div class="min-w-[130px] flex-shrink-0">
+                              <span class="text-xs font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
+                                {act.activity_date
+                                  ? new Date(act.activity_date).toLocaleDateString('id-ID', {
+                                      day: '2-digit',
+                                      month: 'long',
+                                      year: 'numeric'
+                                    })
+                                  : '-'}
+                              </span>
+                            </div>
+                            <div class="flex-1">
+                              <div class="flex items-center gap-2">
+                                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                                <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+                                <h5
+                                  on:click={() => openActivityDetail(act, project)}
+                                  class="cursor-pointer text-sm font-bold leading-tight text-gray-900 hover:text-indigo-600 dark:text-gray-100 dark:hover:text-indigo-400"
+                                >
+                                  {act.name}
+                                </h5>
+                                <span
+                                  class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                >
+                                  {act.kategori || 'Umum'}
+                                </span>
+                              </div>
+                              {#if act.mitra}
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                  Jenis: 
+                                  <span class="font-medium text-gray-700 dark:text-gray-300">
+                                    {act.jenis || '-'}
+                                  </span>
+                                  {#if (act.jenis === 'Customer' || act.jenis === 'Vendor') && act.mitra}
+                                    | Mitra: 
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">
+                                      {act.mitra.nama || '-'}
+                                    </span>
+                                  {/if}
+                                </p>
+                              {/if}
+                            </div>
+                          </div>
+                        </div>
+                      {/each}
+                    {/if}
+                  </div>
+                </div>
+              </div>
+            {/if}
           </li>
         {/each}
       </ul>
@@ -743,6 +863,31 @@
                 </td>
                 <td class="relative whitespace-nowrap px-3 py-4 text-left text-sm font-medium">
                   <div class="flex items-left space-x-2">
+                    {#if canViewActivity}
+                      <button
+                        on:click|stopPropagation={() => toggleActivities(project.id)}
+                        class="transition-colors {openActivities[project.id]
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-gray-400 hover:text-emerald-500'}"
+                        aria-label="Lihat Kegiatan"
+                        title="Daftar Kegiatan"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          ><rect x="3" y="5" width="6" height="6" rx="1" /><path d="m3 17 2 2 4-4" /><path
+                            d="M13 6h8"
+                          /><path d="M13 12h8" /><path d="M13 18h8" /></svg
+                        >
+                      </button>
+                    {/if}
                     <button on:click={() => openDetailDrawer(project)} class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" title="Detail">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                       <span class="sr-only">Detail, {project.name}</span>
@@ -766,6 +911,79 @@
                   </div>
                 </td>
               </tr>
+
+              {#if canViewActivity && openActivities[project.id]}
+                <tr class="bg-gray-50/70 transition-all dark:bg-neutral-900/50">
+                  <td colspan="7" class="px-3 py-0">
+                    <div class="relative py-5 pl-14 pr-4">
+                      <!-- Garis Vertikal Timeline -->
+                      <div class="absolute top-0 bottom-0 left-9 w-[2px] bg-gray-200 dark:bg-neutral-800"></div>
+
+                      <div class="space-y-6">
+                        {#if !project.activities || project.activities.length === 0}
+                          <div class="py-2 text-sm text-gray-500 italic">
+                            Belum ada aktivitas tercatat untuk proyek ini.
+                          </div>
+                        {:else}
+                          {#each project.activities as act (act.id)}
+                            <div class="relative">
+                              <!-- Dot Timeline -->
+                              <div
+                                class="absolute -left-[23px] top-1.5 h-4 w-4 rounded-full border-2 border-white bg-emerald-500 ring-2 ring-emerald-500/20 dark:border-black"
+                              ></div>
+
+                              <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
+                                <div class="min-w-[130px] flex-shrink-0">
+                                  <span class="text-xs font-bold tracking-tight text-emerald-600 dark:text-emerald-400">
+                                    {act.activity_date
+                                      ? new Date(act.activity_date).toLocaleDateString('id-ID', {
+                                          day: '2-digit',
+                                          month: 'long',
+                                          year: 'numeric'
+                                        })
+                                      : '-'}
+                                  </span>
+                                </div>
+                                <div class="flex-1">
+                                  <div class="flex items-center gap-2">
+                                    <!-- svelte-ignore a11y_click_events_have_key_events -->
+                                    <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+                                    <h5
+                                      on:click={() => openActivityDetail(act, project)}
+                                      class="cursor-pointer text-sm font-bold text-gray-900 hover:text-indigo-600 dark:text-gray-100 dark:hover:text-indigo-400"
+                                    >
+                                      {act.name}
+                                    </h5>
+                                    <span
+                                      class="inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    >
+                                      {act.kategori || 'Umum'}
+                                    </span>
+                                  </div>
+                                  {#if act.mitra}
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                      Jenis: 
+                                      <span class="font-medium text-gray-700 dark:text-gray-300">
+                                        {act.jenis || '-'}
+                                      </span>
+                                      {#if (act.jenis === 'Customer' || act.jenis === 'Vendor') && act.mitra}
+                                        | Mitra: 
+                                        <span class="font-medium text-gray-700 dark:text-gray-300">
+                                          {act.mitra.nama || '-'}
+                                        </span>
+                                      {/if}
+                                    </p>
+                                  {/if}
+                                </div>
+                              </div>
+                            </div>
+                          {/each}
+                        {/if}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              {/if}
             {/each}
           </tbody>
         </table>
@@ -816,4 +1034,9 @@
 <!-- Drawer detail -->
 <Drawer bind:show={showDetailDrawer} title="Detail Project" on:close={() => (showDetailDrawer = false)}>
   <ProjectDetail project={selectedProject} />
+</Drawer>
+
+<!-- Drawer detail kegiatan -->
+<Drawer bind:show={showActivityDetailDrawer} title="Detail Kegiatan" on:close={() => (showActivityDetailDrawer = false)}>
+  <ActivityDetail activity={selectedActivity} />
 </Drawer>
